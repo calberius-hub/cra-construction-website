@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CRA Construction — Homepage Concept</title>
+  <style>
+    :root {
+      --ink: #191714;
+      --charcoal: #11100e;
+      --stone: #f4f1ec;
+      --warm: #e8e0d3;
+      --muted: #756f66;
+      --line: rgba(25, 23, 20, 0.14);
+      --paper: #fffaf2;
+      --bronze: #9a7041;
+      --bronze-dark: #6f4d2c;
+      --white: #ffffff;
+      --max: 1180px;
+    }
+
+    * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--paper);
+      color: var(--ink);
+      -webkit-font-smoothing: antialiased;
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .nav {
+      position: fixed;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 72px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 28px;
+      color: #fff;
+      background: linear-gradient(to bottom, rgba(0,0,0,0.58), rgba(0,0,0,0.08));
+      backdrop-filter: blur(12px);
+    }
+
+    .nav-inner {
+      width: min(var(--max), 100%);
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 24px;
+    }
+
+    .brand {
+      display: flex;
+      flex-direction: column;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      font-weight: 700;
+      line-height: 1;
+    }
+
+    .brand small {
+      margin-top: 6px;
+      font-size: 10px;
+      letter-spacing: .24em;
+      font-weight: 500;
+      opacity: .78;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 28px;
+      font-size: 13px;
+      letter-spacing: .02em;
+      opacity: .92;
+    }
+
+    .nav-cta {
+      justify-self: end;
+      border: 1px solid rgba(255,255,255,.5);
+      border-radius: 999px;
+      padding: 11px 18px;
+      font-size: 13px;
+      background: rgba(255,255,255,.08);
+    }
+
+    .hero {
+      min-height: 94vh;
+      padding-top: 92px;
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      overflow: hidden;
+      color: #fff;
+      background:
+        linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.18) 35%, rgba(0,0,0,.72)),
+        radial-gradient(circle at 75% 25%, rgba(255,255,255,.16), transparent 28%),
+        linear-gradient(135deg, #625845, #211d18 48%, #0f0e0d);
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      inset: 96px 34px 132px;
+      border: 1px solid rgba(255,255,255,.18);
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.01)),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 1px, transparent 1px 14px);
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 1;
+      width: min(var(--max), calc(100% - 56px));
+      margin: 0 auto 72px;
+      display: grid;
+      grid-template-columns: minmax(0, 760px) 1fr;
+      gap: 48px;
+      align-items: end;
+    }
+
+    .eyebrow {
+      text-transform: uppercase;
+      letter-spacing: .22em;
+      font-size: 12px;
+      color: rgba(255,255,255,.74);
+      margin-bottom: 16px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(46px, 7vw, 90px);
+      line-height: .96;
+      letter-spacing: -.065em;
+      font-weight: 650;
+      max-width: 820px;
+    }
+
+    .hero-copy {
+      color: rgba(255,255,255,.82);
+      font-size: clamp(17px, 1.6vw, 22px);
+      line-height: 1.45;
+      max-width: 440px;
+      margin: 0 0 28px;
+    }
+
+    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      min-height: 46px;
+      padding: 0 20px;
+      font-weight: 600;
+      font-size: 14px;
+      transition: .2s ease;
+    }
+    .btn-primary { background: #fff; color: #17130f; }
+    .btn-secondary { border: 1px solid rgba(255,255,255,.46); color: #fff; }
+    .btn:hover { transform: translateY(-1px); }
+
+    main { background: var(--paper); }
+
+    section { padding: 96px 28px; }
+    .section-inner { width: min(var(--max), 100%); margin: 0 auto; }
+
+    .section-head {
+      display: flex;
+      align-items: end;
+      justify-content: space-between;
+      gap: 32px;
+      margin-bottom: 34px;
+    }
+    .section-kicker {
+      color: var(--bronze-dark);
+      text-transform: uppercase;
+      letter-spacing: .18em;
+      font-size: 12px;
+      font-weight: 750;
+      margin-bottom: 10px;
+    }
+    h2 {
+      margin: 0;
+      font-size: clamp(34px, 4.8vw, 68px);
+      line-height: .98;
+      letter-spacing: -.045em;
+      max-width: 780px;
+    }
+    .section-note {
+      color: var(--muted);
+      max-width: 360px;
+      line-height: 1.55;
+      margin: 0;
+    }
+
+    .projects-grid {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 18px;
+    }
+    .project-card {
+      min-height: 480px;
+      display: flex;
+      align-items: flex-end;
+      position: relative;
+      overflow: hidden;
+      background: #302a22;
+      color: #fff;
+      isolation: isolate;
+    }
+    .project-card.small { min-height: 480px; }
+    .photo-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 32px;
+      color: rgba(255,255,255,.58);
+      font-size: 20px;
+      line-height: 1.35;
+      background:
+        linear-gradient(135deg, rgba(255,255,255,.08), transparent),
+        repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 1px, transparent 1px 14px),
+        linear-gradient(135deg, #6d604d, #1e1b17);
+      z-index: -2;
+    }
+    .project-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 34%, rgba(0,0,0,.78));
+      z-index: -1;
+    }
+    .project-meta { padding: 28px; }
+    .status {
+      display: inline-flex;
+      border: 1px solid rgba(255,255,255,.44);
+      border-radius: 999px;
+      padding: 7px 11px;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: .14em;
+      margin-bottom: 16px;
+      background: rgba(255,255,255,.08);
+      backdrop-filter: blur(8px);
+    }
+    .project-title {
+      font-size: clamp(28px, 4vw, 54px);
+      line-height: .96;
+      letter-spacing: -.04em;
+      margin: 0 0 12px;
+      font-weight: 620;
+    }
+    .project-desc { margin: 0; max-width: 500px; line-height: 1.45; color: rgba(255,255,255,.78); }
+
+    .dark-band {
+      background: var(--charcoal);
+      color: #fff;
+      padding-top: 108px;
+      padding-bottom: 108px;
+    }
+    .dark-band .section-kicker { color: #d6b17f; }
+    .dark-band .section-note { color: rgba(255,255,255,.62); }
+
+    .work-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-top: 40px;
+    }
+    .work-tile {
+      min-height: 300px;
+      position: relative;
+      overflow: hidden;
+      background: #28231e;
+      display: flex;
+      align-items: flex-end;
+    }
+    .work-tile:nth-child(2), .work-tile:nth-child(4) { transform: translateY(34px); }
+    .work-label {
+      position: relative;
+      z-index: 1;
+      padding: 20px;
+      font-weight: 650;
+      letter-spacing: -.02em;
+    }
+    .work-tile .photo-placeholder { font-size: 15px; }
+    .work-tile::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(180deg, transparent 42%, rgba(0,0,0,.72));
+    }
+
+    .split {
+      display: grid;
+      grid-template-columns: .9fr 1.1fr;
+      gap: clamp(34px, 6vw, 86px);
+      align-items: center;
+    }
+    .copy-block p {
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+      max-width: 590px;
+    }
+    .capability-list {
+      display: grid;
+      gap: 1px;
+      background: var(--line);
+      border: 1px solid var(--line);
+    }
+    .capability {
+      background: var(--paper);
+      padding: 26px 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+    }
+    .capability strong { font-size: 18px; }
+    .capability span { color: var(--muted); text-align: right; }
+
+    .cta {
+      padding: 112px 28px;
+      background: var(--stone);
+    }
+    .cta-card {
+      width: min(var(--max), 100%);
+      margin: 0 auto;
+      min-height: 430px;
+      display: grid;
+      grid-template-columns: 1fr .72fr;
+      background: var(--ink);
+      color: #fff;
+      overflow: hidden;
+    }
+    .cta-copy { padding: clamp(34px, 6vw, 72px); align-self: end; }
+    .cta-copy h2 { max-width: 700px; }
+    .cta-copy p { color: rgba(255,255,255,.72); font-size: 18px; line-height: 1.6; max-width: 520px; }
+    .cta-photo { position: relative; background: #3a3329; }
+    .cta-photo .photo-placeholder { font-size: 18px; }
+
+    footer {
+      padding: 34px 28px;
+      background: var(--charcoal);
+      color: rgba(255,255,255,.68);
+      font-size: 13px;
+    }
+    .footer-inner { width: min(var(--max), 100%); margin: 0 auto; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+
+    @media (max-width: 860px) {
+      .nav { height: 64px; }
+      .nav-inner { grid-template-columns: 1fr auto; }
+      .nav-links { display: none; }
+      .hero-content, .projects-grid, .split, .cta-card { grid-template-columns: 1fr; }
+      .hero-content { width: min(100% - 36px, var(--max)); margin-bottom: 42px; }
+      .hero::before { inset: 84px 18px 260px; }
+      section { padding: 72px 18px; }
+      .section-head { display: block; }
+      .section-note { margin-top: 18px; }
+      .project-card, .project-card.small { min-height: 390px; }
+      .work-grid { grid-template-columns: 1fr 1fr; }
+      .work-tile:nth-child(2), .work-tile:nth-child(4) { transform: none; }
+      .cta { padding: 72px 18px; }
+      .cta-photo { min-height: 280px; }
+    }
+
+    @media (max-width: 520px) {
+      .brand small, .nav-cta { display: none; }
+      .nav-inner { grid-template-columns: 1fr; }
+      h1 { font-size: 52px; }
+      .work-grid { grid-template-columns: 1fr; }
+      .capability { display: block; }
+      .capability span { display: block; text-align: left; margin-top: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav" aria-label="Primary navigation">
+    <div class="nav-inner">
+      <a class="brand" href="#top">CRA <small>Construction</small></a>
+      <div class="nav-links" aria-label="Site sections">
+        <a href="#current">Current Projects</a>
+        <a href="#previous">Previous Work</a>
+        <a href="#capability">Capabilities</a>
+        <a href="#contact">Contact</a>
+      </div>
+      <a class="nav-cta" href="#contact">Start a Project</a>
+    </div>
+  </nav>
+
+  <header class="hero" id="top">
+    <div class="hero-content">
+      <div>
+        <div class="eyebrow">Central Arkansas Builder</div>
+        <h1>Built with intention. Managed with discipline.</h1>
+      </div>
+      <div>
+        <p class="hero-copy">Custom homes, development work, and construction projects led with ownership-level care from start to finish.</p>
+        <div class="actions">
+          <a class="btn btn-primary" href="#current">View Current Projects</a>
+          <a class="btn btn-secondary" href="#contact">Talk With CRA</a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section id="current">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Current Projects</div>
+            <h2>Homes and developments underway now.</h2>
+          </div>
+          <p class="section-note">A Pike-inspired project-forward section. Replace placeholders with CRA Instagram/project photography when ready.</p>
+        </div>
+        <div class="projects-grid">
+          <article class="project-card">
+            <div class="photo-placeholder">Use CRA Instagram image: 307 Fletcher Loop / strongest current home exterior</div>
+            <div class="project-meta">
+              <span class="status">Available / Current</span>
+              <h3 class="project-title">307 Fletcher Loop</h3>
+              <p class="project-desc">Ready for move-in. Built by CRA in Central Arkansas with a clean, modern residential finish.</p>
+            </div>
+          </article>
+          <article class="project-card small">
+            <div class="photo-placeholder">Use CRA Instagram image: active build, framing, exterior detail, or jobsite progress</div>
+            <div class="project-meta">
+              <span class="status">In Progress</span>
+              <h3 class="project-title">Custom Home Build</h3>
+              <p class="project-desc">A simple featured-project card for an active custom home or spec project.</p>
+            </div>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="dark-band" id="previous">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Previous Work</div>
+            <h2>Finished work that carries the CRA standard.</h2>
+          </div>
+          <p class="section-note">A focused gallery section for completed CRA homes and detail work.</p>
+        </div>
+        <div class="work-grid">
+          <article class="work-tile"><div class="photo-placeholder">TW Ranch final results</div><div class="work-label">TW Ranch</div></article>
+          <article class="work-tile"><div class="photo-placeholder">Fireplace / outdoor living</div><div class="work-label">Outdoor Living</div></article>
+          <article class="work-tile"><div class="photo-placeholder">Custom closet detail</div><div class="work-label">Interior Finish</div></article>
+          <article class="work-tile"><div class="photo-placeholder">Kitchen / bath / millwork</div><div class="work-label">Custom Details</div></article>
+        </div>
+      </div>
+    </section>
+
+    <section id="capability">
+      <div class="section-inner split">
+        <div class="copy-block">
+          <div class="section-kicker">Built by CRA</div>
+          <h2>Custom residential work with development-level discipline.</h2>
+          <p>CRA Construction brings the field execution of a builder and the long-view thinking of an owner/developer. The site should feel residential enough for a custom-home client and credible enough for partners, lenders, and commercial prospects.</p>
+        </div>
+        <div class="capability-list" aria-label="CRA capabilities">
+          <div class="capability"><strong>Custom Homes</strong><span>High-touch residential builds</span></div>
+          <div class="capability"><strong>Spec Homes</strong><span>Market-ready homes with intentional finish-out</span></div>
+          <div class="capability"><strong>Developments</strong><span>Communities, lots, infrastructure, long-term value</span></div>
+          <div class="capability"><strong>Light Commercial</strong><span>Practical construction capability beyond residential</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta" id="contact">
+      <div class="cta-card">
+        <div class="cta-copy">
+          <div class="section-kicker">Start a Project</div>
+          <h2>Have a build, site, or development in mind?</h2>
+          <p>Talk with CRA about custom homes, residential development, light commercial work, or a project that needs disciplined construction management.</p>
+          <div class="actions">
+            <a class="btn btn-primary" href="mailto:hello@example.com">Request a Consultation</a>
+            <a class="btn btn-secondary" href="https://www.instagram.com/cra_construction_/">View Instagram</a>
+          </div>
+        </div>
+        <div class="cta-photo">
+          <div class="photo-placeholder">CRA field / finished home / team image from @cra_construction_</div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="footer-inner">
+      <div>CRA Construction · Central Arkansas</div>
+      <div>Concept mockup — replace placeholders with approved CRA photos.</div>
+    </div>
+  </footer>
+</body>
+</html>
