@@ -43,6 +43,16 @@ We will run this as a design-first project:
 5. Implement the production website.
 6. Deploy through GitHub/Netlify when ready.
 
+## Primary reference
+
+Cole wants the site modeled after https://pikeproperties.com as a luxury builder reference.
+
+Important scope exclusions:
+
+- No blog
+- No foundation section
+- No house plans / home plans section
+
 ## Default visual directions
 
 ### 1. Trusted Arkansas Builder
@@ -65,7 +75,6 @@ Bold, capable, execution-focused, useful for commercial/sitework/development cre
 - Developments / Communities
 - Light Commercial / Site Work
 - Portfolio
-- Process
 - Contact / Start a Project
 
 ## Notes

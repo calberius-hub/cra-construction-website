@@ -14,10 +14,14 @@ Project workspace created. Next step is design concept generation, not productio
 
 ## Recommended next step
 
-Create three browser-viewable homepage concept mockups:
+Create a Pike Properties-inspired, original CRA homepage mockup:
 
-1. Trusted Arkansas Builder
-2. Premium Custom Homes + Development
-3. Construction Operator / Infrastructure Capability
+- luxury custom builder structure
+- large project photography
+- current projects / previous work emphasis
+- simple navigation
+- no blog
+- no foundation section
+- no house plans / home plans section
 
 After Cole chooses a direction, convert that concept into the production website stack and connect GitHub/Netlify.

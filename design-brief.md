@@ -23,6 +23,21 @@ Premium but practical.
 
 The website should feel more capable and established than a small builder template, but not overly glossy or fake. CRA should come across as a real operator: trusted, field-capable, organized, and experienced.
 
+## Primary website reference
+
+Cole wants the site modeled after Pike Properties: https://pikeproperties.com
+
+Use it as inspiration for a luxury builder website structure and feel, especially:
+
+- large photography-led presentation
+- simple navigation
+- current projects / previous work emphasis
+- minimal copy
+- direct contact CTA
+- premium custom-home posture
+
+Do not copy Pike's exact wording, images, logo, or proprietary identity. Create an original CRA version with a similar level of polish.
+
 ## Design principles
 
 - Strong first impression
@@ -43,6 +58,9 @@ The website should feel more capable and established than a small builder templa
 - Busy hero sections
 - Weak CTAs like “Learn More” everywhere
 - Too much text above the fold
+- Blog section
+- Foundation section
+- House plans / home plans section
 
 ## Possible CTA language
 
@@ -55,11 +73,11 @@ The website should feel more capable and established than a small builder templa
 ## Possible homepage sections
 
 1. Hero / positioning statement
-2. Services overview
-3. Featured projects / portfolio preview
-4. Why CRA / operating principles
-5. Development + construction capability
-6. Process
+2. Current Projects
+3. Previous Work
+4. Custom Homes / Development Capability
+5. About CRA / Built by CRA
+6. Optional social/photo feed if real content is available
 7. Contact CTA
 
 ## Open items for Cole
