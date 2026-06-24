@@ -329,9 +329,68 @@
     .capability strong { font-size: 18px; }
     .capability span { color: var(--muted); text-align: right; }
 
-    .cta {
-      padding: 112px 28px;
+    .ig-feed-section {
       background: var(--stone);
+    }
+    .ig-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 14px;
+      margin-top: 40px;
+    }
+    .ig-tile {
+      aspect-ratio: 1;
+      overflow: hidden;
+      position: relative;
+      background: var(--warm);
+      display: block;
+    }
+    .ig-tile img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform .4s ease;
+    }
+    .ig-tile:hover img { transform: scale(1.04); }
+    .ig-tile-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(25,23,20,.0);
+      transition: background .3s ease;
+      display: flex;
+      align-items: flex-end;
+    }
+    .ig-tile:hover .ig-tile-overlay { background: rgba(25,23,20,.52); }
+    .ig-tile-caption {
+      padding: 14px;
+      color: #fff;
+      font-size: 13px;
+      line-height: 1.4;
+      opacity: 0;
+      transition: opacity .3s ease;
+    }
+    .ig-tile:hover .ig-tile-caption { opacity: 1; }
+    .ig-follow {
+      margin-top: 32px;
+      text-align: center;
+    }
+    .ig-follow a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: .04em;
+      color: var(--bronze-dark);
+      border-bottom: 1px solid var(--bronze);
+      padding-bottom: 2px;
+    }
+    @media (max-width: 860px) {
+      .ig-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+    @media (max-width: 520px) {
+      .ig-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
     }
     .cta-card {
       width: min(var(--max), 100%);
@@ -392,6 +451,7 @@
         <a href="#current">Current Projects</a>
         <a href="#previous">Previous Work</a>
         <a href="#capability">Capabilities</a>
+        <a href="#follow">Instagram</a>
         <a href="#contact">Contact</a>
       </div>
       <a class="nav-cta" href="#contact">Start a Project</a>
@@ -479,6 +539,26 @@
       </div>
     </section>
 
+    <section class="ig-feed-section" id="follow">
+      <div class="section-inner">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">Latest from the Field</div>
+            <h2>Follow the build.</h2>
+          </div>
+          <p class="section-note">Updated automatically from <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener">@cra_construction_</a> after every post.</p>
+        </div>
+        <div class="ig-grid" id="ig-grid">
+          <!-- Populated by loadIgFeed() from instagram_feed.json -->
+        </div>
+        <div class="ig-follow">
+          <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener">
+            Follow @cra_construction_ on Instagram →
+          </a>
+        </div>
+      </div>
+    </section>
+
     <section class="cta" id="contact">
       <div class="cta-card">
         <div class="cta-copy">
@@ -503,5 +583,33 @@
       <div>Concept mockup — replace placeholders with approved CRA photos.</div>
     </div>
   </footer>
+
+  <script>
+    async function loadIgFeed() {
+      const grid = document.getElementById('ig-grid');
+      if (!grid) return;
+      try {
+        const res = await fetch('instagram_feed.json');
+        if (!res.ok) throw new Error('Feed not found');
+        const data = await res.json();
+        const posts = (data.posts || []).slice(0, 6);
+        grid.innerHTML = posts.map(p => {
+          const caption = (p.caption || '').replace(/\n/g, ' ').substring(0, 120);
+          const img = p.image_url || '';
+          const url = p.permalink || 'https://www.instagram.com/cra_construction_/';
+          return `
+            <a class="ig-tile" href="${url}" target="_blank" rel="noopener" aria-label="CRA Instagram post">
+              <img src="${img}" alt="${caption}" loading="lazy" />
+              <div class="ig-tile-overlay">
+                <div class="ig-tile-caption">${caption}</div>
+              </div>
+            </a>`;
+        }).join('');
+      } catch (e) {
+        grid.innerHTML = '<p style="color:var(--muted);grid-column:1/-1;padding:20px 0">Follow us at <a href="https://www.instagram.com/cra_construction_/" target="_blank">@cra_construction_</a></p>';
+      }
+    }
+    loadIgFeed();
+  </script>
 </body>
 </html>
