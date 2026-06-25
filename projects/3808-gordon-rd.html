@@ -27,6 +27,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .nav-cta:hover{background:var(--navy);color:var(--white)}
 .hero{height:70vh;min-height:480px;position:relative;overflow:hidden;margin-top:70px}
 .hero-bg{position:absolute;inset:0;background-size:cover;background-position:center}
+.hero-video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .hero-overlay{position:absolute;inset:0;background:rgba(0,0,0,.38)}
 .hero-badge{position:absolute;bottom:40px;left:40px;color:var(--white)}
 .hero-badge .eyebrow{font-size:10px;font-weight:600;letter-spacing:.26em;text-transform:uppercase;color:var(--gold);margin-bottom:10px}
@@ -78,7 +79,9 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 </nav>
 
 <div class="hero">
-  <div class="hero-bg" style="background-image:url('../photos/projects/3808-gordon-rd/DP0A0814-web.jpg');"></div>
+  <video class="hero-video" autoplay muted loop playsinline poster="../photos/projects/3808-gordon-rd/DP0A0814-web.jpg">
+    <source src="../photos/projects/3808-gordon-rd/drone-hero-web.mp4" type="video/mp4">
+  </video>
   <div class="hero-overlay"></div>
   <div class="hero-badge">
     <p class="eyebrow">CRA Construction</p>
