@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Projects — CRA Construction</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#1d3a4a;--navy2:#162e3b;--gold:#c9a54a;--cream:#f8f5f0;--white:#ffffff;--ink:#1a1814;--muted:#6b6560;--line:rgba(25,22,18,.12);--max:1200px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Montserrat',sans-serif;color:var(--ink);background:var(--white);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    /* NAV */
+    .nav{position:fixed;z-index:100;top:0;left:0;right:0;height:70px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0 32px}
+    .nav-inner{width:min(var(--max),100%);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+    .nav-logo{display:flex;align-items:center;gap:10px}
+    .nav-monogram{width:40px;height:40px;border:2px solid var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:16px;font-weight:700;color:var(--navy)}
+    .nav-wordmark strong{font-size:15px;font-weight:700;letter-spacing:.18em;text-transform:uppercase;color:var(--navy);display:block}
+    .nav-wordmark span{font-size:9px;font-weight:500;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);margin-top:4px;display:block}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);opacity:.8;transition:opacity .2s}
+    .nav-links a:hover{opacity:1}
+    .nav-cta{justify-self:end;display:inline-flex;align-items:center;padding:10px 20px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1.5px solid var(--navy);color:var(--navy);transition:background .2s,color .2s}
+    .nav-cta:hover{background:var(--navy);color:var(--white)}
+
+    /* PAGE HEADER */
+    .page-header{padding:120px 32px 64px;background:var(--navy);color:var(--white);text-align:center}
+    .page-header .script{font-family:'Dancing Script',cursive;font-size:28px;color:var(--gold);margin-bottom:12px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:700;line-height:1.1}
+    .page-header p{margin-top:16px;font-size:14px;opacity:.65;max-width:480px;margin-left:auto;margin-right:auto;line-height:1.65}
+
+    /* STATUS TABS */
+    .tabs{display:flex;justify-content:center;gap:0;background:var(--cream);border-bottom:1px solid var(--line)}
+    .tab{padding:18px 36px;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;cursor:pointer;border-bottom:2px solid transparent;transition:border-color .2s,color .2s}
+    .tab.active,.tab:hover{border-bottom-color:var(--navy);color:var(--navy)}
+
+    /* GRID */
+    .projects-section{padding:64px 32px 96px;background:var(--cream)}
+    .projects-inner{max-width:var(--max);margin:0 auto}
+    .projects-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px}
+    .project-card{background:var(--white);overflow:hidden;transition:transform .3s,box-shadow .3s;cursor:pointer;display:block}
+    .project-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.12)}
+    .card-photo{height:260px;position:relative;overflow:hidden;background:var(--navy)}
+    .card-photo img{transition:transform .6s ease}
+    .project-card:hover .card-photo img{transform:scale(1.05)}
+    .card-status{position:absolute;top:16px;left:16px;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:6px 12px;background:var(--navy);color:var(--white)}
+    .card-status.current{background:var(--gold);color:var(--ink)}
+    .card-body{padding:24px 28px 32px}
+    .card-address{font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);margin-bottom:8px}
+    .card-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;line-height:1.2;margin-bottom:10px}
+    .card-desc{font-size:13px;color:var(--muted);line-height:1.65}
+    .card-link{display:inline-flex;align-items:center;gap:6px;margin-top:18px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--navy)}
+    .card-link svg{width:14px;height:14px;stroke:var(--navy);fill:none}
+
+    /* FOOTER */
+    .footer{background:#0e1e28;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.08em}
+    .footer a{color:rgba(255,255,255,.35);transition:color .2s}
+    .footer a:hover{color:var(--gold)}
+
+    @media(max-width:900px){.projects-grid{grid-template-columns:1fr 1fr}.nav-links{display:none}}
+    @media(max-width:600px){.projects-grid{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="../index.html" class="nav-logo">
+      <div class="nav-monogram">CRA</div>
+      <div class="nav-wordmark"><strong>CRA</strong><span>Construction</span></div>
+    </a>
+    <ul class="nav-links">
+      <li><a href="../index.html#about">About</a></li>
+      <li><a href="index.html">Work</a></li>
+      <li><a href="../index.html#services">Services</a></li>
+      <li><a href="../index.html#instagram">Instagram</a></li>
+      <li><a href="../index.html#contact">Contact</a></li>
+    </ul>
+    <a href="../index.html#contact" class="nav-cta">Get In Touch</a>
+  </div>
+</nav>
+
+<div class="page-header">
+  <div class="script">Our Work</div>
+  <h1>Projects</h1>
+  <p>Every build is a commitment — to the craft, the client, and the community. Here's what we've been building.</p>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="filter('all')">All Projects</div>
+  <div class="tab" onclick="filter('current')">Under Construction</div>
+  <div class="tab" onclick="filter('completed')">Completed</div>
+</div>
+
+<section class="projects-section">
+  <div class="projects-inner">
+    <div class="projects-grid" id="grid">
+
+      <!-- CURRENT -->
+      <a class="project-card" href="114-kinley-lp.html" data-status="current">
+        <div class="card-photo">
+          <img src="../photos/projects/114-kinley-lp/Rendering---Plans---114-Kinley-Lp---CRA-Construction-LLC-web.jpg" alt="114 Kinley Loop"/>
+          <div class="card-status current">Under Construction</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">114 Kinley Loop · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home construction in West Little Rock.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="24-daventry-dr.html" data-status="current">
+        <div class="card-photo" style="background:var(--navy);display:flex;align-items:center;justify-content:center;">
+          <svg style="width:48px;height:48px;stroke:rgba(255,255,255,.2);fill:none" viewBox="0 0 24 24" stroke-width="1"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <div class="card-status current">Under Construction</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">24 Daventry Drive · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home construction in West Little Rock.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <!-- COMPLETED -->
+      <a class="project-card" href="154-fletcher-ridge-dr.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/154-fletcher-ridge-dr/DP0A2125-web.jpg" alt="154 Fletcher Ridge Drive"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">154 Fletcher Ridge Dr · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home in the Fletcher Ridge subdivision.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="362-fletcher-lp.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/362-fletcher-lp/DP0A0905-web.jpg" alt="362 Fletcher Loop"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">362 Fletcher Loop · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home in the Fletcher Loop neighborhood.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="117-bear-den-ct.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/117-bear-den-ct/DP0A0617-2-web.jpg" alt="117 Bear Den Court"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">117 Bear Den Ct · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home in the Bear Den neighborhood.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="150-fletcher-lp.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/150-fletcher-lp/Photo-Jan-01-2000,-12-01-11-AM-web.jpg" alt="150 Fletcher Loop"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">150 Fletcher Loop · Little Rock, AR 72223</div>
+          <div class="card-title">Custom Residential Build</div>
+          <div class="card-desc">Ground-up custom home in the Fletcher Loop neighborhood.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="3901-gordon-rd.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/3901-gordon-rd/DJI_0605-web.jpg" alt="3901 Gordon Road"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">3901 Gordon Rd · Little Rock, AR 72204</div>
+          <div class="card-title">Residential Build</div>
+          <div class="card-desc">Custom residential construction in Little Rock.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+      <a class="project-card" href="3808-gordon-rd.html" data-status="completed">
+        <div class="card-photo">
+          <img src="../photos/projects/3808-gordon-rd/DP0A0814-web.jpg" alt="3808 Gordon Road"/>
+          <div class="card-status">Completed</div>
+        </div>
+        <div class="card-body">
+          <div class="card-address">3808 Gordon Rd · Little Rock, AR 72204</div>
+          <div class="card-title">Residential Build</div>
+          <div class="card-desc">Custom residential construction in Little Rock.</div>
+          <span class="card-link">View Project <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg></span>
+        </div>
+      </a>
+
+    </div>
+  </div>
+</section>
+
+<div class="footer">
+  <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
+  <a href="../index.html">← Back to Home</a>
+</div>
+
+<script>
+function filter(status) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.project-card').forEach(card => {
+    if (status === 'all' || card.dataset.status === status) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+</script>
+</body>
+</html>

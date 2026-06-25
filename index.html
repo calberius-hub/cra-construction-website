@@ -711,7 +711,7 @@
       </a>
       <ul class="nav-links">
         <li><a href="#about">About</a></li>
-        <li><a href="#work">Work</a></li>
+        <li><a href="projects/index.html">Work</a></li>
         <li><a href="#services">Services</a></li>
         <li><a href="#instagram">Instagram</a></li>
         <li><a href="#contact">Contact</a></li>
@@ -753,8 +753,8 @@
   <!-- PROJECTS STRIP -->
   <div class="projects-strip" id="work">
     <!-- Left panel — current project -->
-    <div class="strip-panel">
-      <div class="strip-panel-bg" style="background-image: url('photos/hero-0-web.jpg');"></div>
+    <div class="strip-panel" onclick="location.href='projects/index.html?filter=current'" style="cursor:pointer">
+      <div class="strip-panel-bg" style="background-image: url('photos/hero-aerial-web.jpg');"></div>
       <div class="strip-panel-overlay"></div>
       <div class="strip-panel-label">Current</div>
     </div>
@@ -762,7 +762,6 @@
     <div class="strip-center">
       <div class="strip-center-label">Our Work</div>
       <div class="strip-center-icon">
-        <!-- Hard hat / tools icon -->
         <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
           <path d="M2 18h20M5 18V10a7 7 0 0114 0v8"/>
           <path d="M9 10V8a3 3 0 016 0v2"/>
@@ -772,8 +771,8 @@
       <p>Little Rock, Arkansas</p>
     </div>
     <!-- Right panel — previous project -->
-    <div class="strip-panel">
-      <div class="strip-panel-bg" style="background-image: url('photos/hero-1-web.jpg');"></div>
+    <div class="strip-panel" onclick="location.href='projects/index.html?filter=completed'" style="cursor:pointer">
+      <div class="strip-panel-bg" style="background-image: url('photos/hero-home-web.jpg');"></div>
       <div class="strip-panel-overlay"></div>
       <div class="strip-panel-label strip-label-right">Previous</div>
     </div>
