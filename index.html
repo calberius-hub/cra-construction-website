@@ -3,50 +3,47 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CRA Construction — Homepage Concept</title>
+  <title>CRA Construction — Little Rock, AR</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --ink: #191714;
-      --charcoal: #11100e;
-      --stone: #f4f1ec;
-      --warm: #e8e0d3;
-      --muted: #756f66;
-      --line: rgba(25, 23, 20, 0.14);
-      --paper: #fffaf2;
-      --bronze: #9a7041;
-      --bronze-dark: #6f4d2c;
-      --white: #ffffff;
-      --max: 1180px;
+      --navy:   #1d3a4a;
+      --navy2:  #162e3b;
+      --gold:   #c9a54a;
+      --gold2:  #a8882f;
+      --cream:  #f8f5f0;
+      --white:  #ffffff;
+      --ink:    #1a1814;
+      --muted:  #6b6560;
+      --line:   rgba(25,22,18,.12);
+      --max:    1200px;
     }
-
-    * { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     html { scroll-behavior: smooth; }
     body {
-      margin: 0;
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      background: var(--paper);
+      font-family: 'Montserrat', sans-serif;
       color: var(--ink);
+      background: var(--white);
       -webkit-font-smoothing: antialiased;
     }
-
     a { color: inherit; text-decoration: none; }
+    img { display: block; width: 100%; height: 100%; object-fit: cover; }
 
+    /* ── NAV ───────────────────────────────────────────────── */
     .nav {
       position: fixed;
-      z-index: 10;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 72px;
+      z-index: 100;
+      top: 0; left: 0; right: 0;
+      height: 70px;
+      background: var(--white);
+      border-bottom: 1px solid var(--line);
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 0 28px;
-      color: #fff;
-      background: linear-gradient(to bottom, rgba(0,0,0,0.58), rgba(0,0,0,0.08));
-      backdrop-filter: blur(12px);
+      padding: 0 32px;
     }
-
     .nav-inner {
       width: min(var(--max), 100%);
       display: grid;
@@ -54,562 +51,989 @@
       align-items: center;
       gap: 24px;
     }
-
-    .brand {
+    .nav-logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-monogram {
+      width: 40px; height: 40px;
+      border: 2px solid var(--navy);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 16px; font-weight: 700;
+      color: var(--navy);
+      letter-spacing: .04em;
+      flex-shrink: 0;
+    }
+    .nav-wordmark {
       display: flex;
       flex-direction: column;
-      letter-spacing: .14em;
-      text-transform: uppercase;
-      font-weight: 700;
       line-height: 1;
     }
-
-    .brand small {
-      margin-top: 6px;
-      font-size: 10px;
-      letter-spacing: .24em;
-      font-weight: 500;
-      opacity: .78;
+    .nav-wordmark strong {
+      font-family: 'Montserrat', sans-serif;
+      font-size: 15px; font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      color: var(--navy);
     }
-
+    .nav-wordmark span {
+      font-size: 9px; font-weight: 500;
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-top: 4px;
+    }
     .nav-links {
       display: flex;
-      gap: 28px;
-      font-size: 13px;
-      letter-spacing: .02em;
-      opacity: .92;
+      gap: 32px;
+      list-style: none;
     }
-
+    .nav-links a {
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      color: var(--ink);
+      opacity: .8;
+      transition: opacity .2s;
+    }
+    .nav-links a:hover { opacity: 1; }
     .nav-cta {
       justify-self: end;
-      border: 1px solid rgba(255,255,255,.5);
-      border-radius: 999px;
-      padding: 11px 18px;
-      font-size: 13px;
-      background: rgba(255,255,255,.08);
-    }
-
-    .hero {
-      min-height: 94vh;
-      padding-top: 92px;
-      position: relative;
-      display: flex;
-      align-items: flex-end;
-      overflow: hidden;
-      color: #fff;
-      background:
-        linear-gradient(180deg, rgba(0,0,0,.16), rgba(0,0,0,.18) 35%, rgba(0,0,0,.72)),
-        radial-gradient(circle at 75% 25%, rgba(255,255,255,.16), transparent 28%),
-        linear-gradient(135deg, #625845, #211d18 48%, #0f0e0d);
-    }
-
-    .hero::before {
-      content: "";
-      position: absolute;
-      inset: 96px 34px 132px;
-      border: 1px solid rgba(255,255,255,.18);
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.01)),
-        repeating-linear-gradient(45deg, rgba(255,255,255,.03) 0 1px, transparent 1px 14px);
-    }
-
-    .hero-content {
-      position: relative;
-      z-index: 1;
-      width: min(var(--max), calc(100% - 56px));
-      margin: 0 auto 72px;
-      display: grid;
-      grid-template-columns: minmax(0, 760px) 1fr;
-      gap: 48px;
-      align-items: end;
-    }
-
-    .eyebrow {
-      text-transform: uppercase;
-      letter-spacing: .22em;
-      font-size: 12px;
-      color: rgba(255,255,255,.74);
-      margin-bottom: 16px;
-    }
-
-    h1 {
-      margin: 0;
-      font-size: clamp(46px, 7vw, 90px);
-      line-height: .96;
-      letter-spacing: -.065em;
-      font-weight: 650;
-      max-width: 820px;
-    }
-
-    .hero-copy {
-      color: rgba(255,255,255,.82);
-      font-size: clamp(17px, 1.6vw, 22px);
-      line-height: 1.45;
-      max-width: 440px;
-      margin: 0 0 28px;
-    }
-
-    .actions { display: flex; gap: 12px; flex-wrap: wrap; }
-    .btn {
       display: inline-flex;
       align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      min-height: 46px;
-      padding: 0 20px;
+      padding: 10px 20px;
+      font-size: 11px;
       font-weight: 600;
-      font-size: 14px;
-      transition: .2s ease;
-    }
-    .btn-primary { background: #fff; color: #17130f; }
-    .btn-secondary { border: 1px solid rgba(255,255,255,.46); color: #fff; }
-    .btn:hover { transform: translateY(-1px); }
-
-    main { background: var(--paper); }
-
-    section { padding: 96px 28px; }
-    .section-inner { width: min(var(--max), 100%); margin: 0 auto; }
-
-    .section-head {
-      display: flex;
-      align-items: end;
-      justify-content: space-between;
-      gap: 32px;
-      margin-bottom: 34px;
-    }
-    .section-kicker {
-      color: var(--bronze-dark);
+      letter-spacing: .14em;
       text-transform: uppercase;
-      letter-spacing: .18em;
-      font-size: 12px;
-      font-weight: 750;
-      margin-bottom: 10px;
+      border: 1.5px solid var(--navy);
+      color: var(--navy);
+      transition: background .2s, color .2s;
     }
-    h2 {
-      margin: 0;
-      font-size: clamp(34px, 4.8vw, 68px);
-      line-height: .98;
-      letter-spacing: -.045em;
-      max-width: 780px;
-    }
-    .section-note {
-      color: var(--muted);
-      max-width: 360px;
-      line-height: 1.55;
-      margin: 0;
-    }
+    .nav-cta:hover { background: var(--navy); color: var(--white); }
 
-    .projects-grid {
-      display: grid;
-      grid-template-columns: 1.25fr .75fr;
-      gap: 18px;
-    }
-    .project-card {
-      min-height: 480px;
-      display: flex;
-      align-items: flex-end;
+    /* ── HERO ──────────────────────────────────────────────── */
+    .hero {
+      height: 100vh;
       position: relative;
       overflow: hidden;
-      background: #302a22;
-      color: #fff;
-      isolation: isolate;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: var(--white);
     }
-    .project-card.small { min-height: 480px; }
-    .photo-placeholder {
+    .hero-slides {
       position: absolute;
       inset: 0;
+    }
+    .hero-slide {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      transition: opacity 1.2s ease;
+    }
+    .hero-slide.active { opacity: 1; }
+    .hero-slide-bg {
+      width: 100%; height: 100%;
+      background-size: cover;
+      background-position: center;
+      transform: scale(1.04);
+      transition: transform 8s ease;
+    }
+    .hero-slide.active .hero-slide-bg { transform: scale(1); }
+
+    /* Placeholder gradient backgrounds for slides (replace with real photos) */
+    .hero-slide:nth-child(1) .hero-slide-bg {
+      background-image: linear-gradient(160deg, #2a4a5e 0%, #162e3b 60%, #0e1e28 100%);
+    }
+    .hero-slide:nth-child(2) .hero-slide-bg {
+      background-image: linear-gradient(160deg, #3a4a3a 0%, #1e2e1e 60%, #0e180e 100%);
+    }
+    .hero-slide:nth-child(3) .hero-slide-bg {
+      background-image: linear-gradient(160deg, #4a3a2a 0%, #2e1e0e 60%, #180e08 100%);
+    }
+    .hero-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.38);
+    }
+    .hero-badge {
+      position: relative;
+      z-index: 2;
+      width: 130px; height: 130px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.55);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
       text-align: center;
-      padding: 32px;
-      color: rgba(255,255,255,.58);
-      font-size: 20px;
-      line-height: 1.35;
-      background:
-        linear-gradient(135deg, rgba(255,255,255,.08), transparent),
-        repeating-linear-gradient(45deg, rgba(255,255,255,.04) 0 1px, transparent 1px 14px),
-        linear-gradient(135deg, #6d604d, #1e1b17);
-      z-index: -2;
+      gap: 0;
     }
-    .project-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 34%, rgba(0,0,0,.78));
-      z-index: -1;
+    .hero-badge-letters {
+      font-family: 'Playfair Display', serif;
+      font-size: 38px;
+      font-weight: 700;
+      letter-spacing: .06em;
+      line-height: 1;
     }
-    .project-meta { padding: 28px; }
-    .status {
-      display: inline-flex;
-      border: 1px solid rgba(255,255,255,.44);
-      border-radius: 999px;
-      padding: 7px 11px;
-      font-size: 11px;
+    .hero-badge-sub {
+      font-size: 8px;
+      font-weight: 600;
+      letter-spacing: .26em;
       text-transform: uppercase;
-      letter-spacing: .14em;
-      margin-bottom: 16px;
-      background: rgba(255,255,255,.08);
-      backdrop-filter: blur(8px);
+      opacity: .78;
+      margin-top: 6px;
     }
-    .project-title {
-      font-size: clamp(28px, 4vw, 54px);
-      line-height: .96;
-      letter-spacing: -.04em;
-      margin: 0 0 12px;
-      font-weight: 620;
+    .hero-chevron {
+      position: absolute;
+      bottom: 36px;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      opacity: .7;
+      animation: bounce 2s ease-in-out infinite;
     }
-    .project-desc { margin: 0; max-width: 500px; line-height: 1.45; color: rgba(255,255,255,.78); }
+    @keyframes bounce {
+      0%,100% { transform: translateY(0); }
+      50%      { transform: translateY(6px); }
+    }
+    .hero-chevron svg { width: 24px; height: 24px; }
+    .hero-nav-dots {
+      position: absolute;
+      bottom: 40px;
+      right: 40px;
+      z-index: 2;
+      display: flex;
+      gap: 8px;
+    }
+    .hero-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,.6);
+      background: transparent;
+      cursor: pointer;
+      transition: background .3s;
+    }
+    .hero-dot.active { background: var(--white); }
 
-    .dark-band {
-      background: var(--charcoal);
-      color: #fff;
-      padding-top: 108px;
-      padding-bottom: 108px;
-    }
-    .dark-band .section-kicker { color: #d6b17f; }
-    .dark-band .section-note { color: rgba(255,255,255,.62); }
-
-    .work-grid {
+    /* ── PROJECTS CAROUSEL STRIP ───────────────────────────── */
+    .projects-strip {
       display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 14px;
-      margin-top: 40px;
+      grid-template-columns: 1fr 380px 1fr;
+      min-height: 520px;
     }
-    .work-tile {
-      min-height: 300px;
+    .strip-panel {
       position: relative;
       overflow: hidden;
-      background: #28231e;
-      display: flex;
-      align-items: flex-end;
+      cursor: pointer;
     }
-    .work-tile:nth-child(2), .work-tile:nth-child(4) { transform: translateY(34px); }
-    .work-label {
-      position: relative;
-      z-index: 1;
-      padding: 20px;
-      font-weight: 650;
-      letter-spacing: -.02em;
+    .strip-panel-bg {
+      position: absolute; inset: 0;
+      background-size: cover;
+      background-position: center;
+      transition: transform .6s ease;
     }
-    .work-tile .photo-placeholder { font-size: 15px; }
-    .work-tile::after {
-      content: "";
+    .strip-panel:hover .strip-panel-bg { transform: scale(1.04); }
+    .strip-panel-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,.32);
+    }
+    .strip-panel-label {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(180deg, transparent 42%, rgba(0,0,0,.72));
+      top: 28px; left: 28px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: rgba(255,255,255,.85);
+      border: 1px solid rgba(255,255,255,.4);
+      padding: 8px 14px;
     }
+    .strip-label-right { left: auto; right: 28px; }
 
-    .split {
-      display: grid;
-      grid-template-columns: .9fr 1.1fr;
-      gap: clamp(34px, 6vw, 86px);
-      align-items: center;
-    }
-    .copy-block p {
-      color: var(--muted);
-      font-size: 18px;
-      line-height: 1.65;
-      max-width: 590px;
-    }
-    .capability-list {
-      display: grid;
-      gap: 1px;
-      background: var(--line);
-      border: 1px solid var(--line);
-    }
-    .capability {
-      background: var(--paper);
-      padding: 26px 24px;
+    /* center panel */
+    .strip-center {
+      background: var(--navy);
       display: flex;
-      justify-content: space-between;
+      flex-direction: column;
       align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 48px 40px;
+      color: var(--white);
       gap: 20px;
     }
-    .capability strong { font-size: 18px; }
-    .capability span { color: var(--muted); text-align: right; }
+    .strip-center-icon {
+      width: 64px; height: 64px;
+      border: 1.5px solid var(--gold);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .strip-center-icon svg { width: 28px; height: 28px; stroke: var(--gold); fill: none; }
+    .strip-center-label {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .26em; text-transform: uppercase;
+      color: var(--gold);
+    }
+    .strip-center h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 400;
+      line-height: 1.25;
+    }
+    .strip-center h2 em { font-style: italic; }
+    .strip-center p {
+      font-size: 12px; font-weight: 500;
+      letter-spacing: .14em; text-transform: uppercase;
+      opacity: .6;
+    }
 
-    .ig-feed-section {
-      background: var(--stone);
+    /* ── FEATURED PROJECT ──────────────────────────────────── */
+    .featured {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 560px;
+    }
+    .featured-photo {
+      position: relative;
+      overflow: hidden;
+    }
+    .featured-photo-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #2a3a2a, #1a2a1a);
+      background-size: cover;
+      background-position: center;
+    }
+    .featured-photo-label {
+      position: absolute;
+      bottom: 32px; left: 32px;
+      color: var(--white);
+    }
+    .featured-photo-label .eyebrow {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .26em; text-transform: uppercase;
+      opacity: .75;
+      margin-bottom: 8px;
+    }
+    .featured-photo-label h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 28px; font-weight: 700;
+      letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .featured-info {
+      background: var(--navy);
+      color: var(--white);
+      padding: 64px 56px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 28px;
+    }
+    .featured-info .eyebrow {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .26em; text-transform: uppercase;
+      color: var(--gold);
+    }
+    .featured-info h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(26px, 3vw, 40px);
+      font-weight: 400;
+      line-height: 1.2;
+    }
+    .featured-specs {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .featured-specs li {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: .1em;
+      text-transform: uppercase;
+      border-bottom: 1px solid rgba(255,255,255,.1);
+      padding-bottom: 14px;
+    }
+    .featured-specs li svg { width: 18px; height: 18px; stroke: var(--gold); fill: none; flex-shrink: 0; }
+    .featured-btn {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      padding: 14px 28px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      border: 1.5px solid rgba(255,255,255,.4);
+      color: var(--white);
+      transition: border-color .2s, background .2s;
+    }
+    .featured-btn:hover { border-color: var(--white); background: rgba(255,255,255,.08); }
+
+    /* ── SERVICES ──────────────────────────────────────────── */
+    .services {
+      background: var(--cream);
+      padding: 96px 32px;
+    }
+    .services-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+    }
+    .section-top {
+      text-align: center;
+      margin-bottom: 56px;
+    }
+    .section-script {
+      font-family: 'Dancing Script', cursive;
+      font-size: 28px;
+      color: var(--gold2);
+      margin-bottom: 12px;
+    }
+    .section-title {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 4vw, 52px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    .section-sub {
+      margin-top: 14px;
+      font-size: 14px;
+      color: var(--muted);
+      max-width: 560px;
+      margin-left: auto;
+      margin-right: auto;
+      line-height: 1.6;
+    }
+    .services-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2px;
+    }
+    .service-card {
+      background: var(--white);
+      padding: 44px 36px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .service-icon {
+      width: 48px; height: 48px;
+      border: 1.5px solid var(--gold);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .service-icon svg { width: 22px; height: 22px; stroke: var(--gold2); fill: none; }
+    .service-card h3 {
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+    }
+    .service-card p {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--muted);
+    }
+    .service-link {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--navy);
+      display: flex; align-items: center; gap: 6px;
+      margin-top: auto;
+    }
+    .service-link svg { width: 14px; height: 14px; stroke: var(--navy); fill: none; }
+
+    /* ── ABOUT SPLIT ───────────────────────────────────────── */
+    .about {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      min-height: 540px;
+    }
+    .about-photo {
+      position: relative;
+      overflow: hidden;
+      min-height: 420px;
+    }
+    .about-photo-bg {
+      position: absolute; inset: 0;
+      background: linear-gradient(135deg, #3a3020, #1a1810);
+      background-size: cover; background-position: center;
+    }
+    .about-content {
+      padding: 72px 64px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 20px;
+    }
+    .about-content .section-script { text-align: left; margin-bottom: 0; }
+    .about-content h2 {
+      font-family: 'Playfair Display', serif;
+      font-size: clamp(28px, 3.5vw, 46px);
+      font-weight: 700;
+      line-height: 1.1;
+      letter-spacing: -.02em;
+    }
+    .about-content p {
+      font-size: 15px;
+      line-height: 1.7;
+      color: var(--muted);
+      max-width: 480px;
+    }
+    .about-stats {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+      border-top: 1px solid var(--line);
+      padding-top: 24px;
+      margin-top: 4px;
+    }
+    .stat { display: flex; flex-direction: column; gap: 4px; }
+    .stat strong {
+      font-family: 'Playfair Display', serif;
+      font-size: 32px; font-weight: 700;
+      color: var(--navy);
+    }
+    .stat span {
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: var(--muted);
+    }
+    .about-btn {
+      align-self: flex-start;
+      display: inline-flex;
+      align-items: center;
+      padding: 14px 28px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      background: var(--navy);
+      color: var(--white);
+      transition: background .2s;
+    }
+    .about-btn:hover { background: var(--navy2); }
+
+    /* ── INSTAGRAM ─────────────────────────────────────────── */
+    .instagram {
+      background: var(--navy);
+      padding: 80px 32px;
+    }
+    .instagram-inner { max-width: var(--max); margin: 0 auto; }
+    .instagram-header {
+      text-align: center;
+      margin-bottom: 48px;
+      color: var(--white);
+    }
+    .instagram-header h2 {
+      font-family: 'Montserrat', sans-serif;
+      font-size: clamp(22px, 3vw, 36px);
+      font-weight: 700;
+      letter-spacing: .18em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+    }
+    .instagram-header h2 svg { width: 28px; height: 28px; stroke: var(--white); fill: none; }
+    .instagram-header p {
+      font-size: 14px; opacity: .65;
+      margin-top: 10px;
     }
     .ig-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 14px;
-      margin-top: 40px;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
     }
-    .ig-tile {
+    .ig-post {
+      position: relative;
       aspect-ratio: 1;
       overflow: hidden;
-      position: relative;
-      background: var(--warm);
-      display: block;
+      background: rgba(255,255,255,.06);
+      cursor: pointer;
     }
-    .ig-tile img {
-      width: 100%;
-      height: 100%;
+    .ig-post img {
+      width: 100%; height: 100%;
       object-fit: cover;
-      display: block;
       transition: transform .4s ease;
     }
-    .ig-tile:hover img { transform: scale(1.04); }
-    .ig-tile-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(25,23,20,.0);
-      transition: background .3s ease;
-      display: flex;
-      align-items: flex-end;
-    }
-    .ig-tile:hover .ig-tile-overlay { background: rgba(25,23,20,.52); }
-    .ig-tile-caption {
-      padding: 14px;
-      color: #fff;
-      font-size: 13px;
-      line-height: 1.4;
+    .ig-post:hover img { transform: scale(1.06); }
+    .ig-post-overlay {
+      position: absolute; inset: 0;
+      background: rgba(29,58,74,.82);
       opacity: 0;
-      transition: opacity .3s ease;
-    }
-    .ig-tile:hover .ig-tile-caption { opacity: 1; }
-    .ig-follow {
-      margin-top: 32px;
-      text-align: center;
-    }
-    .ig-follow a {
-      display: inline-flex;
+      transition: opacity .3s;
+      display: flex;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
-      font-weight: 600;
-      letter-spacing: .04em;
-      color: var(--bronze-dark);
-      border-bottom: 1px solid var(--bronze);
-      padding-bottom: 2px;
+      justify-content: center;
+      padding: 12px;
     }
-    @media (max-width: 860px) {
-      .ig-grid { grid-template-columns: repeat(2, 1fr); }
-    }
-    @media (max-width: 520px) {
-      .ig-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
-    }
-    .cta-card {
-      width: min(var(--max), 100%);
-      margin: 0 auto;
-      min-height: 430px;
-      display: grid;
-      grid-template-columns: 1fr .72fr;
-      background: var(--ink);
-      color: #fff;
+    .ig-post:hover .ig-post-overlay { opacity: 1; }
+    .ig-post-caption {
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--white);
+      text-align: center;
+      display: -webkit-box;
+      -webkit-line-clamp: 5;
+      -webkit-box-orient: vertical;
       overflow: hidden;
     }
-    .cta-copy { padding: clamp(34px, 6vw, 72px); align-self: end; }
-    .cta-copy h2 { max-width: 700px; }
-    .cta-copy p { color: rgba(255,255,255,.72); font-size: 18px; line-height: 1.6; max-width: 520px; }
-    .cta-photo { position: relative; background: #3a3329; }
-    .cta-photo .photo-placeholder { font-size: 18px; }
-
-    footer {
-      padding: 34px 28px;
-      background: var(--charcoal);
-      color: rgba(255,255,255,.68);
-      font-size: 13px;
+    .ig-placeholder {
+      width: 100%; height: 100%;
+      background: rgba(255,255,255,.05);
+      display: flex; align-items: center; justify-content: center;
     }
-    .footer-inner { width: min(var(--max), 100%); margin: 0 auto; display:flex; justify-content:space-between; gap:20px; flex-wrap:wrap; }
+    .ig-placeholder svg { width: 24px; height: 24px; stroke: rgba(255,255,255,.2); fill: none; }
+    .ig-footer {
+      text-align: center;
+      margin-top: 40px;
+    }
+    .ig-btn {
+      display: inline-flex;
+      align-items: center;
+      padding: 14px 36px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: .18em; text-transform: uppercase;
+      border: 1.5px solid rgba(255,255,255,.4);
+      color: var(--white);
+      transition: border-color .2s, background .2s;
+    }
+    .ig-btn:hover { border-color: var(--white); background: rgba(255,255,255,.08); }
 
-    @media (max-width: 860px) {
-      .nav { height: 64px; }
-      .nav-inner { grid-template-columns: 1fr auto; }
+    /* ── CONTACT ───────────────────────────────────────────── */
+    .contact {
+      background: var(--navy2);
+      padding: 80px 32px 56px;
+      color: var(--white);
+    }
+    .contact-inner {
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 56px;
+      align-items: start;
+    }
+    .contact-brand {}
+    .contact-brand .section-script {
+      font-size: 36px;
+      color: var(--gold);
+      margin-bottom: 12px;
+    }
+    .contact-brand p {
+      font-size: 14px;
+      line-height: 1.65;
+      opacity: .65;
+      max-width: 300px;
+    }
+    .contact-info h4 {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+    .contact-info ul { list-style: none; display: flex; flex-direction: column; gap: 12px; }
+    .contact-info li {
+      display: flex; align-items: flex-start; gap: 10px;
+      font-size: 14px; opacity: .8; line-height: 1.5;
+    }
+    .contact-info li svg { width: 16px; height: 16px; stroke: var(--gold); fill: none; flex-shrink: 0; margin-top: 2px; }
+    .contact-social h4 {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .22em; text-transform: uppercase;
+      color: var(--gold);
+      margin-bottom: 18px;
+    }
+    .social-row {
+      display: flex; gap: 14px; flex-wrap: wrap;
+    }
+    .social-icon {
+      width: 38px; height: 38px;
+      border: 1px solid rgba(255,255,255,.25);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color .2s, background .2s;
+    }
+    .social-icon:hover { border-color: var(--gold); background: rgba(201,165,74,.12); }
+    .social-icon svg { width: 16px; height: 16px; stroke: rgba(255,255,255,.7); fill: none; }
+
+    /* ── FOOTER BAR ────────────────────────────────────────── */
+    .footer-bar {
+      background: #0e1e28;
+      padding: 18px 32px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 11px;
+      color: rgba(255,255,255,.35);
+      letter-spacing: .08em;
+    }
+    .footer-bar a { opacity: .5; transition: opacity .2s; }
+    .footer-bar a:hover { opacity: 1; }
+    .footer-hub-link {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 10px; font-weight: 600;
+      letter-spacing: .14em; text-transform: uppercase;
+      color: rgba(255,255,255,.35);
+      transition: color .2s;
+    }
+    .footer-hub-link:hover { color: var(--gold); }
+    .footer-hub-link svg { width: 12px; height: 12px; stroke: currentColor; fill: none; }
+
+    /* ── RESPONSIVE ────────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .projects-strip { grid-template-columns: 1fr; }
+      .strip-center { min-height: 300px; }
+      .featured { grid-template-columns: 1fr; }
+      .services-grid { grid-template-columns: 1fr; }
+      .about { grid-template-columns: 1fr; }
+      .about-content { padding: 48px 32px; }
+      .contact-inner { grid-template-columns: 1fr; gap: 40px; }
+      .ig-grid { grid-template-columns: repeat(3, 1fr); }
       .nav-links { display: none; }
-      .hero-content, .projects-grid, .split, .cta-card { grid-template-columns: 1fr; }
-      .hero-content { width: min(100% - 36px, var(--max)); margin-bottom: 42px; }
-      .hero::before { inset: 84px 18px 260px; }
-      section { padding: 72px 18px; }
-      .section-head { display: block; }
-      .section-note { margin-top: 18px; }
-      .project-card, .project-card.small { min-height: 390px; }
-      .work-grid { grid-template-columns: 1fr 1fr; }
-      .work-tile:nth-child(2), .work-tile:nth-child(4) { transform: none; }
-      .cta { padding: 72px 18px; }
-      .cta-photo { min-height: 280px; }
-    }
-
-    @media (max-width: 520px) {
-      .brand small, .nav-cta { display: none; }
-      .nav-inner { grid-template-columns: 1fr; }
-      h1 { font-size: 52px; }
-      .work-grid { grid-template-columns: 1fr; }
-      .capability { display: block; }
-      .capability span { display: block; text-align: left; margin-top: 8px; }
     }
   </style>
 </head>
 <body>
-  <nav class="nav" aria-label="Primary navigation">
+
+  <!-- NAV -->
+  <nav class="nav">
     <div class="nav-inner">
-      <a class="brand" href="#top">CRA <small>Construction</small></a>
-      <div class="nav-links" aria-label="Site sections">
-        <a href="#current">Current Projects</a>
-        <a href="#previous">Previous Work</a>
-        <a href="#capability">Capabilities</a>
-        <a href="#follow">Instagram</a>
-        <a href="#contact">Contact</a>
-      </div>
-      <a class="nav-cta" href="#contact">Start a Project</a>
+      <a href="#" class="nav-logo">
+        <div class="nav-monogram">CRA</div>
+        <div class="nav-wordmark">
+          <strong>CRA</strong>
+          <span>Construction</span>
+        </div>
+      </a>
+      <ul class="nav-links">
+        <li><a href="#about">About</a></li>
+        <li><a href="#work">Work</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#instagram">Instagram</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+      <a href="#contact" class="nav-cta">Get In Touch</a>
     </div>
   </nav>
 
-  <header class="hero" id="top">
-    <div class="hero-content">
-      <div>
-        <div class="eyebrow">Central Arkansas Builder</div>
-        <h1>Built with intention. Managed with discipline.</h1>
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-slides" id="heroSlides">
+      <div class="hero-slide active">
+        <div class="hero-slide-bg"></div>
       </div>
-      <div>
-        <p class="hero-copy">Custom homes, development work, and construction projects led with ownership-level care from start to finish.</p>
-        <div class="actions">
-          <a class="btn btn-primary" href="#current">View Current Projects</a>
-          <a class="btn btn-secondary" href="#contact">Talk With CRA</a>
+      <div class="hero-slide">
+        <div class="hero-slide-bg"></div>
+      </div>
+      <div class="hero-slide">
+        <div class="hero-slide-bg"></div>
+      </div>
+    </div>
+    <div class="hero-overlay"></div>
+    <div class="hero-badge">
+      <span class="hero-badge-letters">CRA</span>
+      <span class="hero-badge-sub">Construction</span>
+    </div>
+    <a href="#work" class="hero-chevron" aria-label="Scroll down">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="6 9 12 15 18 9"/>
+      </svg>
+    </a>
+    <div class="hero-nav-dots">
+      <div class="hero-dot active" data-slide="0"></div>
+      <div class="hero-dot" data-slide="1"></div>
+      <div class="hero-dot" data-slide="2"></div>
+    </div>
+  </section>
+
+  <!-- PROJECTS STRIP -->
+  <div class="projects-strip" id="work">
+    <!-- Left panel — current project -->
+    <div class="strip-panel">
+      <div class="strip-panel-bg" style="background-image: linear-gradient(160deg,#3a4a3e,#1a2a1e);"></div>
+      <div class="strip-panel-overlay"></div>
+      <div class="strip-panel-label">Current</div>
+    </div>
+    <!-- Center dark panel -->
+    <div class="strip-center">
+      <div class="strip-center-label">Our Work</div>
+      <div class="strip-center-icon">
+        <!-- Hard hat / tools icon -->
+        <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 18h20M5 18V10a7 7 0 0114 0v8"/>
+          <path d="M9 10V8a3 3 0 016 0v2"/>
+        </svg>
+      </div>
+      <h2><em>built for life,</em><br>built to last</h2>
+      <p>Little Rock, Arkansas</p>
+    </div>
+    <!-- Right panel — previous project -->
+    <div class="strip-panel">
+      <div class="strip-panel-bg" style="background-image: linear-gradient(160deg,#4a3a2a,#2a1a0a);"></div>
+      <div class="strip-panel-overlay"></div>
+      <div class="strip-panel-label strip-label-right">Previous</div>
+    </div>
+  </div>
+
+  <!-- FEATURED PROJECT -->
+  <div class="featured">
+    <div class="featured-photo">
+      <div class="featured-photo-bg"></div>
+      <div class="featured-photo-label">
+        <p class="eyebrow">Featured Project</p>
+        <h3>Rosemary Villas<br>at Chenal</h3>
+      </div>
+    </div>
+    <div class="featured-info">
+      <p class="eyebrow">Active Development</p>
+      <h2>Luxury Senior Living<br>in West Little Rock</h2>
+      <ul class="featured-specs">
+        <li>
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
+          55+ Community
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          Independent &amp; Assisted Living
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          Chenal Parkway, Little Rock
+        </li>
+      </ul>
+      <a href="#contact" class="featured-btn">Learn More</a>
+    </div>
+  </div>
+
+  <!-- SERVICES -->
+  <section class="services" id="services">
+    <div class="services-inner">
+      <div class="section-top">
+        <div class="section-script">What We Do</div>
+        <h2 class="section-title">Built on Craft,<br>Driven by Standards</h2>
+        <p class="section-sub">From ground-up construction to finish-out and site development, CRA delivers on time and on spec — every time.</p>
+      </div>
+      <div class="services-grid">
+        <div class="service-card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </div>
+          <h3>Ground-Up Construction</h3>
+          <p>Full-scope new construction — residential and commercial — managed from site prep through certificate of occupancy.</p>
+          <span class="service-link">
+            Learn more
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+          <h3>Interior Finish-Out</h3>
+          <p>High-end interior finishes, custom millwork, and curated selections — built to the standard your project demands.</p>
+          <span class="service-link">
+            Learn more
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
+        </div>
+        <div class="service-card">
+          <div class="service-icon">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+          </div>
+          <h3>Site Development</h3>
+          <p>Land clearing, grading, utilities, and infrastructure — expert site development services through SDS.</p>
+          <span class="service-link">
+            Learn more
+            <svg viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>
+          </span>
         </div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <main>
-    <section id="current">
-      <div class="section-inner">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Current Projects</div>
-            <h2>Homes and developments underway now.</h2>
-          </div>
-          <p class="section-note">A Pike-inspired project-forward section. Replace placeholders with CRA Instagram/project photography when ready.</p>
+  <!-- ABOUT SPLIT -->
+  <div class="about" id="about">
+    <div class="about-photo">
+      <div class="about-photo-bg"></div>
+    </div>
+    <div class="about-content">
+      <div class="section-script">Our Story</div>
+      <h2>A Builder's Standard in Everything We Touch</h2>
+      <p>CRA Construction is a Little Rock-based general contractor specializing in custom residential construction, multifamily development, and high-end interior finish-out. We build with precision, operate with integrity, and deliver work that holds up long after the ribbon is cut.</p>
+      <div class="about-stats">
+        <div class="stat">
+          <strong>15+</strong>
+          <span>Years Building</span>
         </div>
-        <div class="projects-grid">
-          <article class="project-card">
-            <div class="photo-placeholder">Use CRA Instagram image: 307 Fletcher Loop / strongest current home exterior</div>
-            <div class="project-meta">
-              <span class="status">Available / Current</span>
-              <h3 class="project-title">307 Fletcher Loop</h3>
-              <p class="project-desc">Ready for move-in. Built by CRA in Central Arkansas with a clean, modern residential finish.</p>
-            </div>
-          </article>
-          <article class="project-card small">
-            <div class="photo-placeholder">Use CRA Instagram image: active build, framing, exterior detail, or jobsite progress</div>
-            <div class="project-meta">
-              <span class="status">In Progress</span>
-              <h3 class="project-title">Custom Home Build</h3>
-              <p class="project-desc">A simple featured-project card for an active custom home or spec project.</p>
-            </div>
-          </article>
+        <div class="stat">
+          <strong>100+</strong>
+          <span>Projects Delivered</span>
+        </div>
+        <div class="stat">
+          <strong>AR</strong>
+          <span>Licensed &amp; Insured</span>
         </div>
       </div>
-    </section>
+      <a href="#contact" class="about-btn">Work With Us</a>
+    </div>
+  </div>
 
-    <section class="dark-band" id="previous">
-      <div class="section-inner">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Previous Work</div>
-            <h2>Finished work that carries the CRA standard.</h2>
-          </div>
-          <p class="section-note">A focused gallery section for completed CRA homes and detail work.</p>
-        </div>
-        <div class="work-grid">
-          <article class="work-tile"><div class="photo-placeholder">TW Ranch final results</div><div class="work-label">TW Ranch</div></article>
-          <article class="work-tile"><div class="photo-placeholder">Fireplace / outdoor living</div><div class="work-label">Outdoor Living</div></article>
-          <article class="work-tile"><div class="photo-placeholder">Custom closet detail</div><div class="work-label">Interior Finish</div></article>
-          <article class="work-tile"><div class="photo-placeholder">Kitchen / bath / millwork</div><div class="work-label">Custom Details</div></article>
-        </div>
+  <!-- INSTAGRAM -->
+  <section class="instagram" id="instagram">
+    <div class="instagram-inner">
+      <div class="instagram-header">
+        <h2>
+          <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+          Follow CRA on Instagram
+        </h2>
+        <p>See what's happening on our job sites — @cra_construction_</p>
       </div>
-    </section>
-
-    <section id="capability">
-      <div class="section-inner split">
-        <div class="copy-block">
-          <div class="section-kicker">Built by CRA</div>
-          <h2>Custom residential work with development-level discipline.</h2>
-          <p>CRA Construction brings the field execution of a builder and the long-view thinking of an owner/developer. The site should feel residential enough for a custom-home client and credible enough for partners, lenders, and commercial prospects.</p>
-        </div>
-        <div class="capability-list" aria-label="CRA capabilities">
-          <div class="capability"><strong>Custom Homes</strong><span>High-touch residential builds</span></div>
-          <div class="capability"><strong>Spec Homes</strong><span>Market-ready homes with intentional finish-out</span></div>
-          <div class="capability"><strong>Developments</strong><span>Communities, lots, infrastructure, long-term value</span></div>
-          <div class="capability"><strong>Light Commercial</strong><span>Practical construction capability beyond residential</span></div>
-        </div>
+      <div class="ig-grid" id="igGrid">
+        <!-- Populated by JS from instagram_feed.json -->
       </div>
-    </section>
+      <div class="ig-footer">
+        <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener" class="ig-btn">
+          View on Instagram
+        </a>
+      </div>
+    </div>
+  </section>
 
-    <section class="ig-feed-section" id="follow">
-      <div class="section-inner">
-        <div class="section-head">
-          <div>
-            <div class="section-kicker">Latest from the Field</div>
-            <h2>Follow the build.</h2>
-          </div>
-          <p class="section-note">Updated automatically from <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener">@cra_construction_</a> after every post.</p>
-        </div>
-        <div class="ig-grid" id="ig-grid">
-          <!-- Populated by loadIgFeed() from instagram_feed.json -->
-        </div>
-        <div class="ig-follow">
-          <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener">
-            Follow @cra_construction_ on Instagram →
+  <!-- CONTACT -->
+  <section class="contact" id="contact">
+    <div class="contact-inner">
+      <div class="contact-brand">
+        <div class="section-script">Contact Us</div>
+        <p>Thrilled you're here. Reach out with any questions about current projects, new construction, or working with CRA.</p>
+      </div>
+      <div class="contact-info">
+        <h4>Get In Touch</h4>
+        <ul>
+          <li>
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 014.69 10.5 19.79 19.79 0 011.56 2 2 2 0 013.54 0h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L7.91 7.91a16 16 0 006.08 6.08l.88-.88a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/></svg>
+            (501) 000-0000
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            info@cra-construction.com
+          </li>
+          <li>
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
+            Little Rock, Arkansas
+          </li>
+        </ul>
+      </div>
+      <div class="contact-social">
+        <h4>Follow Along</h4>
+        <div class="social-row">
+          <a href="https://www.instagram.com/cra_construction_/" target="_blank" rel="noopener" class="social-icon" aria-label="Instagram">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r=".5" fill="currentColor"/></svg>
+          </a>
+          <a href="https://www.facebook.com/" target="_blank" rel="noopener" class="social-icon" aria-label="Facebook">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z"/></svg>
+          </a>
+          <a href="alberiusops.com" target="_blank" rel="noopener" class="social-icon" aria-label="Alberius Hub">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
           </a>
         </div>
       </div>
-    </section>
-
-    <section class="cta" id="contact">
-      <div class="cta-card">
-        <div class="cta-copy">
-          <div class="section-kicker">Start a Project</div>
-          <h2>Have a build, site, or development in mind?</h2>
-          <p>Talk with CRA about custom homes, residential development, light commercial work, or a project that needs disciplined construction management.</p>
-          <div class="actions">
-            <a class="btn btn-primary" href="mailto:hello@example.com">Request a Consultation</a>
-            <a class="btn btn-secondary" href="https://www.instagram.com/cra_construction_/">View Instagram</a>
-          </div>
-        </div>
-        <div class="cta-photo">
-          <div class="photo-placeholder">CRA field / finished home / team image from @cra_construction_</div>
-        </div>
-      </div>
-    </section>
-  </main>
-
-  <footer>
-    <div class="footer-inner">
-      <div>CRA Construction · Central Arkansas</div>
-      <div>Concept mockup — replace placeholders with approved CRA photos.</div>
     </div>
-  </footer>
+  </section>
+
+  <!-- FOOTER BAR -->
+  <div class="footer-bar">
+    <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
+    <a href="https://alberiusops.com" target="_blank" rel="noopener" class="footer-hub-link">
+      <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6M9 21H3v-6M21 3l-7 7M3 21l7-7"/></svg>
+      Alberius Ops Hub
+    </a>
+  </div>
 
   <script>
-    async function loadIgFeed() {
-      const grid = document.getElementById('ig-grid');
-      if (!grid) return;
-      try {
-        const res = await fetch('instagram_feed.json');
-        if (!res.ok) throw new Error('Feed not found');
-        const data = await res.json();
-        const posts = (data.posts || []).slice(0, 6);
-        grid.innerHTML = posts.map(p => {
-          const caption = (p.caption || '').replace(/\n/g, ' ').substring(0, 120);
-          const img = p.image_url || '';
-          const url = p.permalink || 'https://www.instagram.com/cra_construction_/';
-          return `
-            <a class="ig-tile" href="${url}" target="_blank" rel="noopener" aria-label="CRA Instagram post">
-              <img src="${img}" alt="${caption}" loading="lazy" />
-              <div class="ig-tile-overlay">
-                <div class="ig-tile-caption">${caption}</div>
-              </div>
-            </a>`;
-        }).join('');
-      } catch (e) {
-        grid.innerHTML = '<p style="color:var(--muted);grid-column:1/-1;padding:20px 0">Follow us at <a href="https://www.instagram.com/cra_construction_/" target="_blank">@cra_construction_</a></p>';
+    /* ── HERO SLIDESHOW ─────────────────────────────── */
+    (function () {
+      const slides = document.querySelectorAll('.hero-slide');
+      const dots   = document.querySelectorAll('.hero-dot');
+      let current  = 0;
+      let timer;
+
+      function goTo(n) {
+        slides[current].classList.remove('active');
+        dots[current].classList.remove('active');
+        current = (n + slides.length) % slides.length;
+        slides[current].classList.add('active');
+        dots[current].classList.add('active');
       }
-    }
-    loadIgFeed();
+
+      function next() { goTo(current + 1); }
+
+      function start() { timer = setInterval(next, 5500); }
+      function reset() { clearInterval(timer); start(); }
+
+      dots.forEach(d => {
+        d.addEventListener('click', () => { goTo(+d.dataset.slide); reset(); });
+      });
+
+      start();
+    })();
+
+    /* ── INSTAGRAM FEED ─────────────────────────────── */
+    (function () {
+      const grid = document.getElementById('igGrid');
+
+      fetch('instagram_feed.json')
+        .then(r => r.json())
+        .then(data => {
+          const posts = Array.isArray(data) ? data : (data.posts || []);
+          const show  = posts.slice(0, 12);
+
+          if (!show.length) { renderPlaceholders(12); return; }
+
+          show.forEach(post => {
+            const a = document.createElement('a');
+            a.href   = post.permalink || 'https://www.instagram.com/cra_construction_/';
+            a.target = '_blank';
+            a.rel    = 'noopener';
+            a.className = 'ig-post';
+
+            const imgSrc = post.thumbnail_url || post.media_url || '';
+            const cap    = post.caption || '';
+
+            a.innerHTML = imgSrc
+              ? `<img src="${imgSrc}" alt="CRA Instagram post" loading="lazy" />
+                 <div class="ig-post-overlay"><p class="ig-post-caption">${cap}</p></div>`
+              : `<div class="ig-placeholder">
+                   <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                     <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/>
+                   </svg>
+                 </div>`;
+            grid.appendChild(a);
+          });
+
+          // fill remaining slots
+          const rem = 12 - show.length;
+          if (rem > 0) renderPlaceholders(rem);
+        })
+        .catch(() => renderPlaceholders(12));
+
+      function renderPlaceholders(n) {
+        for (let i = 0; i < n; i++) {
+          const div = document.createElement('div');
+          div.className = 'ig-post';
+          div.innerHTML = `<div class="ig-placeholder">
+            <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/>
+            </svg></div>`;
+          grid.appendChild(div);
+        }
+      }
+    })();
   </script>
+
 </body>
 </html>
