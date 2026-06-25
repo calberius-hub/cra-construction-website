@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>217 Abington Circle, Little Rock, AR 72223 — CRA Construction</title>
+  <title>217 Abington Circle, Little Rock, AR — CRA Construction</title>
   <link rel="preconnect" href="https://fonts.googleapis.com"/>
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet"/>
@@ -34,10 +34,17 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .hero-badge .status{display:inline-flex;margin-top:12px;padding:7px 14px;border:1px solid rgba(255,255,255,.4);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase}
 .content{max-width:var(--max);margin:0 auto;padding:64px 32px}
 .content-grid{display:grid;grid-template-columns:2fr 1fr;gap:48px;align-items:start}
-.gallery{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.gallery-main{grid-column:1/-1;height:400px;overflow:hidden}
-.gallery-thumb{height:220px;overflow:hidden;cursor:pointer;transition:opacity .2s}
+
+/* Gallery */
+.gallery{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.gallery-main{grid-column:1/-1;height:440px;overflow:hidden;cursor:pointer}
+.gallery-main:hover img{transform:scale(1.02);transition:transform .4s ease}
+.gallery-main img{transition:transform .4s ease}
+.gallery-thumb{height:200px;overflow:hidden;cursor:pointer;transition:opacity .2s}
 .gallery-thumb:hover{opacity:.85}
+.gallery-thumb img{transition:transform .3s ease}
+.gallery-thumb:hover img{transform:scale(1.04)}
+
 .sidebar{display:flex;flex-direction:column;gap:28px}
 .sidebar-card{background:var(--cream);padding:28px}
 .sidebar-card h3{font-size:10px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-bottom:16px}
@@ -54,7 +61,21 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .back-link svg{width:14px;height:14px;stroke:currentColor;fill:none}
 .footer{background:#0e1e28;padding:24px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.35)}
 .footer a{color:rgba(255,255,255,.35)}
-@media(max-width:800px){.content-grid{grid-template-columns:1fr}.nav-links{display:none}.gallery-main{height:260px}.gallery-thumb{height:160px}}
+
+/* Lightbox */
+.lb{display:none;position:fixed;inset:0;z-index:999;background:rgba(0,0,0,.92);align-items:center;justify-content:center;padding:20px}
+.lb.open{display:flex}
+.lb-img{max-width:90vw;max-height:88vh;object-fit:contain;width:auto;height:auto;box-shadow:0 8px 40px rgba(0,0,0,.6)}
+.lb-close{position:absolute;top:20px;right:28px;color:#fff;font-size:36px;cursor:pointer;line-height:1;opacity:.7;transition:opacity .2s}
+.lb-close:hover{opacity:1}
+.lb-arrow{position:absolute;top:50%;transform:translateY(-50%);color:#fff;font-size:48px;cursor:pointer;opacity:.6;transition:opacity .2s;padding:12px;user-select:none}
+.lb-arrow:hover{opacity:1}
+.lb-prev{left:12px}
+.lb-next{right:12px}
+.lb-counter{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.5);font-size:11px;letter-spacing:.14em;font-family:'Montserrat',sans-serif}
+
+@media(max-width:800px){.content-grid{grid-template-columns:1fr}.nav-links{display:none}.gallery{grid-template-columns:1fr 1fr}.gallery-main{height:280px}.gallery-thumb{height:150px}}
+@media(max-width:520px){.gallery{grid-template-columns:1fr}.gallery-thumb{height:200px}}
 </style>
 </head>
 <body>
@@ -77,11 +98,11 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 </nav>
 
 <div class="hero">
-  <div class="hero-bg" style="background-image:url('../photos/projects/217-abington-circle/DSC_0329-web.jpg');"></div>
+  <div class="hero-bg" style="background-image:url('../photos/projects/217-abington-circle/DJI_0039-web.jpg');background-position:center 40%;"></div>
   <div class="hero-overlay"></div>
   <div class="hero-badge">
     <p class="eyebrow">CRA Construction</p>
-    <h1>217 Abington Circle</h1>
+    <h1>217 Abington Circle<br><span style="font-size:.62em;opacity:.85">Little Rock, AR</span></h1>
     <div class="status">Completed</div>
   </div>
 </div>
@@ -93,12 +114,35 @@ img{display:block;width:100%;height:100%;object-fit:cover}
   </a>
   <div class="content-grid">
     <div>
-      <div class="gallery">
-        <div class="gallery-main"><img src="../photos/projects/217-abington-circle/DSC_0329-web.jpg" alt="217 Abington Circle, Little Rock, AR 72223"/></div>
-        <div class="gallery-thumb"><img src="../photos/projects/217-abington-circle/DSC_0355-web.jpg" alt="217 Abington Circle, Little Rock, AR 72223"/></div>
-        <div class="gallery-thumb"><img src="../photos/projects/217-abington-circle/DSC_0543-web.jpg" alt="217 Abington Circle, Little Rock, AR 72223"/></div>
-        <div class="gallery-thumb"><img src="../photos/projects/217-abington-circle/DSC_0590-web.jpg" alt="217 Abington Circle, Little Rock, AR 72223"/></div>
-        <div class="gallery-thumb"><img src="../photos/projects/217-abington-circle/DSC_0736-web.jpg" alt="217 Abington Circle, Little Rock, AR 72223"/></div>
+      <div class="gallery" id="gallery">
+        <!-- Main hero shot: aerial exterior -->
+        <div class="gallery-main" data-idx="0">
+          <img src="../photos/projects/217-abington-circle/DJI_0039-web.jpg" alt="217 Abington Circle — Aerial exterior view, Little Rock, AR"/>
+        </div>
+        <!-- Row 1 -->
+        <div class="gallery-thumb" data-idx="1">
+          <img src="../photos/projects/217-abington-circle/DSC_0329-web.jpg" alt="217 Abington Circle — Great room with fireplace"/>
+        </div>
+        <div class="gallery-thumb" data-idx="2">
+          <img src="../photos/projects/217-abington-circle/DSC_0595-web.jpg" alt="217 Abington Circle — Marble shower detail"/>
+        </div>
+        <div class="gallery-thumb" data-idx="3">
+          <img src="../photos/projects/217-abington-circle/DSC_0709-web.jpg" alt="217 Abington Circle — Brass chandelier and arched window"/>
+        </div>
+        <!-- Row 2 -->
+        <div class="gallery-thumb" data-idx="4">
+          <img src="../photos/projects/217-abington-circle/DSC_0734-web.jpg" alt="217 Abington Circle — Wide interior living space"/>
+        </div>
+        <div class="gallery-thumb" data-idx="5">
+          <img src="../photos/projects/217-abington-circle/DSC_0649-web.jpg" alt="217 Abington Circle — Interior detail"/>
+        </div>
+        <div class="gallery-thumb" data-idx="6">
+          <img src="../photos/projects/217-abington-circle/DSC_0551-web.jpg" alt="217 Abington Circle — Interior finish-out"/>
+        </div>
+        <!-- Row 3 full-width accent -->
+        <div class="gallery-thumb" style="grid-column:1/-1;height:260px;" data-idx="7">
+          <img src="../photos/projects/217-abington-circle/DSC_0500-web.jpg" alt="217 Abington Circle — Interior renovation detail"/>
+        </div>
       </div>
     </div>
     <div class="sidebar">
@@ -107,7 +151,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
         <ul>
           <li>
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z"/><circle cx="12" cy="10" r="3"/></svg>
-            217 Abington Circle, Little Rock, AR 72223
+            217 Abington Circle, Little Rock, AR
           </li>
           <li>
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/></svg>
@@ -115,7 +159,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
           </li>
           <li>
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
-            Interior Renovation &amp; Finish-Out
+            Full Interior Renovation
           </li>
           <li>
             <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -132,9 +176,62 @@ img{display:block;width:100%;height:100%;object-fit:cover}
   </div>
 </div>
 
+<!-- Lightbox -->
+<div class="lb" id="lb" role="dialog" aria-modal="true">
+  <span class="lb-close" id="lb-close" aria-label="Close">&times;</span>
+  <span class="lb-arrow lb-prev" id="lb-prev" aria-label="Previous">&#8249;</span>
+  <img class="lb-img" id="lb-img" src="" alt=""/>
+  <span class="lb-arrow lb-next" id="lb-next" aria-label="Next">&#8250;</span>
+  <span class="lb-counter" id="lb-counter"></span>
+</div>
+
 <div class="footer">
   <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
   <a href="../index.html">← Home</a>
 </div>
+
+<script>
+(function(){
+  var items = Array.from(document.querySelectorAll('#gallery [data-idx]'));
+  var imgs = items.map(function(el){ return el.querySelector('img'); });
+  var lb = document.getElementById('lb');
+  var lbImg = document.getElementById('lb-img');
+  var lbCounter = document.getElementById('lb-counter');
+  var cur = 0;
+
+  function open(idx){
+    cur = idx;
+    lbImg.src = imgs[idx].src;
+    lbImg.alt = imgs[idx].alt;
+    lbCounter.textContent = (idx+1) + ' / ' + imgs.length;
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function close(){
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  function nav(dir){
+    cur = (cur + dir + imgs.length) % imgs.length;
+    lbImg.src = imgs[cur].src;
+    lbImg.alt = imgs[cur].alt;
+    lbCounter.textContent = (cur+1) + ' / ' + imgs.length;
+  }
+
+  items.forEach(function(el){
+    el.addEventListener('click', function(){ open(+el.dataset.idx); });
+  });
+  document.getElementById('lb-close').addEventListener('click', close);
+  document.getElementById('lb-prev').addEventListener('click', function(){ nav(-1); });
+  document.getElementById('lb-next').addEventListener('click', function(){ nav(1); });
+  lb.addEventListener('click', function(e){ if(e.target===lb) close(); });
+  document.addEventListener('keydown', function(e){
+    if(!lb.classList.contains('open')) return;
+    if(e.key==='Escape') close();
+    if(e.key==='ArrowLeft') nav(-1);
+    if(e.key==='ArrowRight') nav(1);
+  });
+})();
+</script>
 </body>
 </html>
