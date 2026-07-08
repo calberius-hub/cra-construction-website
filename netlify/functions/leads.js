@@ -170,16 +170,20 @@ exports.handler = async function (event) {
   const action = req.action;
 
   try {
-    if (action === "debug-forms") {
-      // Temporary diagnostic: what forms/submissions does Netlify actually have?
-      const formsRes = await fetch(`${NETLIFY_API}/sites/${siteId}/forms`, {
-        headers: { Authorization: `Bearer ${token}` },
+    if (action === "delete-lead") {
+      // Remove a lead by email from the direct-capture store.
+      const email = (req.email || "").toLowerCase();
+      if (!email) return json(400, { error: "email required" });
+      const s = getStore({
+        name: "leads-direct",
+        siteID: process.env.NETLIFY_SITE_ID,
+        token: process.env.NETLIFY_API_TOKEN,
+        consistency: "strong",
       });
-      const forms = formsRes.ok ? await formsRes.json() : { error: formsRes.status };
-      const summary = Array.isArray(forms)
-        ? forms.map((f) => ({ name: f.name, id: f.id, submission_count: f.submission_count }))
-        : forms;
-      return json(200, { site: siteId, forms: summary });
+      const arr = (await s.get("all", { type: "json" })) || [];
+      const next = arr.filter((l) => (l.email || "").toLowerCase() !== email);
+      await s.setJSON("all", next);
+      return json(200, { deleted: arr.length - next.length, remaining: next.length });
     }
 
     if (action === "list") {
