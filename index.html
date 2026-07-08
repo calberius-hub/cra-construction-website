@@ -1411,12 +1411,21 @@
         const body = new URLSearchParams();
         for (const pair of data.entries()) body.append(pair[0], pair[1]);
 
+        // Post to our own capture function (reliable) AND Netlify Forms (backup).
+        // Success is driven by the capture function; Netlify post is fire-and-forget.
         fetch('/', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: body.toString()
+        }).catch(function(){});
+
+        fetch('/.netlify/functions/capture-lead', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: body.toString()
         })
-        .then(function () {
+        .then(function (r) {
+          if (!r.ok) throw new Error('capture failed');
           document.getElementById('contactFields').classList.add('hide');
           document.getElementById('contactSuccess').classList.add('show');
           form.reset();

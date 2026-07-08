@@ -105,6 +105,36 @@ function toLead(sub) {
   };
 }
 
+// Direct-capture leads (from capture-lead.js → Blobs store "leads-direct")
+async function directLeads() {
+  try {
+    const s = getStore({
+      name: "leads-direct",
+      siteID: process.env.NETLIFY_SITE_ID,
+      token: process.env.NETLIFY_API_TOKEN,
+      consistency: "strong",
+    });
+    const arr = await s.get("all", { type: "json" });
+    return Array.isArray(arr) ? arr : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// Merge Netlify Forms submissions + direct-capture leads, de-duped by email.
+async function allLeads(siteId, token) {
+  let forms = [];
+  try { forms = (await fetchSubmissions(siteId, token)).map(toLead); } catch (e) { forms = []; }
+  const direct = await directLeads();
+  const byEmail = new Map();
+  for (const l of direct.concat(forms)) {
+    const key = (l.email || "").toLowerCase();
+    if (!key) continue;
+    if (!byEmail.has(key)) byEmail.set(key, l);
+  }
+  return Array.from(byEmail.values());
+}
+
 // ── Resend send ──────────────────────────────────────────────────────────────
 async function resendSend(to, subject, html, from, replyTo) {
   const res = await fetch("https://api.resend.com/emails", {
@@ -153,11 +183,10 @@ exports.handler = async function (event) {
     }
 
     if (action === "list") {
-      const subs = await fetchSubmissions(siteId, token);
+      const base = await allLeads(siteId, token);
       const overrides = (await blobGet("overrides")) || {};
-      const leads = subs.map((s) => {
-        const lead = toLead(s);
-        const ov = overrides[lead.email.toLowerCase()];
+      const leads = base.map((lead) => {
+        const ov = overrides[(lead.email || "").toLowerCase()];
         if (ov && ov.status) lead.status = ov.status;
         if (ov && ov.notes) lead.notes = ov.notes;
         return lead;
@@ -181,11 +210,10 @@ exports.handler = async function (event) {
     }
 
     if (action === "prepare-blast") {
-      const subs = await fetchSubmissions(siteId, token);
+      const base = await allLeads(siteId, token);
       const overrides = (await blobGet("overrides")) || {};
       const interest = (req.interest || "").toLowerCase();
-      const recipients = subs
-        .map(toLead)
+      const recipients = base
         .filter((l) => l.email)
         .filter((l) => {
           const ov = overrides[l.email.toLowerCase()];
