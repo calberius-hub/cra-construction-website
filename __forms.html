@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><title>Netlify Forms detection</title><meta name="robots" content="noindex"></head>
+<body>
+  <!--
+    This hidden static form exists ONLY so Netlify's build-time form detector
+    registers the "cra-leads" form. The real form users see is the modal in
+    index.html, which submits via AJAX to "/". Netlify's scanner reliably finds
+    forms in a standalone static file like this one.
+    Do not delete.
+  -->
+  <form name="cra-leads" netlify netlify-honeypot="company-website" hidden>
+    <input type="text" name="name" />
+    <input type="email" name="email" />
+    <input type="tel" name="phone" />
+    <input type="text" name="interest" />
+    <textarea name="message"></textarea>
+    <input type="text" name="entity" />
+    <input type="text" name="source" />
+    <input type="text" name="company-website" />
+  </form>
+</body>
+</html>
