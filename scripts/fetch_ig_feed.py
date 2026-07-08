@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 fetch_ig_feed.py — CRA Construction Website
-Fetches the 6 most recent CRA Instagram posts and writes instagram_feed.json.
+Fetches the 12 most recent CRA Instagram posts and writes instagram_feed.json.
 Run after each successful post to keep the website feed current.
 Secrets are read from the marketing agent's .secrets/ directory.
 """
@@ -29,17 +29,24 @@ def fetch_feed() -> list[dict]:
     url = (
         f"https://graph.facebook.com/v20.0/{ig_id}/media"
         f"?fields=id,caption,media_type,media_url,thumbnail_url,permalink,timestamp"
-        f"&limit=6&access_token={token}"
+        f"&limit=12&access_token={token}"
     )
     with urllib.request.urlopen(url, timeout=15) as r:
         data = json.loads(r.read())
     posts = []
     for p in data.get("data", []):
+        mt = p.get("media_type")
+        # For VIDEO/REELS, thumbnail_url is a still image; media_url is the .mp4.
+        # Prefer the thumbnail so the grid shows a proper poster, not a black tile.
+        if mt in ("VIDEO", "REELS"):
+            image_url = p.get("thumbnail_url") or p.get("media_url")
+        else:
+            image_url = p.get("media_url") or p.get("thumbnail_url")
         posts.append({
             "id": p.get("id"),
             "caption": (p.get("caption") or "")[:200],
-            "media_type": p.get("media_type"),
-            "image_url": p.get("media_url") or p.get("thumbnail_url"),
+            "media_type": mt,
+            "image_url": image_url,
             "permalink": p.get("permalink"),
             "timestamp": p.get("timestamp"),
         })

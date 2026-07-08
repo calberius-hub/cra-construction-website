@@ -611,6 +611,13 @@
       transition: transform .4s ease;
     }
     .ig-post:hover img, .ig-post:hover video { transform: scale(1.06); }
+    .ig-play-badge {
+      position: absolute; top: 8px; right: 8px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: rgba(0,0,0,.55); color: #fff;
+      font-size: 10px; display: flex; align-items: center; justify-content: center;
+      padding-left: 2px; pointer-events: none;
+    }
     .ig-post-overlay {
       position: absolute; inset: 0;
       background: rgba(29,58,74,.82);
@@ -1237,17 +1244,15 @@
             a.className = 'ig-post';
 
             const mediaSrc = post.image_url || post.thumbnail_url || post.media_url || '';
-            const isVideo  = (post.media_type === 'VIDEO') || /\.mp4(\?|$)/i.test(mediaSrc);
+            const isVideo  = (post.media_type === 'VIDEO' || post.media_type === 'REELS');
             const cap      = post.caption || '';
 
-            if (mediaSrc && isVideo) {
-              a.innerHTML =
-                `<video src="${mediaSrc}" muted loop playsinline preload="metadata"
-                        onmouseover="this.play()" onmouseout="this.pause()"></video>
-                 <div class="ig-post-overlay"><p class="ig-post-caption">${cap}</p></div>`;
-            } else if (mediaSrc) {
+            if (mediaSrc) {
+              // image_url is always a still image now (videos use their thumbnail),
+              // so render an <img> for every post. Videos get a small play badge.
               a.innerHTML =
                 `<img src="${mediaSrc}" alt="CRA Instagram post" loading="lazy" />
+                 ${isVideo ? '<div class="ig-play-badge">▶</div>' : ''}
                  <div class="ig-post-overlay"><p class="ig-post-caption">${cap}</p></div>`;
             } else {
               a.innerHTML =
