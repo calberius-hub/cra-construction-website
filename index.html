@@ -1352,6 +1352,8 @@
       m.classList.add('open');
       m.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
+      // Mark as seen so the timed auto-open never re-triggers this session
+      try { sessionStorage.setItem('craContactSeen', '1'); } catch (e) {}
       // reset to form view in case it was left on success
       document.getElementById('contactFields').classList.remove('hide');
       document.getElementById('contactSuccess').classList.remove('show');
@@ -1363,6 +1365,7 @@
       m.classList.remove('open');
       m.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
+      try { sessionStorage.setItem('craContactSeen', '1'); } catch (e) {}
     };
     (function () {
       const overlay = document.getElementById('contactModal');
@@ -1377,6 +1380,20 @@
       document.addEventListener('keydown', function (e) {
         if (e.key === 'Escape' && overlay.classList.contains('open')) window.closeContactModal();
       });
+
+      // Auto-open once per session, ~6s after landing — unless the visitor
+      // already opened it, already submitted, or dismissed it this session.
+      try {
+        var seen = sessionStorage.getItem('craContactSeen');
+        if (!seen) {
+          setTimeout(function () {
+            // Don't interrupt if they already opened/closed it in the meantime
+            if (!sessionStorage.getItem('craContactSeen') && !overlay.classList.contains('open')) {
+              window.openContactModal();
+            }
+          }, 6000);
+        }
+      } catch (err) { /* sessionStorage unavailable — skip auto-open */ }
 
       // AJAX submit → Netlify Forms, then show in-modal success
       form.addEventListener('submit', function (e) {
