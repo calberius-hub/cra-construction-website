@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>CRA Leads</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --navy:#1d3a4a; --navy2:#162e3b; --gold:#c9a54a; --gold2:#a8882f;
+      --cream:#f8f5f0; --white:#fff; --ink:#1a1814; --muted:#6b6560;
+      --line:rgba(25,22,18,.12); --green:#3f7d5a; --amber:#b7791f;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',sans-serif;color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+
+    /* Login gate */
+    .gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:24px;}
+    .gate-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:4px;padding:44px 40px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);}
+    .gate-card h1{font-family:'Playfair Display',serif;color:var(--navy);font-size:24px;margin-bottom:6px;}
+    .gate-card p{color:var(--muted);font-size:13px;margin-bottom:22px;}
+    .gate-card input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:inherit;margin-bottom:14px;}
+    .gate-card input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .gate-err{color:#b23;font-size:13px;margin-bottom:12px;display:none;}
+    .btn{background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:14px 20px;transition:background .2s;}
+    .btn:hover{background:var(--gold2);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--line);}
+    .btn-ghost:hover{background:rgba(25,22,18,.05);color:var(--navy);}
+
+    /* App */
+    .app{display:none;max-width:1160px;margin:0 auto;padding:26px 22px 60px;}
+    header.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:22px;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .monogram{width:42px;height:42px;border:2px solid var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);}
+    .brand h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);line-height:1;}
+    .brand span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;}
+
+    .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:20px;}
+    .stat{background:var(--white);border:1px solid var(--line);border-radius:5px;padding:14px 20px;min-width:110px;}
+    .stat .n{font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);}
+    .stat .l{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:2px;}
+
+    .toolbar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:14px;align-items:center;}
+    .toolbar input,.toolbar select{padding:10px 12px;border:1px solid var(--line);border-radius:3px;font-size:13px;font-family:inherit;background:var(--white);}
+    .toolbar input{flex:1;min-width:200px;}
+    .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--gold);}
+
+    .table-wrap{background:var(--white);border:1px solid var(--line);border-radius:6px;overflow:hidden;}
+    table{width:100%;border-collapse:collapse;}
+    th{text-align:left;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);padding:13px 14px;border-bottom:1px solid var(--line);background:#faf8f4;}
+    td{padding:13px 14px;border-bottom:1px solid var(--line);font-size:13.5px;vertical-align:top;}
+    tr:last-child td{border-bottom:none;}
+    tr:hover td{background:#fcfbf8;}
+    .lead-name{font-weight:600;color:var(--navy);}
+    .lead-msg{color:var(--muted);font-size:12px;max-width:260px;}
+    .tag{display:inline-block;font-size:10px;letter-spacing:.06em;padding:3px 8px;border-radius:20px;background:rgba(201,165,74,.16);color:var(--gold2);margin:1px 3px 1px 0;white-space:nowrap;}
+    .status-sel{font-size:12px;padding:5px 8px;border:1px solid var(--line);border-radius:3px;background:var(--white);font-family:inherit;}
+    .empty{text-align:center;padding:48px 20px;color:var(--muted);}
+    a.email-link{color:var(--gold2);}
+
+    /* Blast modal */
+    .modal{position:fixed;inset:0;z-index:50;display:none;align-items:center;justify-content:center;background:rgba(22,20,16,.55);padding:22px;}
+    .modal.open{display:flex;}
+    .modal-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:5px;width:min(620px,100%);max-height:92vh;overflow-y:auto;padding:32px 32px 26px;position:relative;}
+    .modal-card h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:22px;margin-bottom:4px;}
+    .modal-card .sub{color:var(--muted);font-size:13px;margin-bottom:20px;}
+    .fld{margin-bottom:15px;}
+    .fld label{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;}
+    .fld input,.fld select,.fld textarea{width:100%;padding:11px 13px;border:1px solid var(--line);border-radius:3px;font-size:14px;font-family:inherit;background:var(--white);}
+    .fld textarea{min-height:150px;resize:vertical;}
+    .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .close-x{position:absolute;top:14px;right:16px;border:none;background:none;font-size:26px;color:var(--muted);cursor:pointer;line-height:1;}
+    .banner{padding:12px 14px;border-radius:4px;font-size:13px;margin-bottom:16px;display:none;}
+    .banner.warn{background:#fff4e0;color:#8a5a00;border:1px solid #f0d9a8;display:block;}
+    .banner.ok{background:#e6f3ec;color:#2c6a45;border:1px solid #bfe0cc;display:block;}
+    .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+    .muted-note{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.5;}
+  </style>
+</head>
+<body>
+  <!-- LOGIN GATE -->
+  <div class="gate" id="gate">
+    <div class="gate-card">
+      <h1>CRA Leads</h1>
+      <p>Enter your dashboard password to continue.</p>
+      <div class="gate-err" id="gateErr">Wrong password — try again.</div>
+      <input type="password" id="pw" placeholder="Password" autocomplete="current-password" />
+      <button class="btn" style="width:100%" id="loginBtn">Enter</button>
+    </div>
+  </div>
+
+  <!-- APP -->
+  <div class="app" id="app">
+    <header class="top">
+      <div class="brand">
+        <div class="monogram">CRA</div>
+        <div><h1>Leads</h1><span>CRA Construction</span></div>
+      </div>
+      <div class="actions">
+        <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+        <button class="btn" id="blastBtn">✉ New Email Blast</button>
+        <button class="btn btn-ghost" id="logoutBtn">Log out</button>
+      </div>
+    </header>
+
+    <div class="stats" id="stats"></div>
+
+    <div class="toolbar">
+      <input type="search" id="search" placeholder="Search name, email, phone, message…" />
+      <select id="fInterest">
+        <option value="">All interests</option>
+        <option value="New Home">New Home</option>
+        <option value="Available Lot">Available Lot</option>
+        <option value="General Inquiry">General Inquiry</option>
+      </select>
+      <select id="fStatus">
+        <option value="">All statuses</option>
+        <option value="new">New</option>
+        <option value="contacted">Contacted</option>
+        <option value="client">Client</option>
+        <option value="unsubscribed">Unsubscribed</option>
+      </select>
+    </div>
+
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Contact</th><th>Interested In</th><th>Message</th><th>Date</th><th>Status</th></tr>
+        </thead>
+        <tbody id="rows"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- BLAST MODAL -->
+  <div class="modal" id="blastModal">
+    <div class="modal-card">
+      <button class="close-x" id="blastClose">&times;</button>
+      <h2>New Email Blast</h2>
+      <div class="sub">Send an announcement — a new home on the market or a new lot — to a segment of your leads.</div>
+
+      <div class="banner" id="blastBanner"></div>
+
+      <div class="fld">
+        <label>Send to</label>
+        <select id="blastSegment">
+          <option value="">Everyone (all leads)</option>
+          <option value="New Home">Only "New Home" interest</option>
+          <option value="Available Lot">Only "Available Lot" interest</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Subject</label>
+        <input type="text" id="blastSubject" placeholder="New lots just released off Chenal Parkway" />
+      </div>
+      <div class="fld">
+        <label>Message (HTML or plain text)</label>
+        <textarea id="blastBody" placeholder="Write your announcement here…"></textarea>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="prepareBtn">Preview recipients</button>
+        <button class="btn" id="sendBtn" style="display:none;background:var(--green)">Confirm &amp; Send</button>
+        <span id="prepInfo" class="muted-note"></span>
+      </div>
+      <div class="muted-note">Nothing is sent until you click <strong>Confirm &amp; Send</strong>. Unsubscribed leads are always excluded.</div>
+    </div>
+  </div>
+
+  <script>
+    var KEY = null;
+    var LEADS = [];
+    var PENDING_TOKEN = null;
+
+    function api(action, extra) {
+      return fetch('/.netlify/functions/leads', {
+        method:'POST',
+        headers:{'Content-Type':'application/json','x-leads-key':KEY},
+        body:JSON.stringify(Object.assign({action:action}, extra||{}))
+      }).then(function(r){ return r.json().then(function(j){ return {status:r.status, body:j}; }); });
+    }
+
+    // ── Login ──────────────────────────────────────────────
+    function tryLogin(pw) {
+      KEY = pw;
+      return api('list').then(function(res){
+        if (res.status === 200) {
+          sessionStorage.setItem('craLeadsKey', pw);
+          document.getElementById('gate').style.display='none';
+          document.getElementById('app').style.display='block';
+          LEADS = res.body.leads || [];
+          render();
+          return true;
+        }
+        KEY = null;
+        return false;
+      });
+    }
+    document.getElementById('loginBtn').onclick = function(){
+      var pw = document.getElementById('pw').value.trim();
+      if(!pw) return;
+      this.disabled=true; var self=this;
+      tryLogin(pw).then(function(ok){
+        self.disabled=false;
+        if(!ok) document.getElementById('gateErr').style.display='block';
+      });
+    };
+    document.getElementById('pw').addEventListener('keydown', function(e){ if(e.key==='Enter') document.getElementById('loginBtn').click(); });
+    document.getElementById('logoutBtn').onclick=function(){ sessionStorage.removeItem('craLeadsKey'); location.reload(); };
+
+    // ── Render ─────────────────────────────────────────────
+    function fmtDate(iso){ if(!iso) return '—'; var d=new Date(iso); return d.toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'}); }
+    function esc(s){ return (s||'').replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];}); }
+
+    function render(){
+      var q=(document.getElementById('search').value||'').toLowerCase();
+      var fi=document.getElementById('fInterest').value.toLowerCase();
+      var fs=document.getElementById('fStatus').value.toLowerCase();
+      var filtered=LEADS.filter(function(l){
+        if(fi && (l.interest||'').toLowerCase().indexOf(fi)<0) return false;
+        if(fs && (l.status||'new').toLowerCase()!==fs) return false;
+        if(q){ var hay=((l.name||'')+' '+(l.email||'')+' '+(l.phone||'')+' '+(l.message||'')).toLowerCase(); if(hay.indexOf(q)<0) return false; }
+        return true;
+      });
+
+      // stats (on full set)
+      var total=LEADS.length, nw=0, ct=0, cl=0;
+      LEADS.forEach(function(l){ var s=(l.status||'new'); if(s==='new')nw++; else if(s==='contacted')ct++; else if(s==='client')cl++; });
+      document.getElementById('stats').innerHTML=
+        stat(total,'Total leads')+stat(nw,'New')+stat(ct,'Contacted')+stat(cl,'Clients');
+
+      var tb=document.getElementById('rows');
+      if(!filtered.length){ tb.innerHTML='<tr><td colspan="6" class="empty">No leads match.</td></tr>'; return; }
+      tb.innerHTML=filtered.map(function(l){
+        var interests=(l.interest||'').split(',').map(function(t){t=t.trim();return t?'<span class="tag">'+esc(t)+'</span>':'';}).join('');
+        var statuses=['new','contacted','client','unsubscribed'];
+        var opts=statuses.map(function(s){return '<option value="'+s+'"'+((l.status||'new')===s?' selected':'')+'>'+s.charAt(0).toUpperCase()+s.slice(1)+'</option>';}).join('');
+        return '<tr>'+
+          '<td class="lead-name">'+esc(l.name||'—')+'</td>'+
+          '<td><a class="email-link" href="mailto:'+esc(l.email)+'">'+esc(l.email||'—')+'</a><br><span class="lead-msg">'+esc(l.phone||'')+'</span></td>'+
+          '<td>'+interests+'</td>'+
+          '<td class="lead-msg">'+esc(l.message||'')+'</td>'+
+          '<td>'+fmtDate(l.created_at)+'</td>'+
+          '<td><select class="status-sel" data-email="'+esc(l.email)+'">'+opts+'</select></td>'+
+        '</tr>';
+      }).join('');
+
+      Array.prototype.forEach.call(document.querySelectorAll('.status-sel'), function(sel){
+        sel.onchange=function(){
+          var email=this.getAttribute('data-email'), status=this.value;
+          api('set-status',{email:email,status:status}).then(function(){
+            var lead=LEADS.filter(function(x){return x.email===email;})[0]; if(lead) lead.status=status; render();
+          });
+        };
+      });
+    }
+    function stat(n,l){ return '<div class="stat"><div class="n">'+n+'</div><div class="l">'+l+'</div></div>'; }
+
+    ['search','fInterest','fStatus'].forEach(function(id){ document.getElementById(id).addEventListener('input', render); });
+    document.getElementById('refreshBtn').onclick=function(){ this.disabled=true; var self=this; api('list').then(function(res){ if(res.status===200){LEADS=res.body.leads||[]; render();} self.disabled=false; }); };
+
+    // ── Blast ──────────────────────────────────────────────
+    var bm=document.getElementById('blastModal');
+    document.getElementById('blastBtn').onclick=function(){ bm.classList.add('open'); resetBlast(); };
+    document.getElementById('blastClose').onclick=function(){ bm.classList.remove('open'); };
+    bm.addEventListener('click',function(e){ if(e.target===bm) bm.classList.remove('open'); });
+    function resetBlast(){ PENDING_TOKEN=null; document.getElementById('sendBtn').style.display='none'; document.getElementById('prepInfo').textContent=''; banner('',''); }
+    function banner(cls,msg){ var b=document.getElementById('blastBanner'); b.className='banner'+(cls?(' '+cls):''); b.textContent=msg; }
+
+    document.getElementById('prepareBtn').onclick=function(){
+      var subject=document.getElementById('blastSubject').value.trim();
+      var body=document.getElementById('blastBody').value.trim();
+      var seg=document.getElementById('blastSegment').value;
+      if(!subject||!body){ banner('warn','Add a subject and a message first.'); return; }
+      var self=this; self.disabled=true;
+      api('prepare-blast',{subject:subject,html:body,interest:seg}).then(function(res){
+        self.disabled=false;
+        if(res.status!==200){ banner('warn', res.body.error||'Could not prepare.'); return; }
+        PENDING_TOKEN=res.body.token;
+        document.getElementById('prepInfo').textContent='→ '+res.body.recipient_count+' recipient(s)';
+        document.getElementById('sendBtn').style.display='inline-block';
+        banner('warn','Ready to send to '+res.body.recipient_count+' lead(s). Review, then Confirm & Send.');
+      });
+    };
+    document.getElementById('sendBtn').onclick=function(){
+      if(!PENDING_TOKEN) return;
+      if(!confirm('Send this email now?')) return;
+      var self=this; self.disabled=true;
+      api('send-blast',{token:PENDING_TOKEN}).then(function(res){
+        self.disabled=false;
+        if(res.status!==200){ banner('warn', res.body.error||'Send failed.'); return; }
+        banner('ok','Sent to '+res.body.sent+' lead(s)'+(res.body.failed?(', '+res.body.failed+' failed'):'')+'.');
+        document.getElementById('sendBtn').style.display='none'; PENDING_TOKEN=null;
+      });
+    };
+
+    // Auto-login if key stored this session
+    (function(){
+      var saved=sessionStorage.getItem('craLeadsKey');
+      if(saved) tryLogin(saved).then(function(ok){ if(!ok){ document.getElementById('gate').style.display='flex'; } });
+    })();
+  </script>
+</body>
+</html>

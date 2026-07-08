@@ -12,3 +12,8 @@
   from = "/mockup"
   to = "/mockups/cra-homepage-pike-inspired.html"
   status = 200
+
+[[redirects]]
+  from = "/leads"
+  to = "/leads.html"
+  status = 200
