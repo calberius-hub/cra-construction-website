@@ -19,6 +19,8 @@
 //   RESEND_API_KEY        — for send-blast (optional until you send email)
 //   RESEND_FROM           — e.g. "CRA Construction <hello@cra-construction.com>"
 
+const { getStore } = require("@netlify/blobs");
+
 const NETLIFY_API = "https://api.netlify.com/api/v1";
 const FORM_NAME = "cra-leads";
 const BLOBS_STORE = "lead-status";
@@ -31,25 +33,28 @@ function json(statusCode, obj) {
   };
 }
 
-// ── Netlify Blobs REST (status overrides + pending blast) ────────────────────
-// Uses the site's API token; store scoped to this site.
-async function blobGet(siteId, token, key) {
-  const url = `${NETLIFY_API}/sites/${siteId}/blobs/${BLOBS_STORE}/${encodeURIComponent(key)}`;
-  const res = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
-  if (res.status === 404) return null;
-  if (!res.ok) return null;
-  const txt = await res.text();
-  try { return JSON.parse(txt); } catch (e) { return null; }
+// ── Netlify Blobs (status overrides + pending blast) ─────────────────────────
+// getStore auto-configures inside Netlify Functions.
+function store() {
+  return getStore({ name: BLOBS_STORE, consistency: "strong" });
 }
 
-async function blobSet(siteId, token, key, value) {
-  const url = `${NETLIFY_API}/sites/${siteId}/blobs/${BLOBS_STORE}/${encodeURIComponent(key)}`;
-  const res = await fetch(url, {
-    method: "PUT",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-    body: JSON.stringify(value),
-  });
-  return res.ok;
+async function blobGet(key) {
+  try {
+    const v = await store().get(key, { type: "json" });
+    return v || null;
+  } catch (e) {
+    return null;
+  }
+}
+
+async function blobSet(key, value) {
+  try {
+    await store().setJSON(key, value);
+    return true;
+  } catch (e) {
+    return false;
+  }
 }
 
 // ── Fetch all cra-leads submissions ──────────────────────────────────────────
@@ -132,7 +137,7 @@ exports.handler = async function (event) {
   try {
     if (action === "list") {
       const subs = await fetchSubmissions(siteId, token);
-      const overrides = (await blobGet(siteId, token, "overrides")) || {};
+      const overrides = (await blobGet("overrides")) || {};
       const leads = subs.map((s) => {
         const lead = toLead(s);
         const ov = overrides[lead.email.toLowerCase()];
@@ -148,19 +153,19 @@ exports.handler = async function (event) {
     if (action === "set-status") {
       const email = (req.email || "").toLowerCase();
       if (!email) return json(400, { error: "email required" });
-      const overrides = (await blobGet(siteId, token, "overrides")) || {};
+      const overrides = (await blobGet("overrides")) || {};
       overrides[email] = Object.assign({}, overrides[email], {
         status: req.status || "new",
         notes: req.notes != null ? req.notes : (overrides[email] || {}).notes || "",
         updated_at: new Date().toISOString(),
       });
-      const ok = await blobSet(siteId, token, "overrides", overrides);
+      const ok = await blobSet("overrides", overrides);
       return json(ok ? 200 : 500, { ok });
     }
 
     if (action === "prepare-blast") {
       const subs = await fetchSubmissions(siteId, token);
-      const overrides = (await blobGet(siteId, token, "overrides")) || {};
+      const overrides = (await blobGet("overrides")) || {};
       const interest = (req.interest || "").toLowerCase();
       const recipients = subs
         .map(toLead)
@@ -180,7 +185,7 @@ exports.handler = async function (event) {
         if (!seen.has(e)) { seen.add(e); emails.push(r.email); }
       }
       const token2 = Math.random().toString(36).slice(2, 12);
-      await blobSet(siteId, token, "pending-blast", {
+      await blobSet("pending-blast", {
         token: token2,
         subject: req.subject || "",
         html: req.html || "",
@@ -196,7 +201,7 @@ exports.handler = async function (event) {
       if (!process.env.RESEND_API_KEY) {
         return json(400, { error: "RESEND_API_KEY not configured — add it to send email." });
       }
-      const staged = await blobGet(siteId, token, "pending-blast");
+      const staged = await blobGet("pending-blast");
       if (!staged) return json(400, { error: "no prepared blast" });
       if (staged.sent) return json(400, { error: "already sent" });
       if (req.token !== staged.token) return json(400, { error: "token mismatch" });
@@ -212,7 +217,7 @@ exports.handler = async function (event) {
       staged.sent = true;
       staged.sent_at = new Date().toISOString();
       staged.result = { sent, failed };
-      await blobSet(siteId, token, "pending-blast", staged);
+      await blobSet("pending-blast", staged);
       return json(200, { sent, failed, failures });
     }
 
