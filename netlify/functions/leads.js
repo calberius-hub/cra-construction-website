@@ -34,9 +34,14 @@ function json(statusCode, obj) {
 }
 
 // ── Netlify Blobs (status overrides + pending blast) ─────────────────────────
-// getStore auto-configures inside Netlify Functions.
+// Explicit siteID + token so it works regardless of auto-config context.
 function store() {
-  return getStore({ name: BLOBS_STORE, consistency: "strong" });
+  return getStore({
+    name: BLOBS_STORE,
+    siteID: process.env.NETLIFY_SITE_ID,
+    token: process.env.NETLIFY_API_TOKEN,
+    consistency: "strong",
+  });
 }
 
 async function blobGet(key) {
