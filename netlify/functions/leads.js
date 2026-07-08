@@ -140,6 +140,18 @@ exports.handler = async function (event) {
   const action = req.action;
 
   try {
+    if (action === "debug-forms") {
+      // Temporary diagnostic: what forms/submissions does Netlify actually have?
+      const formsRes = await fetch(`${NETLIFY_API}/sites/${siteId}/forms`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const forms = formsRes.ok ? await formsRes.json() : { error: formsRes.status };
+      const summary = Array.isArray(forms)
+        ? forms.map((f) => ({ name: f.name, id: f.id, submission_count: f.submission_count }))
+        : forms;
+      return json(200, { site: siteId, forms: summary });
+    }
+
     if (action === "list") {
       const subs = await fetchSubmissions(siteId, token);
       const overrides = (await blobGet("overrides")) || {};
