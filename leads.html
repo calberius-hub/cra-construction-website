@@ -104,6 +104,7 @@
       </div>
       <div class="actions">
         <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+        <button class="btn" id="newLeadBtn">＋ New Lead</button>
         <button class="btn" id="blastBtn">✉ New Email Blast</button>
         <button class="btn btn-ghost" id="logoutBtn">Log out</button>
       </div>
@@ -135,6 +136,47 @@
         </thead>
         <tbody id="rows"><tr><td colspan="6" class="empty">Loading…</td></tr></tbody>
       </table>
+    </div>
+  </div>
+
+  <!-- NEW LEAD MODAL -->
+  <div class="modal" id="newLeadModal">
+    <div class="modal-card">
+      <button class="close-x" id="newLeadClose">&times;</button>
+      <h2>Add Lead Manually</h2>
+      <div class="sub">Enter a lead you captured by phone, referral, or in person. It lands in the CRM just like a website submission.</div>
+
+      <div class="banner" id="newLeadBanner"></div>
+
+      <div class="fld">
+        <label>Name</label>
+        <input type="text" id="nlName" placeholder="John Smith" />
+      </div>
+      <div class="fld">
+        <label>Email <span class="muted-note">(required)</span></label>
+        <input type="email" id="nlEmail" placeholder="john@example.com" />
+      </div>
+      <div class="fld">
+        <label>Phone</label>
+        <input type="text" id="nlPhone" placeholder="(501) 555-0123" />
+      </div>
+      <div class="fld">
+        <label>Interested in</label>
+        <select id="nlInterest">
+          <option value="General Inquiry">General Inquiry</option>
+          <option value="New Home">New Home</option>
+          <option value="Available Lot">Available Lot</option>
+        </select>
+      </div>
+      <div class="fld">
+        <label>Notes / Message</label>
+        <textarea id="nlMessage" placeholder="Met at Chenal open house — interested in a 4BR…"></textarea>
+      </div>
+
+      <div class="row">
+        <button class="btn" id="nlSaveBtn">Save Lead</button>
+        <span id="nlInfo" class="muted-note"></span>
+      </div>
     </div>
   </div>
 
@@ -264,6 +306,40 @@
 
     ['search','fInterest','fStatus'].forEach(function(id){ document.getElementById(id).addEventListener('input', render); });
     document.getElementById('refreshBtn').onclick=function(){ this.disabled=true; var self=this; api('list').then(function(res){ if(res.status===200){LEADS=res.body.leads||[]; render();} self.disabled=false; }); };
+
+    // ── New Lead (manual entry) ────────────────────────────
+    var nlm=document.getElementById('newLeadModal');
+    function nlBanner(cls,msg){ var b=document.getElementById('newLeadBanner'); b.className='banner'+(cls?(' '+cls):''); b.textContent=msg; }
+    function resetNewLead(){ ['nlName','nlEmail','nlPhone','nlMessage'].forEach(function(id){document.getElementById(id).value='';}); document.getElementById('nlInterest').value='General Inquiry'; document.getElementById('nlInfo').textContent=''; nlBanner('',''); }
+    document.getElementById('newLeadBtn').onclick=function(){ nlm.classList.add('open'); resetNewLead(); };
+    document.getElementById('newLeadClose').onclick=function(){ nlm.classList.remove('open'); };
+    nlm.addEventListener('click',function(e){ if(e.target===nlm) nlm.classList.remove('open'); });
+    document.getElementById('nlSaveBtn').onclick=function(){
+      var email=(document.getElementById('nlEmail').value||'').trim();
+      if(!email){ nlBanner('err','Email is required.'); return; }
+      var btn=this; btn.disabled=true;
+      var body=new URLSearchParams();
+      body.append('name', document.getElementById('nlName').value.trim());
+      body.append('email', email);
+      body.append('phone', document.getElementById('nlPhone').value.trim());
+      body.append('interest', document.getElementById('nlInterest').value);
+      body.append('message', document.getElementById('nlMessage').value.trim());
+      body.append('source','manual-crm-entry');
+      body.append('entity','CRA');
+      fetch('/.netlify/functions/capture-lead',{ method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body:body.toString() })
+        .then(function(r){ return r.json().then(function(j){return {status:r.status,body:j};}); })
+        .then(function(res){
+          btn.disabled=false;
+          if(res.status===200 && res.body.ok){
+            nlBanner('ok','Lead saved ✓');
+            api('list').then(function(r2){ if(r2.status===200){LEADS=r2.body.leads||[]; render();} });
+            setTimeout(function(){ nlm.classList.remove('open'); }, 900);
+          } else {
+            nlBanner('err','Save failed: '+((res.body&&res.body.error)||res.status));
+          }
+        })
+        .catch(function(){ btn.disabled=false; nlBanner('err','Network error — try again.'); });
+    };
 
     // ── Blast ──────────────────────────────────────────────
     var bm=document.getElementById('blastModal');
