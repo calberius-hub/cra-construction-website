@@ -879,12 +879,16 @@
       .nav-hamburger { display: flex; }
       .nav-inner { grid-template-columns: auto 1fr auto; }
 
+      .hero-slide-bg { background-position: center top; }
+
       .projects-strip { grid-template-columns: 1fr; }
-      .strip-panel { min-height: 260px; }
+      .strip-panel { min-height: 0; aspect-ratio: 4 / 3; }
+      .strip-panel-bg { background-position: center top; }
       .strip-center { min-height: auto; padding: 40px 32px; gap: 16px; }
 
       .featured { grid-template-columns: 1fr; }
-      .featured-photo { min-height: 320px; }
+      .featured-photo { min-height: 0; aspect-ratio: 4 / 3; }
+      .featured-photo-bg { background-position: center top; }
       .featured-info { padding: 48px 40px; }
 
       .services { padding: 72px 24px; }
@@ -893,10 +897,12 @@
       .details { padding: 72px 24px; }
       .details-grid { grid-template-columns: 1fr; }
       .detail-photo.large { grid-column: span 1; }
-      .detail-photo { min-height: 260px; }
+      .detail-photo { min-height: 0; aspect-ratio: 4 / 3; }
+      .detail-photo img { object-position: center top; }
 
       .about { grid-template-columns: 1fr; }
-      .about-photo { min-height: 300px; }
+      .about-photo { min-height: 0; aspect-ratio: 4 / 3; }
+      .about-photo-bg { background-position: center top; }
       .about-content { padding: 48px 40px; }
 
       .instagram { padding: 64px 20px; }
@@ -916,12 +922,12 @@
       .hero-chevron { bottom: 56px; }
       .hero-nav-dots { bottom: 16px; right: 16px; }
 
-      .strip-panel { min-height: 220px; }
+      .strip-panel { min-height: 0; }
       .strip-center { padding: 28px 20px; gap: 12px; }
       .strip-center h2 { font-size: 22px; }
       .strip-center-icon { width: 48px; height: 48px; }
 
-      .featured-photo { min-height: 260px; }
+      .featured-photo { min-height: 0; }
       .featured-info { padding: 32px 20px; gap: 20px; }
       .featured-photo-label { bottom: 18px; left: 18px; }
       .featured-photo-label h3 { font-size: 20px; }
@@ -931,9 +937,9 @@
       .section-top { margin-bottom: 36px; }
 
       .details { padding: 56px 20px; }
-      .detail-photo { min-height: 220px; }
+      .detail-photo { min-height: 0; }
 
-      .about-photo { min-height: 260px; }
+      .about-photo { min-height: 0; }
       .about-content { padding: 32px 20px; gap: 16px; }
       .about-stats { gap: 12px; }
       .stat strong { font-size: 26px; }
