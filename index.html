@@ -1086,6 +1086,7 @@
       <div class="hero-dot" data-slide="1"></div>
       <div class="hero-dot" data-slide="2"></div>
       <div class="hero-dot" data-slide="3"></div>
+      <div class="hero-dot" data-slide="4"></div>
     </div>
   </section>
 
@@ -1442,12 +1443,19 @@
       let current  = 0;
       let timer;
 
+      if (!slides.length) return;
+
+      /* Dots are decorative: there may be fewer of them than slides, so
+         every dot access is guarded to keep the rotator running. */
+      function setActive(i, on) {
+        slides[i] && slides[i].classList.toggle('active', on);
+        dots[i]   && dots[i].classList.toggle('active', on);
+      }
+
       function goTo(n) {
-        slides[current].classList.remove('active');
-        dots[current].classList.remove('active');
+        setActive(current, false);
         current = (n + slides.length) % slides.length;
-        slides[current].classList.add('active');
-        dots[current].classList.add('active');
+        setActive(current, true);
       }
 
       function next() { goTo(current + 1); }
