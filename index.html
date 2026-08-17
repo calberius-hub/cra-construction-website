@@ -1074,7 +1074,7 @@
     </div>
     <div class="hero-overlay"></div>
     <div class="hero-badge">
-      <img src="assets/logo/circular-logo-white.svg" alt="CRA Construction" class="hero-badge-img" />
+      <img src="assets/logo/circular-logo-white.svg" alt="CRA Construction" class="hero-badge-img" loading="lazy"/>
     </div>
     <a href="#work" class="hero-chevron" aria-label="Scroll down">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1495,7 +1495,7 @@
 
             if (mediaSrc) {
               // image_url is always a still image now (videos use their thumbnail),
-              // so render an <img> for every post. Videos get a small play badge.
+              // so render an <img loading="lazy"/> for every post. Videos get a small play badge.
               a.innerHTML =
                 `<img src="${mediaSrc}" alt="CRA Instagram post" loading="lazy" />
                  ${isVideo ? '<div class="ig-play-badge">▶</div>' : ''}
