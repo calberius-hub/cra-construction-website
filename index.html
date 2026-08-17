@@ -4,6 +4,20 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>CRA Construction — Little Rock, AR</title>
+  <meta name="description" content="CRA Construction builds custom homes in Little Rock, Arkansas - ground-up construction, interior finish-out, and renovation. See our completed builds and current projects."/>
+  <link rel="canonical" href="https://www.cra-construction.com/"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="CRA Construction"/>
+  <meta property="og:title" content="CRA Construction - Custom Home Builder in Little Rock, AR"/>
+  <meta property="og:description" content="CRA Construction builds custom homes in Little Rock, Arkansas - ground-up construction, interior finish-out, and renovation. See our completed builds and current projects."/>
+  <meta property="og:url" content="https://www.cra-construction.com/"/>
+  <meta property="og:image" content="https://www.cra-construction.com/photos/hero-front-web.jpg"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="CRA Construction - Custom Home Builder in Little Rock, AR"/>
+  <meta name="twitter:description" content="CRA Construction builds custom homes in Little Rock, Arkansas - ground-up construction, interior finish-out, and renovation. See our completed builds and current projects."/>
+  <meta name="twitter:image" content="https://www.cra-construction.com/photos/hero-front-web.jpg"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"GeneralContractor","name":"CRA Construction","legalName":"CRA Construction LLC","url":"https://www.cra-construction.com/","image":"https://www.cra-construction.com/photos/hero-front-web.jpg","address":{"@type":"PostalAddress","addressLocality":"Little Rock","addressRegion":"AR","addressCountry":"US"},"areaServed":{"@type":"City","name":"Little Rock, Arkansas"},"knowsAbout":["Custom home construction","Interior finish-out","Renovation and remodeling"],"sameAs":["https://www.instagram.com/cra_construction_/"]}</script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400;1,600&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet" />
@@ -252,6 +266,19 @@
       width: 100%;
       height: 100%;
       object-fit: contain;
+    }
+    /* Available to screen readers and crawlers, invisible on screen.
+       The hero is image-only, so the page has no other h1. */
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0 0 0 0);
+      white-space: nowrap;
+      border: 0;
     }
     .hero-badge-letters {
       font-family: 'Playfair Display', serif;
@@ -1055,6 +1082,7 @@
 
   <!-- HERO -->
   <section class="hero">
+    <h1 class="visually-hidden">CRA Construction &mdash; Custom Home Builder in Little Rock, Arkansas</h1>
     <div class="hero-slides" id="heroSlides">
       <div class="hero-slide active">
         <div class="hero-slide-bg"></div>

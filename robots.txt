@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /leads
+Disallow: /leads.html
+Disallow: /mockups/
+Disallow: /__forms.html
+
+Sitemap: https://www.cra-construction.com/sitemap.xml
