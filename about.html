@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — CRA Construction</title>
+  <meta name="description" content="Meet the team behind CRA Construction — a Little Rock, Arkansas custom home builder specializing in residential construction, multifamily development, and high-end interior finish-out."/>
+  <link rel="canonical" href="https://www.cra-construction.com/about"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="CRA Construction"/>
+  <meta property="og:title" content="About - CRA Construction, Little Rock AR"/>
+  <meta property="og:description" content="Meet the team behind CRA Construction — a Little Rock, Arkansas custom home builder."/>
+  <meta property="og:url" content="https://www.cra-construction.com/about"/>
+  <meta property="og:image" content="https://www.cra-construction.com/photos/about-web.jpg"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="About - CRA Construction, Little Rock AR"/>
+  <meta name="twitter:description" content="Meet the team behind CRA Construction — a Little Rock, Arkansas custom home builder."/>
+  <meta name="twitter:image" content="https://www.cra-construction.com/photos/about-web.jpg"/>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Montserrat:wght@300;400;500;600;700&family=Dancing+Script:wght@600&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--navy:#1d3a4a;--navy2:#162e3b;--gold:#c9a54a;--cream:#f8f5f0;--white:#ffffff;--ink:#1a1814;--muted:#6b6560;--line:rgba(25,22,18,.12);--max:1200px}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    html{scroll-behavior:smooth}
+    body{font-family:'Montserrat',sans-serif;color:var(--ink);background:var(--white);-webkit-font-smoothing:antialiased}
+    a{color:inherit;text-decoration:none}
+    img{display:block;width:100%;height:100%;object-fit:cover}
+
+    /* NAV */
+    .nav{position:fixed;z-index:100;top:0;left:0;right:0;height:70px;background:var(--white);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:center;padding:0 32px}
+    .nav-inner{width:min(var(--max),100%);display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:24px}
+    .nav-logo{display:flex;align-items:center;gap:10px}
+    .nav-logo-img{height:32px;width:auto;object-fit:contain}
+    .nav-links{display:flex;gap:32px;list-style:none}
+    .nav-links a{font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--ink);opacity:.8;transition:opacity .2s}
+    .nav-links a:hover{opacity:1}
+    .nav-links a.current{opacity:1;color:var(--navy);border-bottom:1.5px solid var(--gold);padding-bottom:3px}
+    .nav-cta{justify-self:end;display:inline-flex;align-items:center;padding:10px 20px;font-size:11px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;border:1.5px solid var(--navy);color:var(--navy);transition:background .2s,color .2s}
+    .nav-cta:hover{background:var(--navy);color:var(--white)}
+
+    /* PAGE HEADER */
+    .page-header{padding:120px 32px 64px;background:var(--navy);color:var(--white);text-align:center}
+    .page-header .script{font-family:'Dancing Script',cursive;font-size:28px;color:var(--gold);margin-bottom:12px}
+    .page-header h1{font-family:'Playfair Display',serif;font-size:clamp(36px,5vw,64px);font-weight:700;line-height:1.1}
+    .page-header p{margin-top:16px;font-size:14px;opacity:.65;max-width:520px;margin-left:auto;margin-right:auto;line-height:1.65}
+
+    /* STORY */
+    .story{max-width:var(--max);margin:0 auto;padding:88px 32px;display:grid;grid-template-columns:1fr 1fr;gap:64px;align-items:center}
+    .story-photo{height:460px;overflow:hidden;background:var(--navy)}
+    .story-content .eyebrow{font-family:'Dancing Script',cursive;font-size:26px;color:var(--gold);margin-bottom:10px}
+    .story-content h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3.2vw,40px);font-weight:700;line-height:1.18;margin-bottom:20px}
+    .story-content p{font-size:14px;color:var(--muted);line-height:1.8;margin-bottom:16px}
+    .story-stats{display:flex;gap:40px;margin-top:28px;padding-top:28px;border-top:1px solid var(--line)}
+    .story-stats .stat strong{display:block;font-family:'Playfair Display',serif;font-size:26px;color:var(--navy);line-height:1}
+    .story-stats .stat span{display:block;margin-top:6px;font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+
+    /* TEAM */
+    .team{background:var(--cream);padding:88px 32px 96px;border-top:1px solid var(--line)}
+    .team-inner{max-width:var(--max);margin:0 auto}
+    .team-head{text-align:center;margin-bottom:56px}
+    .team-head .script{font-family:'Dancing Script',cursive;font-size:26px;color:var(--gold);margin-bottom:10px}
+    .team-head h2{font-family:'Playfair Display',serif;font-size:clamp(28px,3.4vw,42px);font-weight:700;line-height:1.15}
+    .team-head p{margin-top:14px;font-size:14px;color:var(--muted);line-height:1.7;max-width:520px;margin-left:auto;margin-right:auto}
+    .team-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:24px}
+    .member{background:var(--white);padding:40px 26px 34px;text-align:center;transition:transform .3s,box-shadow .3s}
+    .member:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(0,0,0,.10)}
+    /* Monogram medallion — swap this block for an <img> headshot when photos exist */
+    .monogram{width:96px;height:96px;margin:0 auto 22px;border-radius:50%;background:var(--navy);color:var(--gold);display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:30px;font-weight:700;letter-spacing:.04em;position:relative}
+    .monogram::after{content:'';position:absolute;inset:-6px;border:1px solid var(--gold);border-radius:50%;opacity:.45}
+    .member h3{font-family:'Playfair Display',serif;font-size:20px;font-weight:700;line-height:1.25;margin-bottom:8px}
+    .member .role{font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);line-height:1.7}
+    .member .rule{width:28px;height:1px;background:var(--line);margin:18px auto 0}
+
+    /* CTA */
+    .cta{background:var(--navy);color:var(--white);text-align:center;padding:80px 32px}
+    .cta .script{font-family:'Dancing Script',cursive;font-size:26px;color:var(--gold);margin-bottom:10px}
+    .cta h2{font-family:'Playfair Display',serif;font-size:clamp(26px,3.2vw,40px);font-weight:700;margin-bottom:14px}
+    .cta p{font-size:14px;opacity:.65;line-height:1.7;max-width:460px;margin:0 auto 28px}
+    .cta-btn{display:inline-flex;align-items:center;padding:14px 32px;font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;border:1.5px solid rgba(255,255,255,.45);color:var(--white);transition:background .2s,color .2s,border-color .2s}
+    .cta-btn:hover{background:var(--white);color:var(--navy);border-color:var(--white)}
+
+    /* FOOTER */
+    .footer{background:#0e1e28;padding:28px 32px;display:flex;align-items:center;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.35);letter-spacing:.08em}
+    .footer a{color:rgba(255,255,255,.35);transition:color .2s}
+    .footer a:hover{color:var(--gold)}
+
+    .nav-hamburger{display:none;flex-direction:column;justify-content:center;align-items:flex-end;gap:5px;background:none;border:none;cursor:pointer;padding:6px 0;justify-self:end}
+    .nav-hamburger span{display:block;height:1.5px;background:var(--navy);transition:all .25s ease}
+    .nav-hamburger span:nth-child(1){width:22px}
+    .nav-hamburger span:nth-child(2){width:15px}
+    .nav-hamburger span:nth-child(3){width:22px}
+    .nav-hamburger.open span:nth-child(1){transform:translateY(6.5px) rotate(45deg);width:22px}
+    .nav-hamburger.open span:nth-child(2){opacity:0}
+    .nav-hamburger.open span:nth-child(3){transform:translateY(-6.5px) rotate(-45deg);width:22px}
+    .nav-mobile-menu{display:none;position:fixed;top:70px;left:0;right:0;background:var(--white);border-bottom:2px solid var(--line);z-index:99;flex-direction:column;padding:0 24px 20px;box-shadow:0 8px 32px rgba(0,0,0,.1)}
+    .nav-mobile-menu.open{display:flex}
+    .nav-mobile-menu a{display:block;padding:16px 0;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line)}
+    .nav-mobile-menu a.mob-cta{margin-top:16px;text-align:center;background:var(--navy);color:var(--white);padding:14px;border-bottom:none;letter-spacing:.14em}
+
+    @media(max-width:1000px){.team-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:900px){
+      .nav-links{display:none}.nav-cta{display:none}.nav-hamburger{display:flex}
+      .story{grid-template-columns:1fr;gap:36px;padding:64px 32px}
+      .story-photo{height:320px;order:-1}
+    }
+    @media(max-width:560px){.team-grid{grid-template-columns:1fr}.story-stats{gap:28px}}
+  </style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <img src="assets/logo/horizontal-black.svg" alt="CRA Construction" class="nav-logo-img" />
+    </a>
+    <ul class="nav-links">
+      <li><a href="about.html" class="current">About</a></li>
+      <li><a href="projects/index.html">Projects</a></li>
+      <li><a href="index.html#services">Services</a></li>
+      <li><a href="index.html#instagram">Instagram</a></li>
+      <li><a href="index.html#contact">Contact</a></li>
+    </ul>
+    <a href="index.html#contact" class="nav-cta">Get In Touch</a>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
+      <span></span><span></span><span></span>
+    </button>
+  </div>
+</nav>
+
+<div class="nav-mobile-menu" id="navMobileMenu">
+  <a href="about.html">About</a>
+  <a href="projects/index.html">Projects</a>
+  <a href="index.html#services">Services</a>
+  <a href="index.html#instagram">Instagram</a>
+  <a href="index.html#contact">Contact</a>
+  <a href="index.html#contact" class="mob-cta">Get In Touch</a>
+</div>
+
+<div class="page-header">
+  <div class="script">Who We Are</div>
+  <h1>About CRA</h1>
+  <p>A Little Rock builder with a small, senior team — and a standard we hold on every project we take on.</p>
+</div>
+
+<section class="story">
+  <div class="story-photo">
+    <img src="photos/about-web.jpg" alt="A CRA Construction home under construction in Little Rock, Arkansas"/>
+  </div>
+  <div class="story-content">
+    <div class="eyebrow">Our Story</div>
+    <h2>A Builder's Standard in Everything We Touch</h2>
+    <p>CRA Construction is a Little Rock-based general contractor specializing in custom residential construction, multifamily development, and high-end interior finish-out. We build with precision, operate with integrity, and deliver work that holds up long after the ribbon is cut.</p>
+    <p>We keep the team small and senior on purpose. The people you meet at the start of your build are the same people on site through the final walkthrough — no handoffs, no layers between you and the decisions that shape your home.</p>
+    <div class="story-stats">
+      <div class="stat">
+        <strong>AR</strong>
+        <span>Licensed &amp; Insured</span>
+      </div>
+      <div class="stat">
+        <strong>Little Rock</strong>
+        <span>Central Arkansas</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="team">
+  <div class="team-inner">
+    <div class="team-head">
+      <div class="script">The Team</div>
+      <h2>Who You'll Be Working With</h2>
+      <p>From first selections to final punch list, these are the people behind every CRA build.</p>
+    </div>
+    <div class="team-grid">
+
+      <div class="member">
+        <div class="monogram" aria-hidden="true">CA</div>
+        <h3>Cole Alberius</h3>
+        <div class="role">Founder</div>
+        <div class="rule"></div>
+      </div>
+
+      <div class="member">
+        <div class="monogram" aria-hidden="true">AW</div>
+        <h3>Austin Ward</h3>
+        <div class="role">Interior Designer<br/>Selections Coordinator</div>
+        <div class="rule"></div>
+      </div>
+
+      <div class="member">
+        <div class="monogram" aria-hidden="true">JP</div>
+        <h3>Jaimie Perez</h3>
+        <div class="role">Project Manager</div>
+        <div class="rule"></div>
+      </div>
+
+      <div class="member">
+        <div class="monogram" aria-hidden="true">JO</div>
+        <h3>Juan Olvera</h3>
+        <div class="role">Superintendent</div>
+        <div class="rule"></div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<section class="cta">
+  <div class="script">Let's Build</div>
+  <h2>Ready to Start Your Build?</h2>
+  <p>Tell us about your lot, your plans, or just the idea you've been sitting on. We'll take it from there.</p>
+  <a href="index.html#contact" class="cta-btn">Work With Us</a>
+</section>
+
+<div class="footer">
+  <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
+  <a href="index.html">← Back to Home</a>
+</div>
+
+<script>(function(){var btn=document.getElementById("navHamburger"),menu=document.getElementById("navMobileMenu");if(!btn||!menu)return;btn.addEventListener("click",function(){var open=menu.classList.toggle("open");btn.classList.toggle("open",open);});menu.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){menu.classList.remove("open");btn.classList.remove("open");});});})();</script>
+</body>
+</html>
