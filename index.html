@@ -1540,6 +1540,19 @@
                 `<img src="${mediaSrc}" alt="CRA Instagram post" loading="lazy" />
                  ${isVideo ? '<div class="ig-play-badge">▶</div>' : ''}
                  <div class="ig-post-overlay"><p class="ig-post-caption">${cap}</p></div>`;
+
+              // Instagram's CDN links expire, so a stale feed would otherwise
+              // render a wall of broken-image icons. Fall back to the same
+              // placeholder tile used everywhere else, and still link to the post.
+              const im = a.querySelector('img');
+              if (im) im.addEventListener('error', function () {
+                a.innerHTML =
+                  `<div class="ig-placeholder">
+                     <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                       <rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="4"/>
+                     </svg>
+                   </div>`;
+              });
             } else {
               a.innerHTML =
                 `<div class="ig-placeholder">
