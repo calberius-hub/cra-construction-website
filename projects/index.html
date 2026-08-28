@@ -345,7 +345,7 @@
 </section>
 
 <div class="footer">
-  <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
+  <span>© <span class="yr">2026</span> CRA Construction LLC — Little Rock, AR</span>
   <a href="../index.html">← Back to Home</a>
 </div>
 
@@ -363,5 +363,6 @@ function filter(status) {
 }
 </script>
 <script>(function(){var btn=document.getElementById("navHamburger"),menu=document.getElementById("navMobileMenu");if(!btn||!menu)return;btn.addEventListener("click",function(){var open=menu.classList.toggle("open");btn.classList.toggle("open",open);});menu.querySelectorAll("a").forEach(function(a){a.addEventListener("click",function(){menu.classList.remove("open");btn.classList.remove("open");});});})();</script>
+<script>document.querySelectorAll(".yr").forEach(function(e){e.textContent=new Date().getFullYear()});</script>
 </body>
 </html>

@@ -1356,7 +1356,7 @@
 
   <!-- FOOTER BAR -->
   <div class="footer-bar">
-    <span>© 2025 CRA Construction LLC — Little Rock, AR</span>
+    <span>© <span class="yr">2026</span> CRA Construction LLC — Little Rock, AR</span>
     <a href="/leads" class="footer-hub-link" title="Admin — Leads / CRM">
       <svg viewBox="0 0 24 24" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8zM23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       CRM / Leads
@@ -1571,5 +1571,6 @@
     })();
   </script>
 
+<script>document.querySelectorAll(".yr").forEach(function(e){e.textContent=new Date().getFullYear()});</script>
 </body>
 </html>
