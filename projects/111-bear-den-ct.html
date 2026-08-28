@@ -157,25 +157,25 @@ img{display:block;width:100%;height:100%;object-fit:cover}
           <img src="../photos/projects/111-bear-den-ct/bd111-01-web.jpg" alt="111 Bear Den Court &mdash; Arched stone entry hall with stained plank ceiling and iron lantern" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="1">
-          <img src="../photos/projects/111-bear-den-ct/bd111-02-web.jpg" alt="111 Bear Den Court &mdash; Kitchen with marble island, range alcove, and paneled cabinetry" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-02-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-02-web.jpg" alt="111 Bear Den Court &mdash; Kitchen with marble island, range alcove, and paneled cabinetry" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="2">
-          <img src="../photos/projects/111-bear-den-ct/bd111-03-web.jpg" alt="111 Bear Den Court &mdash; Marble waterfall island with brass faucet and wall ovens" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-03-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-03-web.jpg" alt="111 Bear Den Court &mdash; Marble waterfall island with brass faucet and wall ovens" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="3">
-          <img src="../photos/projects/111-bear-den-ct/bd111-04-web.jpg" alt="111 Bear Den Court &mdash; Mudroom lockers and bench in deep blue-green" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-04-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-04-web.jpg" alt="111 Bear Den Court &mdash; Mudroom lockers and bench in deep blue-green" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="4">
-          <img src="../photos/projects/111-bear-den-ct/bd111-05-web.jpg" alt="111 Bear Den Court &mdash; Primary bath with arched marble shower flanked by glass cabinets" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-05-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-05-web.jpg" alt="111 Bear Den Court &mdash; Primary bath with arched marble shower flanked by glass cabinets" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="5">
-          <img src="../photos/projects/111-bear-den-ct/bd111-06-web.jpg" alt="111 Bear Den Court &mdash; Freestanding soaking tub beneath a divided-light window" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-06-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-06-web.jpg" alt="111 Bear Den Court &mdash; Freestanding soaking tub beneath a divided-light window" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="6">
-          <img src="../photos/projects/111-bear-den-ct/bd111-07-web.jpg" alt="111 Bear Den Court &mdash; Double vanity in rift oak with marble top and brass fittings" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-07-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-07-web.jpg" alt="111 Bear Den Court &mdash; Double vanity in rift oak with marble top and brass fittings" loading="lazy"/>
         </div>
         <div class="gallery-thumb" data-idx="7">
-          <img src="../photos/projects/111-bear-den-ct/bd111-08-web.jpg" alt="111 Bear Den Court &mdash; Powder room with ginkgo wallpaper and woven pendants" loading="lazy"/>
+          <img src="../photos/projects/111-bear-den-ct/bd111-08-thumb.jpg" data-full="../photos/projects/111-bear-den-ct/bd111-08-web.jpg" alt="111 Bear Den Court &mdash; Powder room with ginkgo wallpaper and woven pendants" loading="lazy"/>
         </div>
       </div>
     </div>
@@ -247,7 +247,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 
   function open(idx){
     cur = idx;
-    lbImg.src = imgs[idx].src;
+    lbImg.src = imgs[idx].getAttribute('data-full') || imgs[idx].src;
     lbImg.alt = imgs[idx].alt;
     lbCounter.textContent = (idx+1) + ' / ' + imgs.length;
     lb.classList.add('open');
@@ -259,7 +259,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
   }
   function nav(dir){
     cur = (cur + dir + imgs.length) % imgs.length;
-    lbImg.src = imgs[cur].src;
+    lbImg.src = imgs[cur].getAttribute('data-full') || imgs[cur].src;
     lbImg.alt = imgs[cur].alt;
     lbCounter.textContent = (cur+1) + ' / ' + imgs.length;
   }
