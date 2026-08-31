@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Bid My Job — Sign Maker</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700;900&family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#1d3a4a; --gold:#c9a54a; --gold2:#a8882f;
+      --cream:#f8f5f0; --white:#fff; --ink:#1a1814; --muted:#6b6560;
+      --line:rgba(25,22,18,.13);
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--cream);}
+    input,select,button{font-family:inherit;}
+
+    .wrap{max-width:900px;margin:0 auto;padding:28px 20px 70px;}
+    header.top{display:flex;align-items:center;gap:12px;margin-bottom:8px;}
+    .monogram{width:42px;height:42px;border:2px solid var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:13px;}
+    header.top h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);line-height:1;}
+    header.top span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+    .lede{font-size:14px;color:var(--muted);line-height:1.6;margin:14px 0 22px;max-width:62ch;}
+
+    .panel{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:22px;margin-bottom:24px;}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+    @media (max-width:620px){.two{grid-template-columns:1fr;}}
+    .fld{margin-bottom:14px;}
+    .fld label{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:6px;font-weight:700;}
+    .fld input,.fld select{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:3px;font-size:15px;background:var(--white);}
+    .fld input:focus,.fld select:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.16);}
+    .fld .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5;}
+    .btn{background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;padding:14px 22px;}
+    .btn:hover{background:var(--gold2);}
+    .btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--line);}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;}
+    .urlout{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px;background:var(--cream);border:1px solid var(--line);border-radius:3px;padding:11px 13px;word-break:break-all;margin-top:4px;color:var(--navy);}
+    .sec-h{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold2);font-weight:700;margin-bottom:14px;padding-bottom:7px;border-bottom:1px solid var(--line);}
+
+    /* ── The sign itself ────────────────────────────────────── */
+    .sheet{
+      width:8.5in;height:11in;margin:0 auto 24px;background:var(--white);
+      border:1px solid var(--line);box-shadow:0 6px 30px rgba(25,22,18,.13);
+      display:flex;flex-direction:column;align-items:center;justify-content:space-between;
+      padding:0.55in 0.5in 0.45in;text-align:center;overflow:hidden;
+    }
+    .sheet .bar{width:100%;height:.28in;background:var(--navy);border-bottom:.07in solid var(--gold);flex-shrink:0;margin:-0.55in -0.5in 0.3in;width:calc(100% + 1in);}
+    .sheet .brandline{font-family:'Playfair Display',serif;font-size:22pt;color:var(--navy);letter-spacing:.02em;}
+    .sheet .brandsub{font-size:8pt;letter-spacing:.32em;text-transform:uppercase;color:var(--gold2);margin-top:5px;font-weight:700;}
+    .sheet h2{font-family:'Playfair Display',serif;font-size:54pt;line-height:.98;color:var(--navy);margin:.16in 0 .04in;font-weight:900;letter-spacing:-.01em;}
+    .sheet h3{font-family:'Playfair Display',serif;font-size:31pt;line-height:1;color:var(--gold2);font-weight:700;margin-bottom:.16in;}
+    .sheet .who{font-size:12.5pt;line-height:1.5;color:var(--ink);font-weight:600;max-width:6.2in;}
+    .sheet .who .es{color:var(--muted);font-weight:400;display:block;margin-top:3px;}
+    .qrbox{margin:.2in 0 .12in;padding:.16in;background:#fff;border:.035in solid var(--navy);border-radius:.06in;line-height:0;}
+    .qrbox img{width:3.5in;height:3.5in;display:block;}
+    .qrbox .fallback{width:3.5in;height:3.5in;display:flex;align-items:center;justify-content:center;font-size:10pt;color:var(--muted);line-height:1.5;padding:.3in;text-align:center;font-family:'Montserrat',sans-serif;}
+    .scanline{font-size:15pt;font-weight:800;letter-spacing:.03em;color:var(--navy);text-transform:uppercase;}
+    .scanline .es{display:block;font-size:11pt;font-weight:600;color:var(--muted);text-transform:none;letter-spacing:0;margin-top:4px;}
+    .orurl{font-size:11pt;color:var(--muted);margin-top:.12in;}
+    .orurl b{color:var(--navy);font-size:13pt;font-weight:700;}
+    .sheet .foot{width:100%;border-top:1px solid var(--line);padding-top:.13in;margin-top:.16in;display:flex;justify-content:space-between;align-items:center;font-size:8.5pt;color:var(--muted);}
+    .sheet .foot .code{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em;}
+
+    /* Half-sheet variant for door hangers / gate clips */
+    .sheet.half{height:5.45in;padding:.32in .4in .28in;}
+    .sheet.half .bar{height:.2in;margin:-0.32in -0.4in 0.16in;width:calc(100% + .8in);}
+    .sheet.half .brandline{font-size:14pt;}
+    .sheet.half .brandsub{font-size:6.5pt;margin-top:3px;}
+    .sheet.half h2{font-size:28pt;margin:.08in 0 .02in;}
+    .sheet.half h3{font-size:16pt;margin-bottom:.08in;}
+    .sheet.half .who{font-size:8.5pt;}
+    .sheet.half .qrbox{margin:.09in 0 .06in;padding:.08in;}
+    .sheet.half .qrbox img,.sheet.half .qrbox .fallback{width:1.75in;height:1.75in;}
+    .sheet.half .scanline{font-size:10pt;}
+    .sheet.half .scanline .es{font-size:7.5pt;}
+    .sheet.half .orurl{font-size:8pt;margin-top:.06in;}
+    .sheet.half .orurl b{font-size:9.5pt;}
+    .sheet.half .foot{font-size:6.5pt;padding-top:.08in;margin-top:.08in;}
+
+    /* The preview is scaled down so a whole 11in sheet fits on screen. The
+       scale lives on the wrapper, not the sheets — scaling each sheet would
+       leave its full-size layout box behind and push the second half-sign out
+       of view. Print resets it and the sheets go out at true size. */
+    .stage{overflow:hidden;height:calc(11in * var(--zoom, .78) + 24px);}
+    .stage-inner{transform:scale(var(--zoom, .78));transform-origin:top center;}
+    /* Half-page mode prints two identical signs on one letter sheet, so you cut
+       once and get two. Hidden entirely in full-page mode. */
+    #dup{display:none;}
+    .stage.halfh #dup{display:block;}
+
+    /* ── Print ──────────────────────────────────────────────── */
+    @media print{
+      @page{size:letter portrait;margin:0;}
+      body{background:#fff;}
+      .noprint{display:none !important;}
+      .wrap{max-width:none;padding:0;}
+      .stage{height:auto !important;overflow:visible;}
+      .stage-inner{transform:none !important;}
+      .sheet{box-shadow:none;border:none;margin:0;
+             page-break-after:always;break-after:page;}
+      /* Two half sheets fill one letter page — no break between them. The
+         5.45in height leaves a hair of slack so rounding can't push the
+         second one onto a page of its own. */
+      .sheet.half{page-break-after:auto;break-after:auto;
+                  border-bottom:1px dashed rgba(25,22,18,.35);}
+      .sheet:last-of-type{page-break-after:auto;break-after:auto;}
+    }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="noprint">
+    <header class="top">
+      <div class="monogram">CRA</div>
+      <div><h1>Sign Maker</h1><span>Bid My Job</span></div>
+    </header>
+    <p class="lede">
+      Make a printable "Bid My Job" sign for a jobsite. Give each sign its own code so you
+      can tell later which streets and which jobs actually bring subs in. Print it, laminate
+      it or slide it in a sleeve, and zip-tie it to the fence.
+    </p>
+
+    <div class="panel">
+      <div class="sec-h">Sign Setup</div>
+      <div class="two">
+        <div class="fld">
+          <label>Sign code</label>
+          <input type="text" id="code" placeholder="abington" autocapitalize="off" autocomplete="off" />
+          <div class="hint">Short and simple — the street or lot number is perfect. Shows on the QR and in the library so you know which sign they scanned.</div>
+        </div>
+        <div class="fld">
+          <label>Size</label>
+          <select id="size">
+            <option value="full">Full page (8.5 × 11)</option>
+            <option value="half">Half page (2 per sheet)</option>
+          </select>
+          <div class="hint">Full page for fence and yard signs. Half page prints two identical signs on one sheet — cut on the dashed line. Good for gate clips, trailers, and handouts.</div>
+        </div>
+      </div>
+      <div class="fld">
+        <label>Website address</label>
+        <input type="text" id="base" />
+        <div class="hint">The QR points here. Leave it alone unless you're testing.</div>
+      </div>
+      <div class="fld">
+        <label>This sign's link</label>
+        <div class="urlout" id="urlOut">—</div>
+      </div>
+      <div class="row">
+        <button class="btn" id="printBtn">Print This Sign</button>
+        <button class="btn btn-ghost" id="testBtn">Open the form to test it</button>
+        <button class="btn btn-ghost" id="zoomBtn">Zoom</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stage full" id="stage">
+   <div class="stage-inner">
+    <div class="sheet" id="sheet">
+      <div class="bar"></div>
+
+      <div>
+        <div class="brandline">CRA Construction</div>
+        <div class="brandsub">Little Rock, Arkansas</div>
+      </div>
+
+      <div>
+        <h2>BID MY JOB</h2>
+        <h3>Cotiza Mi Trabajo</h3>
+        <div class="who">
+          Subcontractors &amp; suppliers — get on our call list
+          <span class="es">Subcontratistas y proveedores — regístrese en nuestra lista</span>
+        </div>
+      </div>
+
+      <div class="qrbox" id="qrbox">
+        <div class="fallback" id="qrFallback">Enter a sign code above to build the QR.</div>
+      </div>
+
+      <div>
+        <div class="scanline">
+          Scan with your phone camera
+          <span class="es">Escanee con la cámara de su teléfono</span>
+        </div>
+        <div class="orurl">or go to <b id="urlPrint">—</b></div>
+      </div>
+
+      <div class="foot">
+        <span>Licensed &amp; Insured · Built to Last</span>
+        <span class="code" id="codePrint">—</span>
+      </div>
+    </div>
+    <div id="dup"></div>
+   </div>
+  </div>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  function $(id){ return document.getElementById(id); }
+
+  // Default to wherever this page is actually served from, so a preview build
+  // and the live site each produce a QR that points at themselves.
+  var defaultBase = location.origin.indexOf("localhost") >= 0
+    ? location.origin
+    : "https://cra-construction.com";
+  $("base").value = defaultBase;
+
+  var zoomLevels = [0.78, 1, 0.5];
+  var zoomIdx = 0;
+
+  function slug(s){
+    return String(s || "").toLowerCase().trim()
+      .replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 40);
+  }
+
+  function targetUrl(){
+    var base = ($("base").value || defaultBase).trim().replace(/\/+$/, "");
+    var c = slug($("code").value);
+    return base + "/bid" + (c ? "?src=" + encodeURIComponent(c) : "");
+  }
+
+  // Half-page mode puts a second, identical sign under the first so one letter
+  // sheet yields two. Copied from the live sheet after the QR resolves.
+  function mirror(){
+    var dup = $("dup");
+    if ($("size").value !== "half") { dup.innerHTML = ""; return; }
+    dup.innerHTML = $("sheet").outerHTML.replace(/id="[^"]*"/g, "");
+  }
+
+  function render(){
+    var url = targetUrl();
+    var c = slug($("code").value);
+    var pretty = url.replace(/^https?:\/\//, "").replace(/\?.*$/, "");
+
+    $("urlOut").textContent = url;
+    $("urlPrint").textContent = pretty;
+    $("codePrint").textContent = c ? "SIGN " + c.toUpperCase() : "";
+
+    // Size
+    var half = $("size").value === "half";
+    $("sheet").classList.toggle("half", half);
+    $("stage").className = "stage " + (half ? "halfh" : "full");
+
+    // QR. Rendered by a free public generator at print time only — the printed
+    // sign works forever after, and a scan never touches this service. If the
+    // box is blank you're offline; reconnect and reprint.
+    var box = $("qrbox");
+    var px = half ? 500 : 900;
+    var src = "https://api.qrserver.com/v1/create-qr-code/?size=" + px + "x" + px +
+              "&margin=0&ecc=M&data=" + encodeURIComponent(url);
+    box.innerHTML = "";
+    var img = new Image();
+    img.alt = "QR code for " + url;
+    img.onload = function(){ box.innerHTML = ""; box.appendChild(img); mirror(); };
+    img.onerror = function(){
+      var f = document.createElement("div");
+      f.className = "fallback";
+      f.textContent = "Couldn't build the QR — check your internet connection and reload this page.";
+      box.innerHTML = "";
+      box.appendChild(f);
+      mirror();
+    };
+    img.src = src;
+  }
+
+  ["code","base","size"].forEach(function(id){
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+
+  $("printBtn").onclick = function(){ window.print(); };
+  $("testBtn").onclick = function(){ window.open(targetUrl(), "_blank", "noopener"); };
+  $("zoomBtn").onclick = function(){
+    zoomIdx = (zoomIdx + 1) % zoomLevels.length;
+    document.documentElement.style.setProperty("--zoom", zoomLevels[zoomIdx]);
+  };
+
+  render();
+})();
+</script>
+</body>
+</html>

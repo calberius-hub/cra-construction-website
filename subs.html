@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1d3a4a" />
+  <title>CRA Sub Library</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#1d3a4a; --navy2:#162e3b; --gold:#c9a54a; --gold2:#a8882f;
+      --cream:#f8f5f0; --white:#fff; --ink:#1a1814; --muted:#6b6560;
+      --line:rgba(25,22,18,.12); --green:#3f7d5a; --amber:#b7791f; --red:#a3282d;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    input,select,textarea,button{font-family:inherit;}
+
+    /* ── Login gate ─────────────────────────────────────────── */
+    .gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:24px;z-index:100;}
+    .gate-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:4px;padding:44px 40px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);}
+    .gate-card h1{font-family:'Playfair Display',serif;color:var(--navy);font-size:24px;margin-bottom:6px;}
+    .gate-card p{color:var(--muted);font-size:13px;margin-bottom:22px;}
+    .gate-card input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:3px;font-size:16px;margin-bottom:14px;}
+    .gate-card input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .gate-err{color:var(--red);font-size:13px;margin-bottom:12px;display:none;}
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn{background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:13px 18px;transition:background .2s;}
+    .btn:hover{background:var(--gold2);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--line);}
+    .btn-ghost:hover{background:rgba(25,22,18,.05);color:var(--navy);}
+    .btn-sm{padding:9px 13px;font-size:11px;}
+    .btn-danger{background:transparent;color:var(--red);border:1px solid rgba(163,40,45,.3);}
+    .btn-danger:hover{background:rgba(163,40,45,.07);color:var(--red);}
+
+    /* ── App shell ──────────────────────────────────────────── */
+    .app{display:none;max-width:1240px;margin:0 auto;padding:22px 18px 70px;}
+    header.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .monogram{width:42px;height:42px;border:2px solid var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:13px;}
+    .brand h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);line-height:1;}
+    .brand span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+    .actions{display:flex;gap:9px;flex-wrap:wrap;}
+
+    .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+    .stat{background:var(--white);border:1px solid var(--line);border-radius:5px;padding:12px 18px;min-width:96px;}
+    .stat .n{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);line-height:1.1;}
+    .stat .l{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+    .stat.warn .n{color:var(--red);}
+
+    .toolbar{display:flex;gap:9px;flex-wrap:wrap;margin-bottom:16px;align-items:center;}
+    .toolbar input,.toolbar select{padding:11px 12px;border:1px solid var(--line);border-radius:3px;font-size:13.5px;background:var(--white);}
+    .toolbar input[type=search]{flex:1;min-width:200px;font-size:16px;}
+    .toolbar input:focus,.toolbar select:focus{outline:none;border-color:var(--gold);}
+    .togg{display:flex;align-items:center;gap:7px;font-size:13px;color:var(--muted);background:var(--white);border:1px solid var(--line);border-radius:3px;padding:10px 13px;cursor:pointer;}
+    .togg input{width:16px;height:16px;accent-color:var(--navy);}
+
+    /* ── Cards ──────────────────────────────────────────────── */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:13px;}
+    .sub{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:6px;padding:16px 17px;cursor:pointer;transition:.15s;}
+    .sub:hover{box-shadow:0 4px 18px rgba(25,22,18,.09);transform:translateY(-1px);}
+    .sub.st-approved{border-left-color:var(--green);}
+    .sub.st-used{border-left-color:var(--navy);}
+    .sub.st-vetted{border-left-color:var(--gold);}
+    .sub.st-do-not-use{border-left-color:var(--red);opacity:.62;}
+    .sub-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:3px;}
+    .sub-name{font-weight:700;color:var(--navy);font-size:15.5px;line-height:1.3;}
+    .sub-co{font-size:12.5px;color:var(--muted);margin-top:1px;}
+    .sub-meta{font-size:12px;color:var(--muted);margin-top:9px;line-height:1.6;}
+    .stars{font-size:13px;color:var(--gold2);white-space:nowrap;letter-spacing:1px;}
+    .stars .cnt{color:var(--muted);font-size:11px;letter-spacing:0;margin-left:3px;}
+    .tag{display:inline-block;font-size:10.5px;letter-spacing:.04em;padding:4px 9px;border-radius:20px;background:rgba(201,165,74,.16);color:var(--gold2);margin:3px 4px 0 0;white-space:nowrap;}
+    .tag.k-vendor{background:rgba(29,58,74,.11);color:var(--navy);}
+    .tag.k-worker{background:rgba(107,101,96,.15);color:var(--muted);}
+    .flag{display:inline-block;font-size:10.5px;font-weight:600;padding:4px 9px;border-radius:3px;margin:6px 4px 0 0;}
+    .flag.red{background:#fdecec;color:var(--red);}
+    .flag.amber{background:#fff4e0;color:#8a5a00;}
+    .flag.green{background:#e6f3ec;color:#2c6a45;}
+    .flag.grey{background:#f0eee9;color:var(--muted);}
+    .sub-actions{display:flex;gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
+    .sub-actions a{flex:1;text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px;border:1px solid var(--line);border-radius:3px;color:var(--navy);}
+    .sub-actions a:hover{background:var(--cream);}
+    .empty{grid-column:1/-1;text-align:center;padding:56px 20px;color:var(--muted);background:var(--white);border:1px solid var(--line);border-radius:6px;}
+
+    /* ── Modal ──────────────────────────────────────────────── */
+    .modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-start;justify-content:center;background:rgba(22,20,16,.55);padding:20px;overflow-y:auto;}
+    .modal.open{display:flex;}
+    .modal-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:5px;width:min(680px,100%);margin:auto;padding:30px 28px 26px;position:relative;}
+    .modal-card h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:22px;margin-bottom:3px;line-height:1.25;}
+    .modal-card .sub-line{color:var(--muted);font-size:13px;margin-bottom:18px;}
+    .close-x{position:absolute;top:12px;right:14px;border:none;background:none;font-size:28px;color:var(--muted);cursor:pointer;line-height:1;padding:4px 8px;}
+    .banner{padding:11px 13px;border-radius:4px;font-size:13px;margin-bottom:14px;display:none;line-height:1.45;}
+    .banner.warn{background:#fff4e0;color:#8a5a00;border:1px solid #f0d9a8;display:block;}
+    .banner.ok{background:#e6f3ec;color:#2c6a45;border:1px solid #bfe0cc;display:block;}
+    .banner.bad{background:#fdecec;color:var(--red);border:1px solid #f2c4c4;display:block;}
+
+    .sec-h{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold2);font-weight:700;margin:22px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+    .fld{margin-bottom:13px;}
+    .fld label{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;font-weight:600;}
+    .fld input,.fld select,.fld textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--white);}
+    .fld textarea{min-height:78px;resize:vertical;}
+    .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+    .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+    @media (max-width:560px){.two,.three{grid-template-columns:1fr;}}
+    .check{display:flex;align-items:center;gap:10px;font-size:14px;margin-bottom:10px;cursor:pointer;}
+    .check input{width:18px;height:18px;accent-color:var(--navy);}
+    .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:6px;}
+    .note{font-size:12px;color:var(--muted);line-height:1.5;}
+
+    /* Rating stars input */
+    .rate-row{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--white);border:1px solid var(--line);border-radius:4px;padding:11px 13px;margin-bottom:8px;}
+    .rate-row .rl{font-size:13.5px;font-weight:600;color:var(--ink);}
+    .rate-stars{display:flex;gap:3px;}
+    .rate-stars button{background:none;border:none;font-size:23px;line-height:1;cursor:pointer;color:#d8d2c8;padding:0 1px;transition:color .1s;}
+    .rate-stars button.on{color:var(--gold);}
+
+    .rev{background:var(--white);border:1px solid var(--line);border-radius:4px;padding:13px 14px;margin-bottom:9px;}
+    .rev-h{display:flex;justify-content:space-between;gap:10px;font-size:12px;color:var(--muted);margin-bottom:6px;flex-wrap:wrap;}
+    .rev-h b{color:var(--navy);font-size:13px;}
+    .rev-scores{font-size:12.5px;color:var(--ink);line-height:1.7;}
+    .rev-note{font-size:13.5px;margin-top:7px;line-height:1.5;}
+
+    .photos{display:flex;flex-wrap:wrap;gap:9px;}
+    .photos img{width:96px;height:96px;object-fit:cover;border-radius:4px;border:1px solid var(--line);cursor:pointer;background:var(--white);}
+    .photos .ph{width:96px;height:96px;border:1px dashed var(--line);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--muted);background:var(--white);}
+
+    .lightbox{position:fixed;inset:0;z-index:90;background:rgba(10,9,8,.92);display:none;align-items:center;justify-content:center;padding:24px;cursor:zoom-out;}
+    .lightbox.open{display:flex;}
+    .lightbox img{max-width:100%;max-height:100%;object-fit:contain;}
+  </style>
+</head>
+<body>
+
+<!-- ── LOGIN GATE ──────────────────────────────────────────── -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h1>CRA Sub Library</h1>
+    <p>Enter the dashboard password to continue.</p>
+    <div class="gate-err" id="gateErr">Wrong password — try again.</div>
+    <input type="password" id="pw" placeholder="Password" autocomplete="current-password" />
+    <button class="btn" style="width:100%" id="loginBtn">Enter</button>
+  </div>
+</div>
+
+<!-- ── APP ─────────────────────────────────────────────────── -->
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="monogram">CRA</div>
+      <div><h1>Sub Library</h1><span>CRA Construction</span></div>
+    </div>
+    <div class="actions">
+      <button class="btn btn-ghost" id="refreshBtn">Refresh</button>
+      <button class="btn btn-ghost" id="csvBtn">Export CSV</button>
+      <button class="btn" id="addBtn">＋ Add Manually</button>
+      <button class="btn btn-ghost" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <div class="stats" id="stats"></div>
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="Search name, company, phone, trade, notes…" />
+    <select id="fKind">
+      <option value="">Everyone</option>
+      <option value="sub">Subcontractors</option>
+      <option value="vendor">Vendors &amp; suppliers</option>
+      <option value="worker">Looking for work</option>
+    </select>
+    <select id="fTrade"><option value="">All trades</option></select>
+    <select id="fStatus">
+      <option value="">All statuses</option>
+      <option value="new">New</option>
+      <option value="vetted">Vetted</option>
+      <option value="approved">Approved</option>
+      <option value="used">Used</option>
+      <option value="do-not-use">Do not use</option>
+    </select>
+    <select id="fLang">
+      <option value="">Any language</option>
+      <option value="en">English</option>
+      <option value="es">Spanish</option>
+    </select>
+    <select id="sort">
+      <option value="recent">Newest first</option>
+      <option value="rating">Highest rated</option>
+      <option value="name">Name A–Z</option>
+      <option value="used">Most jobs together</option>
+    </select>
+    <label class="togg"><input type="checkbox" id="fIns" /> Insured only</label>
+  </div>
+
+  <div class="grid" id="grid"><div class="empty">Loading…</div></div>
+</div>
+
+<!-- ── DETAIL MODAL ────────────────────────────────────────── -->
+<div class="modal" id="detail">
+  <div class="modal-card">
+    <button class="close-x" data-close="detail">&times;</button>
+    <h2 id="dName">—</h2>
+    <div class="sub-line" id="dSub">—</div>
+    <div class="banner" id="dBanner"></div>
+
+    <div class="row" style="margin-bottom:4px">
+      <select id="dStatus" style="padding:10px 12px;border:1px solid var(--line);border-radius:3px;font-size:13.5px;background:var(--white)">
+        <option value="new">New — not looked at yet</option>
+        <option value="vetted">Vetted — checked them out</option>
+        <option value="approved">Approved — ok to send work</option>
+        <option value="used">Used — we've run a job with them</option>
+        <option value="do-not-use">Do not use</option>
+      </select>
+      <a class="btn btn-sm" id="dCall" href="#">Call</a>
+      <a class="btn btn-sm btn-ghost" id="dText" href="#">Text</a>
+    </div>
+
+    <div class="sec-h">Details</div>
+    <div class="two">
+      <div class="fld"><label>Name</label><input id="eName" /></div>
+      <div class="fld"><label>Company</label><input id="eCompany" /></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label>Phone</label><input id="ePhone" /></div>
+      <div class="fld"><label>Email</label><input id="eEmail" /></div>
+    </div>
+    <div class="fld"><label>Trades (comma separated)</label><input id="eTrades" /></div>
+    <div class="three">
+      <div class="fld"><label>Based in</label><input id="eCity" /></div>
+      <div class="fld"><label>Crew size</label><input id="eCrew" /></div>
+      <div class="fld"><label>Years</label><input id="eYears" /></div>
+    </div>
+    <div class="fld"><label>Travel radius</label><input id="eArea" /></div>
+
+    <div class="sec-h">License &amp; Insurance</div>
+    <div class="two">
+      <div class="fld"><label>License number</label><input id="eLic" /></div>
+      <div class="fld"><label>License expires</label><input id="eLicExp" type="date" /></div>
+    </div>
+    <label class="check"><input type="checkbox" id="eInsured" /> Carries general liability</label>
+    <label class="check"><input type="checkbox" id="eComp" /> Carries workers' comp</label>
+    <div class="two">
+      <div class="fld"><label>Carrier</label><input id="eCarrier" /></div>
+      <div class="fld"><label>Insurance expires</label><input id="eInsExp" type="date" /></div>
+    </div>
+
+    <div class="sec-h">Pricing</div>
+    <div class="two">
+      <div class="fld">
+        <label>Pricing style</label>
+        <select id="ePricing">
+          <option value="">—</option>
+          <option value="bid">Bids the whole job</option>
+          <option value="unit">By the square foot / unit</option>
+          <option value="hourly">By the hour</option>
+          <option value="labor-only">Labor only</option>
+          <option value="depends">Depends on the job</option>
+        </select>
+      </div>
+      <div class="fld"><label>Rates / minimums</label><input id="eRates" /></div>
+    </div>
+
+    <div class="sec-h">Notes</div>
+    <div class="fld"><label>What they told us</label><textarea id="eNotes"></textarea></div>
+    <div class="fld"><label>Our internal notes <span class="note">(they never see this)</span></label><textarea id="eInternal"></textarea></div>
+
+    <div class="sec-h">Photos they sent</div>
+    <div class="photos" id="dPhotos"><div class="ph">None</div></div>
+
+    <div class="sec-h">Field ratings</div>
+    <div id="dRatings"></div>
+
+    <div class="fld" style="margin-top:14px"><label>Add a rating after a job</label></div>
+    <div class="two">
+      <div class="fld"><label>Your name</label><input id="rBy" placeholder="Cole" /></div>
+      <div class="fld"><label>Which job</label><input id="rJob" placeholder="217 Abington" /></div>
+    </div>
+    <div id="rateRows"></div>
+    <div class="fld"><label>Note</label><textarea id="rNote" placeholder="Showed up with 5 guys, finished a day early. Cleaned up after himself."></textarea></div>
+    <div class="row">
+      <button class="btn" id="rSaveBtn">Save Rating</button>
+      <button class="btn btn-ghost" id="saveBtn">Save Details</button>
+      <button class="btn btn-danger btn-sm" id="delBtn" style="margin-left:auto">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ADD MODAL ───────────────────────────────────────────── -->
+<div class="modal" id="addModal">
+  <div class="modal-card">
+    <button class="close-x" data-close="addModal">&times;</button>
+    <h2>Add Someone Manually</h2>
+    <div class="sub-line">For a sub you met on a job or got by referral. Lands in the library exactly like a QR scan.</div>
+    <div class="banner" id="addBanner"></div>
+    <div class="fld">
+      <label>Type</label>
+      <select id="aKind">
+        <option value="sub">Subcontractor</option>
+        <option value="vendor">Vendor / supplier</option>
+        <option value="worker">Looking for work</option>
+      </select>
+    </div>
+    <div class="two">
+      <div class="fld"><label>Name</label><input id="aName" /></div>
+      <div class="fld"><label>Company</label><input id="aCompany" /></div>
+    </div>
+    <div class="two">
+      <div class="fld"><label>Phone (required)</label><input id="aPhone" placeholder="(501) 555-0123" /></div>
+      <div class="fld"><label>Email</label><input id="aEmail" /></div>
+    </div>
+    <div class="fld"><label>Trades (comma separated)</label><input id="aTrades" placeholder="Drywall, Paint" /></div>
+    <div class="two">
+      <div class="fld"><label>Based in</label><input id="aCity" /></div>
+      <div class="fld">
+        <label>Language</label>
+        <select id="aLang"><option value="en">English</option><option value="es">Spanish</option></select>
+      </div>
+    </div>
+    <div class="fld"><label>Notes</label><textarea id="aNotes"></textarea></div>
+    <div class="row"><button class="btn" id="aSaveBtn">Add to Library</button></div>
+  </div>
+</div>
+
+<div class="lightbox" id="lightbox"><img id="lightboxImg" alt="" /></div>
+
+<script>
+(function(){
+  "use strict";
+
+  var API = "/.netlify/functions/subs";
+  var KEY = sessionStorage.getItem("craLeadsKey") || null;
+  var SUBS = [];
+  var CURRENT = null;
+
+  var RATE_KEYS = [
+    ["on_time","Showed up on time"],
+    ["quality","Quality of work"],
+    ["price","Price / value"],
+    ["cleanup","Cleaned up after"],
+    ["again","Would use again"]
+  ];
+  var STATUS_LABEL = {
+    "new":"New", "vetted":"Vetted", "approved":"Approved",
+    "used":"Used", "do-not-use":"Do not use"
+  };
+
+  function $(id){ return document.getElementById(id); }
+  function esc(s){ return String(s == null ? "" : s).replace(/[&<>"]/g, function(c){
+    return {"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;"}[c]; }); }
+
+  function api(action, extra){
+    var body = Object.assign({ action: action }, extra || {});
+    return fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-leads-key": KEY || "" },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(b){
+        return { status: r.status, body: b };
+      });
+    });
+  }
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+  function enter(subs){
+    $("gate").style.display = "none";
+    $("app").style.display = "block";
+    SUBS = subs || [];
+    buildTradeFilter();
+    render();
+  }
+  function tryLogin(pw){
+    KEY = pw;
+    return api("list").then(function(res){
+      if (res.status === 200) {
+        sessionStorage.setItem("craLeadsKey", pw);
+        enter(res.body.subs);
+        return true;
+      }
+      KEY = null;
+      return false;
+    });
+  }
+  $("loginBtn").onclick = function(){
+    var pw = $("pw").value.trim();
+    if (!pw) return;
+    var self = this;
+    self.disabled = true;
+    tryLogin(pw).then(function(ok){
+      self.disabled = false;
+      if (!ok) $("gateErr").style.display = "block";
+    });
+  };
+  $("pw").addEventListener("keydown", function(e){ if (e.key === "Enter") $("loginBtn").click(); });
+  $("logoutBtn").onclick = function(){ sessionStorage.removeItem("craLeadsKey"); location.reload(); };
+
+  function reload(){
+    return api("list").then(function(res){
+      if (res.status === 200) { SUBS = res.body.subs || []; buildTradeFilter(); render(); }
+    });
+  }
+  $("refreshBtn").onclick = function(){ reload(); };
+
+  // ── Filtering ─────────────────────────────────────────────────────────────
+  function buildTradeFilter(){
+    var seen = {};
+    SUBS.forEach(function(s){ (s.trades || []).forEach(function(t){ if (t) seen[t] = 1; }); });
+    var list = Object.keys(seen).sort();
+    var sel = $("fTrade");
+    var keep = sel.value;
+    sel.innerHTML = '<option value="">All trades</option>' +
+      list.map(function(t){ return '<option value="' + esc(t) + '">' + esc(t) + "</option>"; }).join("");
+    if (list.indexOf(keep) >= 0) sel.value = keep;
+  }
+
+  function filtered(){
+    var q = ($("q").value || "").toLowerCase().trim();
+    var qDigits = q.replace(/\D/g, "");
+    var k = $("fKind").value, tr = $("fTrade").value,
+        st = $("fStatus").value, lg = $("fLang").value,
+        insOnly = $("fIns").checked;
+
+    var out = SUBS.filter(function(s){
+      if (k && s.kind !== k) return false;
+      if (st && (s.status || "new") !== st) return false;
+      if (lg && s.lang !== lg) return false;
+      if (insOnly && !s.insured) return false;
+      if (tr && (s.trades || []).indexOf(tr) < 0) return false;
+      if (q) {
+        // A phone search should match however it was typed — compare digits too.
+        if (qDigits.length >= 4 && (s.phone_key || "").indexOf(qDigits) >= 0) return true;
+        var hay = [s.name, s.company, s.phone, s.email, s.city, s.service_area,
+                   s.notes, s.internal_notes, s.rate_notes, s.license_no,
+                   s.ins_carrier, (s.trades || []).join(" ")].join(" ").toLowerCase();
+        if (hay.indexOf(q) < 0) return false;
+      }
+      return true;
+    });
+
+    var sort = $("sort").value;
+    if (sort === "rating") {
+      out.sort(function(a, b){ return (b.overall || -1) - (a.overall || -1); });
+    } else if (sort === "name") {
+      out.sort(function(a, b){
+        return (a.name || a.company || "").localeCompare(b.name || b.company || "");
+      });
+    } else if (sort === "used") {
+      out.sort(function(a, b){ return (b.rating_count || 0) - (a.rating_count || 0); });
+    }
+    return out;
+  }
+
+  ["q","fKind","fTrade","fStatus","fLang","sort"].forEach(function(id){
+    $(id).addEventListener("input", render);
+    $(id).addEventListener("change", render);
+  });
+  $("fIns").addEventListener("change", render);
+
+  // ── Render ────────────────────────────────────────────────────────────────
+  function starStr(n){
+    if (n == null) return "";
+    var full = Math.round(n);
+    return "★★★★★".slice(0, full) + "☆☆☆☆☆".slice(0, 5 - full);
+  }
+  function fmtDate(iso){
+    if (!iso) return "—";
+    var d = new Date(iso);
+    return isNaN(d) ? "—" : d.toLocaleDateString(undefined, { month:"short", day:"numeric", year:"numeric" });
+  }
+  function telHref(p){ return "tel:" + String(p || "").replace(/[^\d+]/g, ""); }
+  function smsHref(p){ return "sms:" + String(p || "").replace(/[^\d+]/g, ""); }
+
+  function statNode(n, l, warn){
+    return '<div class="stat' + (warn ? " warn" : "") + '"><div class="n">' + n +
+           '</div><div class="l">' + l + "</div></div>";
+  }
+
+  function render(){
+    var subs = SUBS.filter(function(s){ return s.kind === "sub"; }).length;
+    var vend = SUBS.filter(function(s){ return s.kind === "vendor"; }).length;
+    var work = SUBS.filter(function(s){ return s.kind === "worker"; }).length;
+    var appr = SUBS.filter(function(s){ return s.status === "approved" || s.status === "used"; }).length;
+    var badIns = SUBS.filter(function(s){ return s.ins_expired || s.ins_expiring; }).length;
+    $("stats").innerHTML =
+      statNode(SUBS.length, "In library") +
+      statNode(subs, "Subs") +
+      statNode(vend, "Vendors") +
+      statNode(work, "Job seekers") +
+      statNode(appr, "Approved") +
+      (badIns ? statNode(badIns, "Insurance issue", true) : "");
+
+    var list = filtered();
+    var g = $("grid");
+    if (!list.length) {
+      g.innerHTML = '<div class="empty">' +
+        (SUBS.length ? "Nobody matches those filters." :
+         "Nobody has scanned yet. Once a sign goes up, they land here.") + "</div>";
+      return;
+    }
+
+    g.innerHTML = list.map(function(s){
+      var who = esc(s.name || s.company || "(no name given)");
+      var co = s.name && s.company ? '<div class="sub-co">' + esc(s.company) + "</div>" : "";
+      var kindTag = s.kind === "vendor" ? '<span class="tag k-vendor">Vendor</span>'
+                  : s.kind === "worker" ? '<span class="tag k-worker">Wants a job</span>' : "";
+      var trades = (s.trades || []).slice(0, 4).map(function(t){
+        return '<span class="tag">' + esc(t) + "</span>"; }).join("");
+      var more = (s.trades || []).length > 4 ?
+        '<span class="tag">+' + ((s.trades || []).length - 4) + "</span>" : "";
+
+      var flags = "";
+      if (s.ins_expired) flags += '<span class="flag red">Insurance expired</span>';
+      else if (s.ins_expiring) flags += '<span class="flag amber">Insurance expires in ' + s.ins_days + "d</span>";
+      else if (s.insured) flags += '<span class="flag green">Insured</span>';
+      else flags += '<span class="flag grey">No insurance on file</span>';
+      if (s.license_expired) flags += '<span class="flag red">License expired</span>';
+      if (s.lang === "es") flags += '<span class="flag grey">Español</span>';
+      if ((s.status || "new") !== "new") flags += '<span class="flag grey">' + esc(STATUS_LABEL[s.status] || s.status) + "</span>";
+
+      var rating = s.overall != null
+        ? '<span class="stars">' + starStr(s.overall) + '<span class="cnt">' + s.overall + " (" + s.rating_count + ")</span></span>"
+        : "";
+
+      var meta = [];
+      if (s.city) meta.push(esc(s.city));
+      if (s.crew_size) meta.push(esc(s.crew_size) + " crew");
+      if (s.years) meta.push(esc(s.years) + " yrs");
+      if (s.pricing_mode) meta.push(esc(s.pricing_mode));
+      if (s.files && s.files.length) meta.push(s.files.length + " photo" + (s.files.length > 1 ? "s" : ""));
+
+      return '<div class="sub st-' + esc(s.status || "new") + '" data-id="' + esc(s.id) + '">' +
+        '<div class="sub-top"><div><div class="sub-name">' + who + "</div>" + co + "</div>" + rating + "</div>" +
+        "<div>" + kindTag + trades + more + "</div>" +
+        '<div class="sub-meta">' + esc(s.phone || "") + (meta.length ? " · " + meta.join(" · ") : "") +
+          "<br>Added " + fmtDate(s.created_at) + (s.src && s.src !== "manual" ? " · sign " + esc(s.src) : "") + "</div>" +
+        "<div>" + flags + "</div>" +
+        '<div class="sub-actions">' +
+          '<a href="' + telHref(s.phone) + '" data-stop="1">Call</a>' +
+          '<a href="' + smsHref(s.phone) + '" data-stop="1">Text</a>' +
+          '<a href="#" data-open="' + esc(s.id) + '">Open</a>' +
+        "</div></div>";
+    }).join("");
+
+    Array.prototype.forEach.call(g.querySelectorAll(".sub"), function(card){
+      card.onclick = function(e){
+        // Let the tel:/sms: links do their own thing.
+        if (e.target.closest("[data-stop]")) return;
+        e.preventDefault();
+        openDetail(card.getAttribute("data-id"));
+      };
+    });
+  }
+
+  // ── Detail ────────────────────────────────────────────────────────────────
+  function banner(id, msg, cls){
+    var b = $(id);
+    b.className = "banner " + (cls || "ok");
+    b.textContent = msg;
+    if (!msg) b.className = "banner";
+  }
+
+  function buildRateRows(){
+    $("rateRows").innerHTML = RATE_KEYS.map(function(p){
+      return '<div class="rate-row"><span class="rl">' + p[1] + "</span>" +
+        '<span class="rate-stars" data-k="' + p[0] + '">' +
+        [1,2,3,4,5].map(function(n){
+          return '<button type="button" data-n="' + n + '">★</button>'; }).join("") +
+        "</span></div>";
+    }).join("");
+    Array.prototype.forEach.call($("rateRows").querySelectorAll(".rate-stars"), function(row){
+      Array.prototype.forEach.call(row.querySelectorAll("button"), function(b){
+        b.onclick = function(){
+          var n = Number(b.getAttribute("data-n"));
+          var cur = Number(row.getAttribute("data-v") || 0);
+          // Tapping the same star again clears it — otherwise a mis-tap is stuck.
+          var next = cur === n ? 0 : n;
+          row.setAttribute("data-v", next);
+          Array.prototype.forEach.call(row.querySelectorAll("button"), function(x){
+            x.classList.toggle("on", Number(x.getAttribute("data-n")) <= next);
+          });
+        };
+      });
+    });
+  }
+
+  function clearRateRows(){
+    Array.prototype.forEach.call($("rateRows").querySelectorAll(".rate-stars"), function(row){
+      row.setAttribute("data-v", 0);
+      Array.prototype.forEach.call(row.querySelectorAll("button"), function(x){ x.classList.remove("on"); });
+    });
+    $("rJob").value = "";
+    $("rNote").value = "";
+  }
+
+  function fillDetail(s){
+    CURRENT = s;
+    $("dName").textContent = s.name || s.company || "(no name given)";
+    var bits = [];
+    if (s.name && s.company) bits.push(s.company);
+    bits.push(s.kind === "vendor" ? "Vendor / supplier" : s.kind === "worker" ? "Looking for work" : "Subcontractor");
+    bits.push(s.lang === "es" ? "Speaks Spanish" : "English");
+    bits.push("Added " + fmtDate(s.created_at));
+    if (s.src && s.src !== "manual") bits.push("scanned sign " + s.src);
+    if (s.rescans) bits.push("scanned " + (s.rescans + 1) + "×");
+    $("dSub").textContent = bits.join(" · ");
+
+    $("dStatus").value = s.status || "new";
+    $("dCall").href = telHref(s.phone);
+    $("dText").href = smsHref(s.phone);
+
+    $("eName").value = s.name || "";
+    $("eCompany").value = s.company || "";
+    $("ePhone").value = s.phone || "";
+    $("eEmail").value = s.email || "";
+    $("eTrades").value = (s.trades || []).join(", ");
+    $("eCity").value = s.city || "";
+    $("eCrew").value = s.crew_size || "";
+    $("eYears").value = s.years || "";
+    $("eArea").value = s.service_area || "";
+    $("eLic").value = s.license_no || "";
+    $("eLicExp").value = s.license_exp || "";
+    $("eInsured").checked = !!s.insured;
+    $("eComp").checked = !!s.workers_comp;
+    $("eCarrier").value = s.ins_carrier || "";
+    $("eInsExp").value = s.ins_exp || "";
+    $("ePricing").value = s.pricing_mode || "";
+    $("eRates").value = s.rate_notes || "";
+    $("eNotes").value = s.notes || "";
+    $("eInternal").value = s.internal_notes || "";
+
+    if (s.ins_expired) banner("dBanner", "Their insurance expired " + Math.abs(s.ins_days) + " days ago. Get a current certificate before they set foot on a job.", "bad");
+    else if (s.ins_expiring) banner("dBanner", "Their insurance expires in " + s.ins_days + " days.", "warn");
+    else banner("dBanner", "");
+
+    // Photos load lazily — they're full-size base64 and we only want them on demand.
+    var pbox = $("dPhotos");
+    if (!(s.files || []).length) {
+      pbox.innerHTML = '<div class="ph">None</div>';
+    } else {
+      pbox.innerHTML = s.files.map(function(){ return '<div class="ph">Loading…</div>'; }).join("");
+      s.files.forEach(function(f, i){
+        api("file", { fileId: f.id }).then(function(res){
+          var slot = pbox.children[i];
+          if (!slot) return;
+          if (res.status !== 200) { slot.textContent = "Missing"; return; }
+          var img = new Image();
+          img.src = res.body.dataUri;
+          img.alt = f.label || "photo";
+          img.onclick = function(){
+            $("lightboxImg").src = img.src;
+            $("lightbox").classList.add("open");
+          };
+          slot.replaceWith(img);
+        });
+      });
+    }
+
+    var rbox = $("dRatings");
+    var ratings = s.ratings || [];
+    if (!ratings.length) {
+      rbox.innerHTML = '<div class="note">No ratings yet. After you run a job with them, rate them below — that history is what makes this library worth having.</div>';
+    } else {
+      rbox.innerHTML = ratings.map(function(r){
+        var scores = RATE_KEYS.filter(function(p){ return r[p[0]]; }).map(function(p){
+          return p[1] + ": <b>" + starStr(r[p[0]]) + "</b>"; }).join(" &nbsp;·&nbsp; ");
+        return '<div class="rev"><div class="rev-h"><b>' + esc(r.by || "CRA") + "</b><span>" +
+          (r.job ? esc(r.job) + " · " : "") + fmtDate(r.date) + "</span></div>" +
+          (scores ? '<div class="rev-scores">' + scores + "</div>" : "") +
+          (r.note ? '<div class="rev-note">' + esc(r.note) + "</div>" : "") + "</div>";
+      }).join("");
+    }
+
+    clearRateRows();
+  }
+
+  function openDetail(id){
+    var s = SUBS.filter(function(x){ return x.id === id; })[0];
+    if (!s) return;
+    fillDetail(s);
+    $("detail").classList.add("open");
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-close]"), function(b){
+    b.onclick = function(){ $(b.getAttribute("data-close")).classList.remove("open"); };
+  });
+  Array.prototype.forEach.call(document.querySelectorAll(".modal"), function(m){
+    m.onclick = function(e){ if (e.target === m) m.classList.remove("open"); };
+  });
+  $("lightbox").onclick = function(){ this.classList.remove("open"); };
+  document.addEventListener("keydown", function(e){
+    if (e.key !== "Escape") return;
+    if ($("lightbox").classList.contains("open")) return $("lightbox").classList.remove("open");
+    Array.prototype.forEach.call(document.querySelectorAll(".modal.open"), function(m){ m.classList.remove("open"); });
+  });
+
+  // ── Save ──────────────────────────────────────────────────────────────────
+  $("dStatus").onchange = function(){
+    if (!CURRENT) return;
+    var st = this.value;
+    api("set-status", { id: CURRENT.id, status: st }).then(function(res){
+      if (res.status !== 200) return banner("dBanner", "Couldn't save that status.", "bad");
+      CURRENT.status = st;
+      var live = SUBS.filter(function(x){ return x.id === CURRENT.id; })[0];
+      if (live) live.status = st;
+      render();
+    });
+  };
+
+  $("saveBtn").onclick = function(){
+    if (!CURRENT) return;
+    var btn = this;
+    btn.disabled = true;
+    var patch = {
+      name: $("eName").value.trim(),
+      company: $("eCompany").value.trim(),
+      phone: $("ePhone").value.trim(),
+      email: $("eEmail").value.trim().toLowerCase(),
+      trades: $("eTrades").value.split(",").map(function(t){ return t.trim(); }).filter(Boolean),
+      city: $("eCity").value.trim(),
+      crew_size: $("eCrew").value.trim(),
+      years: $("eYears").value.trim(),
+      service_area: $("eArea").value.trim(),
+      license_no: $("eLic").value.trim(),
+      license_exp: $("eLicExp").value,
+      insured: $("eInsured").checked,
+      workers_comp: $("eComp").checked,
+      ins_carrier: $("eCarrier").value.trim(),
+      ins_exp: $("eInsExp").value,
+      pricing_mode: $("ePricing").value,
+      rate_notes: $("eRates").value.trim(),
+      notes: $("eNotes").value.trim(),
+      internal_notes: $("eInternal").value.trim()
+    };
+    api("update", { id: CURRENT.id, patch: patch }).then(function(res){
+      btn.disabled = false;
+      if (res.status !== 200) return banner("dBanner", (res.body && res.body.error) || "Save failed.", "bad");
+      banner("dBanner", "Saved.", "ok");
+      reload().then(function(){
+        var live = SUBS.filter(function(x){ return x.id === CURRENT.id; })[0];
+        if (live) CURRENT = live;
+      });
+    });
+  };
+
+  $("rSaveBtn").onclick = function(){
+    if (!CURRENT) return;
+    var rating = {
+      by: $("rBy").value.trim(),
+      job: $("rJob").value.trim(),
+      note: $("rNote").value.trim()
+    };
+    Array.prototype.forEach.call($("rateRows").querySelectorAll(".rate-stars"), function(row){
+      var v = Number(row.getAttribute("data-v") || 0);
+      if (v) rating[row.getAttribute("data-k")] = v;
+    });
+    var btn = this;
+    btn.disabled = true;
+    api("add-rating", { id: CURRENT.id, rating: rating }).then(function(res){
+      btn.disabled = false;
+      if (res.status !== 200) return banner("dBanner", (res.body && res.body.error) || "Couldn't save.", "bad");
+      banner("dBanner", "Rating saved.", "ok");
+      // Remember who's rating — the same guy usually rates several in a row.
+      try { localStorage.setItem("craRatedBy", rating.by); } catch (e) {}
+      reload().then(function(){
+        var live = SUBS.filter(function(x){ return x.id === CURRENT.id; })[0];
+        if (live) fillDetail(live);
+      });
+    });
+  };
+
+  $("delBtn").onclick = function(){
+    if (!CURRENT) return;
+    var who = CURRENT.name || CURRENT.company || "this record";
+    if (!confirm("Delete " + who + " and their photos? This can't be undone.")) return;
+    api("delete", { id: CURRENT.id }).then(function(res){
+      if (res.status !== 200) return banner("dBanner", "Delete failed.", "bad");
+      $("detail").classList.remove("open");
+      reload();
+    });
+  };
+
+  // ── Add manually ──────────────────────────────────────────────────────────
+  $("addBtn").onclick = function(){
+    banner("addBanner", "");
+    ["aName","aCompany","aPhone","aEmail","aTrades","aCity","aNotes"].forEach(function(id){ $(id).value = ""; });
+    $("addModal").classList.add("open");
+  };
+  $("aSaveBtn").onclick = function(){
+    var rec = {
+      kind: $("aKind").value,
+      name: $("aName").value.trim(),
+      company: $("aCompany").value.trim(),
+      phone: $("aPhone").value.trim(),
+      email: $("aEmail").value.trim(),
+      trades: $("aTrades").value.split(",").map(function(t){ return t.trim(); }).filter(Boolean),
+      city: $("aCity").value.trim(),
+      lang: $("aLang").value,
+      notes: $("aNotes").value.trim()
+    };
+    if (rec.phone.replace(/\D/g, "").length < 10) {
+      return banner("addBanner", "A 10-digit phone number is required — that's how we find people again.", "bad");
+    }
+    var btn = this;
+    btn.disabled = true;
+    api("add-sub", { rec: rec }).then(function(res){
+      btn.disabled = false;
+      if (res.status !== 200) return banner("addBanner", (res.body && res.body.error) || "Couldn't add.", "bad");
+      $("addModal").classList.remove("open");
+      reload();
+    });
+  };
+
+  // ── CSV export ────────────────────────────────────────────────────────────
+  $("csvBtn").onclick = function(){
+    var cols = ["name","company","phone","email","kind","trades","lang","city","service_area",
+                "crew_size","years","license_no","license_exp","insured","workers_comp",
+                "ins_carrier","ins_exp","pricing_mode","rate_notes","status","overall",
+                "rating_count","src","notes","internal_notes","created_at"];
+    function cell(v){
+      if (Array.isArray(v)) v = v.join("; ");
+      if (v === true) v = "yes";
+      if (v === false) v = "no";
+      var s = String(v == null ? "" : v);
+      return /[",\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s;
+    }
+    var rows = [cols.join(",")].concat(filtered().map(function(s){
+      return cols.map(function(c){ return cell(s[c]); }).join(",");
+    }));
+    var blob = new Blob(["﻿" + rows.join("\r\n")], { type: "text/csv;charset=utf-8" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "cra-sub-library.csv";
+    a.click();
+    setTimeout(function(){ URL.revokeObjectURL(a.href); }, 2000);
+  };
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  buildRateRows();
+  try { $("rBy").value = localStorage.getItem("craRatedBy") || ""; } catch (e) {}
+  if (KEY) {
+    api("list").then(function(res){
+      if (res.status === 200) enter(res.body.subs);
+      else { KEY = null; sessionStorage.removeItem("craLeadsKey"); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -17,3 +17,19 @@
   from = "/leads"
   to = "/leads.html"
   status = 200
+
+# "Bid My Job" — QR intake for subs & vendors, and the internal library.
+[[redirects]]
+  from = "/bid"
+  to = "/bid.html"
+  status = 200
+
+[[redirects]]
+  from = "/subs"
+  to = "/subs.html"
+  status = 200
+
+[[redirects]]
+  from = "/sign"
+  to = "/sign.html"
+  status = 200

@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1d3a4a" />
+  <title>Bid My Job — CRA Construction</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#1d3a4a; --navy2:#162e3b; --gold:#c9a54a; --gold2:#a8882f;
+      --cream:#f8f5f0; --white:#fff; --ink:#1a1814; --muted:#6b6560;
+      --line:rgba(25,22,18,.14); --green:#3f7d5a;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    html{-webkit-text-size-adjust:100%;}
+    body{
+      font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);
+      background:var(--navy);-webkit-font-smoothing:antialiased;
+      min-height:100vh;min-height:100dvh;
+    }
+    /* 16px minimum on every input — anything smaller makes iOS zoom the page
+       mid-form, which reads as the site breaking. */
+    input,select,textarea,button{font-family:inherit;font-size:16px;}
+
+    .wrap{max-width:560px;margin:0 auto;padding:0 0 40px;}
+
+    /* ── Masthead ───────────────────────────────────────────── */
+    .mast{background:var(--navy);color:#fff;padding:26px 22px 22px;text-align:center;}
+    .monogram{
+      width:54px;height:54px;margin:0 auto 12px;border:2px solid var(--gold);border-radius:50%;
+      display:flex;align-items:center;justify-content:center;
+      font-family:'Playfair Display',serif;font-weight:700;font-size:16px;color:var(--gold);
+    }
+    .mast h1{font-family:'Playfair Display',serif;font-size:29px;line-height:1.15;margin-bottom:7px;}
+    .mast p{font-size:14px;color:rgba(255,255,255,.72);line-height:1.5;}
+    .mast .loc{font-size:10px;letter-spacing:.22em;text-transform:uppercase;color:var(--gold);margin-top:12px;}
+
+    /* ── Card / steps ───────────────────────────────────────── */
+    .card{background:var(--cream);border-radius:14px 14px 0 0;padding:26px 20px 30px;min-height:60vh;}
+    .step{display:none;}
+    .step.on{display:block;animation:fade .22s ease;}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+    .step-h{font-family:'Playfair Display',serif;font-size:23px;color:var(--navy);margin-bottom:6px;line-height:1.25;}
+    .step-p{font-size:14px;color:var(--muted);line-height:1.55;margin-bottom:20px;}
+
+    /* Big choice buttons — thumb-sized, because this gets used standing
+       outside on a phone, often one-handed. */
+    .choice{
+      display:flex;align-items:center;gap:14px;width:100%;text-align:left;
+      background:var(--white);border:1.5px solid var(--line);border-radius:10px;
+      padding:18px 18px;margin-bottom:11px;cursor:pointer;transition:.15s;
+      font-size:16px;font-weight:600;color:var(--ink);
+    }
+    .choice:hover,.choice:focus-visible{border-color:var(--gold);outline:none;}
+    .choice:active{transform:scale(.99);}
+    .choice .ic{font-size:26px;line-height:1;flex-shrink:0;}
+    .choice.lang{justify-content:center;padding:24px 18px;font-size:19px;font-weight:700;}
+    .choice .tx small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4;}
+
+    /* Trade chips */
+    .chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:6px;}
+    .chip{
+      background:var(--white);border:1.5px solid var(--line);border-radius:22px;
+      padding:11px 15px;font-size:14px;cursor:pointer;transition:.12s;color:var(--ink);
+    }
+    .chip:active{transform:scale(.97);}
+    .chip.sel{background:var(--navy);border-color:var(--navy);color:#fff;font-weight:600;}
+
+    /* Fields */
+    .fld{margin-bottom:15px;}
+    .fld label{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:7px;font-weight:600;}
+    .fld label .opt{color:var(--muted);letter-spacing:.04em;text-transform:none;font-weight:400;font-size:11px;}
+    .fld input,.fld select,.fld textarea{
+      width:100%;padding:14px 14px;border:1.5px solid var(--line);border-radius:8px;
+      background:var(--white);color:var(--ink);
+    }
+    .fld textarea{min-height:90px;resize:vertical;}
+    .fld input:focus,.fld select:focus,.fld textarea:focus{
+      outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.18);
+    }
+    .fld .hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45;}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+    @media (max-width:400px){.two{grid-template-columns:1fr;}}
+
+    .check{display:flex;align-items:flex-start;gap:11px;background:var(--white);border:1.5px solid var(--line);border-radius:8px;padding:14px;margin-bottom:11px;cursor:pointer;}
+    .check input{width:21px;height:21px;flex-shrink:0;margin-top:1px;accent-color:var(--navy);}
+    .check span{font-size:14.5px;line-height:1.4;}
+
+    /* Buttons */
+    .btn{
+      width:100%;background:var(--navy);color:#fff;border:none;border-radius:8px;cursor:pointer;
+      font-size:14px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;
+      padding:18px 20px;transition:background .18s;
+    }
+    .btn:hover{background:var(--navy2);}
+    .btn:disabled{opacity:.5;cursor:default;}
+    .btn-gold{background:var(--gold2);}
+    .btn-gold:hover{background:var(--gold);}
+    .btn-link{
+      display:block;width:100%;background:none;border:none;color:var(--muted);
+      font-size:13.5px;text-decoration:underline;cursor:pointer;padding:16px 0 4px;text-align:center;
+    }
+    .back{
+      background:none;border:none;color:var(--muted);font-size:13.5px;cursor:pointer;
+      padding:6px 0;margin-bottom:14px;display:inline-flex;align-items:center;gap:6px;
+    }
+
+    /* Optional details, collapsed by default */
+    .more-toggle{
+      width:100%;background:var(--white);border:1.5px dashed var(--line);border-radius:8px;
+      padding:16px;font-size:14.5px;font-weight:600;color:var(--navy);cursor:pointer;
+      margin:6px 0 16px;text-align:left;display:flex;justify-content:space-between;align-items:center;gap:10px;
+    }
+    .more-toggle small{display:block;font-weight:400;font-size:12.5px;color:var(--muted);margin-top:3px;}
+    .more-toggle .car{font-size:13px;color:var(--muted);flex-shrink:0;}
+    .more{display:none;}
+    .more.open{display:block;}
+    .sec-h{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold2);font-weight:700;margin:24px 0 12px;padding-bottom:7px;border-bottom:1px solid var(--line);}
+
+    /* Photos */
+    .shots{display:flex;flex-wrap:wrap;gap:9px;margin-top:11px;}
+    .shot{position:relative;width:74px;height:74px;border-radius:7px;overflow:hidden;border:1.5px solid var(--line);}
+    .shot img{width:100%;height:100%;object-fit:cover;display:block;}
+    .shot button{
+      position:absolute;top:2px;right:2px;width:22px;height:22px;border-radius:50%;border:none;
+      background:rgba(0,0,0,.65);color:#fff;font-size:14px;line-height:1;cursor:pointer;padding:0;
+    }
+    .addshot{
+      width:74px;height:74px;border:1.5px dashed var(--line);border-radius:7px;background:var(--white);
+      cursor:pointer;font-size:24px;color:var(--muted);display:flex;align-items:center;justify-content:center;padding:0;
+    }
+
+    .err{background:#fdecec;color:#a3282d;border:1px solid #f2c4c4;border-radius:8px;padding:13px 14px;font-size:13.5px;margin-bottom:15px;display:none;line-height:1.45;}
+    .err.on{display:block;}
+
+    /* Done */
+    .done{text-align:center;padding:26px 6px;}
+    .done .mark{
+      width:74px;height:74px;margin:0 auto 20px;border-radius:50%;background:var(--green);
+      display:flex;align-items:center;justify-content:center;font-size:36px;color:#fff;
+    }
+    .done h2{font-family:'Playfair Display',serif;font-size:27px;color:var(--navy);margin-bottom:12px;}
+    .done p{font-size:15px;color:var(--muted);line-height:1.6;margin-bottom:22px;}
+    .callbox{background:var(--white);border:1.5px solid var(--line);border-radius:10px;padding:20px;margin-bottom:14px;}
+    .callbox .lbl{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:7px;}
+    .callbox a{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);text-decoration:none;font-weight:700;}
+
+    .foot{text-align:center;font-size:11.5px;color:rgba(255,255,255,.5);padding:18px 22px 6px;line-height:1.6;}
+    .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="mast">
+    <div class="monogram">CRA</div>
+    <h1 id="mastH">Bid My Job</h1>
+    <p id="mastP">Tell us who you are and what you do. We'll call you when we have work.</p>
+    <div class="loc">CRA Construction · Little Rock, AR</div>
+  </div>
+
+  <div class="card">
+
+    <!-- ── STEP 0 · Language ─────────────────────────────────── -->
+    <section class="step on" id="s0">
+      <h2 class="step-h">Choose your language</h2>
+      <p class="step-p">Elija su idioma</p>
+      <!-- No flag icons: Windows renders them as bare "US"/"MX" letters, and a
+           flag picks a country when all we're asking about is a language. -->
+      <button class="choice lang" data-lang="en"><span class="tx">English</span></button>
+      <button class="choice lang" data-lang="es"><span class="tx">Español</span></button>
+    </section>
+
+    <!-- ── STEP 1 · Who are you ──────────────────────────────── -->
+    <section class="step" id="s1">
+      <button class="back" data-back="0">← <span data-t="back">Back</span></button>
+      <h2 class="step-h" data-t="whoH">Which one are you?</h2>
+      <p class="step-p" data-t="whoP">Pick the one that fits best.</p>
+      <button class="choice" data-kind="sub">
+        <span class="ic">🔨</span>
+        <span class="tx"><span data-t="kSub">I'm a subcontractor</span><small data-t="kSubS">I run a crew or work for myself</small></span>
+      </button>
+      <button class="choice" data-kind="vendor">
+        <span class="ic">🚚</span>
+        <span class="tx"><span data-t="kVen">I'm a vendor or supplier</span><small data-t="kVenS">Materials, equipment, or services</small></span>
+      </button>
+      <button class="choice" data-kind="worker">
+        <span class="ic">👷</span>
+        <span class="tx"><span data-t="kWor">I'm looking for a job</span><small data-t="kWorS">I want to work for CRA directly</small></span>
+      </button>
+    </section>
+
+    <!-- ── STEP 2 · Trade ────────────────────────────────────── -->
+    <section class="step" id="s2">
+      <button class="back" data-back="1">← <span data-t="back">Back</span></button>
+      <h2 class="step-h" id="tradeH">What do you do?</h2>
+      <p class="step-p" id="tradeP">Tap everything that applies. Pick as many as you want.</p>
+      <div class="chips" id="chips"></div>
+      <div class="fld" style="margin-top:16px">
+        <label data-t="otherL">Something else? Type it here <span class="opt" data-t="optional">(optional)</span></label>
+        <input type="text" id="tradeOther" autocomplete="off" />
+      </div>
+      <button class="btn" id="toStep3" data-t="next">Continue</button>
+    </section>
+
+    <!-- ── STEP 3 · Contact ──────────────────────────────────── -->
+    <section class="step" id="s3">
+      <button class="back" data-back="2">← <span data-t="back">Back</span></button>
+      <h2 class="step-h" data-t="conH">How do we reach you?</h2>
+      <p class="step-p" data-t="conP">Just your name and phone number is enough. Everything else is optional.</p>
+
+      <div class="err" id="err"></div>
+
+      <div class="fld">
+        <label data-t="fName">Your name</label>
+        <input type="text" id="fName" autocomplete="name" autocapitalize="words" />
+      </div>
+      <div class="fld">
+        <label data-t="fPhone">Phone number</label>
+        <input type="tel" id="fPhone" autocomplete="tel" inputmode="tel" placeholder="(501) 555-0123" />
+        <div class="hint" data-t="fPhoneH">We'll text you a confirmation.</div>
+      </div>
+
+      <!-- Honeypot: hidden from people, irresistible to bots. -->
+      <div class="sr" aria-hidden="true">
+        <label>Company website</label>
+        <input type="text" id="hp" tabindex="-1" autocomplete="off" />
+      </div>
+
+      <button class="more-toggle" id="moreBtn">
+        <span><span data-t="moreT">Add more details</span><small data-t="moreS">Company, license, insurance, pricing — all optional</small></span>
+        <span class="car" id="moreCar">▼</span>
+      </button>
+
+      <div class="more" id="more">
+        <div class="fld">
+          <label data-t="fCompany">Company name <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="text" id="fCompany" autocomplete="organization" autocapitalize="words" />
+        </div>
+        <div class="fld">
+          <label data-t="fEmail">Email <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="email" id="fEmail" autocomplete="email" inputmode="email" autocapitalize="off" />
+        </div>
+        <div class="two">
+          <div class="fld">
+            <label data-t="fCity">Based in <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="text" id="fCity" placeholder="Little Rock" autocapitalize="words" />
+          </div>
+          <div class="fld">
+            <label data-t="fCrew">Crew size <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="text" id="fCrew" inputmode="numeric" placeholder="4" />
+          </div>
+        </div>
+        <div class="fld">
+          <label data-t="fArea">How far will you travel? <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="text" id="fArea" data-ph="fAreaP" placeholder="Central Arkansas, up to 1 hour" />
+        </div>
+        <div class="fld">
+          <label data-t="fYears">Years doing this work <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="text" id="fYears" inputmode="numeric" placeholder="12" />
+        </div>
+
+        <div class="sec-h" data-t="secLic">License &amp; Insurance</div>
+        <div class="two">
+          <div class="fld">
+            <label data-t="fLic">License number <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="text" id="fLic" autocapitalize="characters" />
+          </div>
+          <div class="fld">
+            <label data-t="fLicExp">Expires <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="date" id="fLicExp" />
+          </div>
+        </div>
+        <label class="check"><input type="checkbox" id="fInsured" /><span data-t="fInsuredL">I carry general liability insurance</span></label>
+        <label class="check"><input type="checkbox" id="fComp" /><span data-t="fCompL">I carry workers' comp</span></label>
+        <div class="two">
+          <div class="fld">
+            <label data-t="fCarrier">Insurance company <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="text" id="fCarrier" autocapitalize="words" />
+          </div>
+          <div class="fld">
+            <label data-t="fInsExp">Expires <span class="opt" data-t="optional">(optional)</span></label>
+            <input type="date" id="fInsExp" />
+          </div>
+        </div>
+
+        <div class="sec-h" data-t="secPrice">Pricing</div>
+        <div class="fld">
+          <label data-t="fPricing">How do you like to price work? <span class="opt" data-t="optional">(optional)</span></label>
+          <select id="fPricing">
+            <option value="" data-t="pPick">— Pick one —</option>
+            <option value="bid" data-t="pBid">Bid the whole job</option>
+            <option value="unit" data-t="pUnit">By the square foot / unit</option>
+            <option value="hourly" data-t="pHourly">By the hour</option>
+            <option value="labor-only" data-t="pLabor">Labor only, you supply material</option>
+            <option value="depends" data-t="pDepends">Depends on the job</option>
+          </select>
+        </div>
+        <div class="fld">
+          <label data-t="fRates">Your rates or minimums <span class="opt" data-t="optional">(optional)</span></label>
+          <input type="text" id="fRates" data-ph="fRatesP" placeholder="$2.25/sf hung and finished" />
+        </div>
+
+        <div class="sec-h" data-t="secPhoto">Photos</div>
+        <p class="step-p" style="margin-bottom:6px" data-t="photoP">Easier than typing — snap your business card, license, or insurance certificate.</p>
+        <div class="shots" id="shots">
+          <button type="button" class="addshot" id="addShot">＋</button>
+        </div>
+        <input type="file" id="fileIn" accept="image/*" multiple style="display:none" />
+
+        <div class="sec-h" data-t="secNotes">Anything else</div>
+        <div class="fld">
+          <label data-t="fNotes">Tell us about your work <span class="opt" data-t="optional">(optional)</span></label>
+          <textarea id="fNotes" data-ph="fNotesP" placeholder="What you're best at, jobs you've done, who you've worked for."></textarea>
+        </div>
+      </div>
+
+      <button class="btn btn-gold" id="submitBtn" data-t="submit">Send it</button>
+      <div class="hint" style="text-align:center;margin-top:12px" data-t="privacy">
+        Your info goes straight to CRA Construction. We don't sell it or share it.
+      </div>
+    </section>
+
+    <!-- ── STEP 4 · Done ─────────────────────────────────────── -->
+    <section class="step" id="s4">
+      <div class="done">
+        <div class="mark">✓</div>
+        <h2 data-t="doneH">You're in the book</h2>
+        <p id="doneP">We've got your info. When we have work in your trade, we'll call you.</p>
+        <div class="callbox">
+          <div class="lbl" data-t="doneCall">Save our number</div>
+          <a href="tel:+15015906646" id="callLink">(501) 590-6646</a>
+        </div>
+        <button class="btn-link" id="againBtn" data-t="doneAgain">Add another person</button>
+      </div>
+    </section>
+
+  </div>
+
+  <div class="foot">CRA Construction · Built to Last</div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  // The phone shown on the thank-you screen. Change in one place.
+  var CRA_PHONE = "(501) 590-6646";
+  var CRA_PHONE_TEL = "+15015906646";
+
+  // ── Copy ──────────────────────────────────────────────────────────────────
+  var T = {
+    en: {
+      mastH:"Bid My Job", mastP:"Tell us who you are and what you do. We'll call you when we have work.",
+      back:"Back", next:"Continue", optional:"(optional)", submit:"Send it",
+      whoH:"Which one are you?", whoP:"Pick the one that fits best.",
+      kSub:"I'm a subcontractor", kSubS:"I run a crew or work for myself",
+      kVen:"I'm a vendor or supplier", kVenS:"Materials, equipment, or services",
+      kWor:"I'm looking for a job", kWorS:"I want to work for CRA directly",
+      tradeHSub:"What do you do?", tradePSub:"Tap everything that applies. Pick as many as you want.",
+      tradeHVen:"What do you sell?", tradePVen:"Tap everything that applies.",
+      tradeHWor:"What can you do?", tradePWor:"Tap everything you have experience with.",
+      otherL:"Something else? Type it here",
+      conH:"How do we reach you?", conP:"Just your name and phone number is enough. Everything else is optional.",
+      fName:"Your name", fPhone:"Phone number", fPhoneH:"We'll text you a confirmation.",
+      moreT:"Add more details", moreS:"Company, license, insurance, pricing — all optional",
+      fCompany:"Company name", fEmail:"Email", fCity:"Based in", fCrew:"Crew size",
+      fArea:"How far will you travel?", fAreaP:"Central Arkansas, up to 1 hour",
+      fYears:"Years doing this work",
+      secLic:"License & Insurance", fLic:"License number", fLicExp:"Expires",
+      fInsuredL:"I carry general liability insurance", fCompL:"I carry workers' comp",
+      fCarrier:"Insurance company", fInsExp:"Expires",
+      secPrice:"Pricing", fPricing:"How do you like to price work?",
+      pPick:"— Pick one —", pBid:"Bid the whole job", pUnit:"By the square foot / unit",
+      pHourly:"By the hour", pLabor:"Labor only, you supply material", pDepends:"Depends on the job",
+      fRates:"Your rates or minimums", fRatesP:"$2.25/sf hung and finished",
+      secPhoto:"Photos", photoP:"Easier than typing — snap your business card, license, or insurance certificate.",
+      secNotes:"Anything else", fNotes:"Tell us about your work",
+      fNotesP:"What you're best at, jobs you've done, who you've worked for.",
+      privacy:"Your info goes straight to CRA Construction. We don't sell it or share it.",
+      doneH:"You're in the book",
+      doneP:"We've got your info. When we have work in your trade, we'll call you.",
+      donePWor:"We've got your info. We'll call you when we're hiring.",
+      doneCall:"Save our number", doneAgain:"Add another person",
+      errPhone:"Please enter a phone number so we can call you back.",
+      errPhoneShort:"That phone number looks too short — please check it.",
+      errSend:"Couldn't send. Check your signal and try again.",
+      sending:"Sending…"
+    },
+    es: {
+      mastH:"Cotiza Mi Trabajo", mastP:"Díganos quién es y qué hace. Le llamaremos cuando tengamos trabajo.",
+      back:"Atrás", next:"Continuar", optional:"(opcional)", submit:"Enviar",
+      whoH:"¿Cuál es usted?", whoP:"Elija el que mejor le describa.",
+      kSub:"Soy subcontratista", kSubS:"Tengo mi cuadrilla o trabajo por mi cuenta",
+      kVen:"Soy proveedor o vendedor", kVenS:"Materiales, equipo o servicios",
+      kWor:"Busco trabajo", kWorS:"Quiero trabajar directamente para CRA",
+      tradeHSub:"¿Qué tipo de trabajo hace?", tradePSub:"Toque todo lo que aplique. Puede elegir varios.",
+      tradeHVen:"¿Qué vende?", tradePVen:"Toque todo lo que aplique.",
+      tradeHWor:"¿Qué sabe hacer?", tradePWor:"Toque todo en lo que tenga experiencia.",
+      otherL:"¿Algo más? Escríbalo aquí",
+      conH:"¿Cómo lo contactamos?", conP:"Solo su nombre y teléfono es suficiente. Todo lo demás es opcional.",
+      fName:"Su nombre", fPhone:"Número de teléfono", fPhoneH:"Le enviaremos un mensaje de confirmación.",
+      moreT:"Agregar más información", moreS:"Compañía, licencia, seguro, precios — todo opcional",
+      fCompany:"Nombre de la compañía", fEmail:"Correo electrónico", fCity:"¿Dónde está basado?",
+      fCrew:"Tamaño de cuadrilla",
+      fArea:"¿Qué tan lejos viaja?", fAreaP:"Centro de Arkansas, hasta 1 hora",
+      fYears:"Años haciendo este trabajo",
+      secLic:"Licencia y Seguro", fLic:"Número de licencia", fLicExp:"Vence",
+      fInsuredL:"Tengo seguro de responsabilidad civil", fCompL:"Tengo seguro de compensación laboral",
+      fCarrier:"Compañía de seguros", fInsExp:"Vence",
+      secPrice:"Precios", fPricing:"¿Cómo prefiere cobrar el trabajo?",
+      pPick:"— Elija uno —", pBid:"Cotizo el trabajo completo", pUnit:"Por pie cuadrado / unidad",
+      pHourly:"Por hora", pLabor:"Solo mano de obra, ustedes ponen material",
+      pDepends:"Depende del trabajo",
+      fRates:"Sus precios o mínimos", fRatesP:"$2.25 por pie cuadrado instalado y terminado",
+      secPhoto:"Fotos", photoP:"Más fácil que escribir — tome foto de su tarjeta, licencia o certificado de seguro.",
+      secNotes:"Algo más", fNotes:"Cuéntenos de su trabajo",
+      fNotesP:"En qué es mejor, trabajos que ha hecho, para quién ha trabajado.",
+      privacy:"Su información va directo a CRA Construction. No la vendemos ni la compartimos.",
+      doneH:"Ya está registrado",
+      doneP:"Tenemos su información. Cuando tengamos trabajo de su oficio, le llamaremos.",
+      donePWor:"Tenemos su información. Le llamaremos cuando estemos contratando.",
+      doneCall:"Guarde nuestro número", doneAgain:"Agregar otra persona",
+      errPhone:"Por favor escriba un número de teléfono para poder llamarle.",
+      errPhoneShort:"Ese número parece muy corto — por favor revíselo.",
+      errSend:"No se pudo enviar. Revise su señal e intente otra vez.",
+      sending:"Enviando…"
+    }
+  };
+
+  // ── Trade lists ───────────────────────────────────────────────────────────
+  // Value is the English slug (what the portal filters on); label is per-language.
+  var TRADES_SUB = [
+    ["Framing","Armazón / Framing"], ["Concrete / Flatwork","Concreto / Piso"],
+    ["Foundation","Cimientos"], ["Roofing","Techos"], ["Siding","Siding / Forro"],
+    ["Windows & Doors","Ventanas y Puertas"], ["Drywall","Tablaroca / Drywall"],
+    ["Paint","Pintura"], ["Trim & Finish Carpentry","Acabados / Carpintería"],
+    ["Cabinets","Gabinetes"], ["Countertops","Cubiertas / Countertops"],
+    ["Flooring","Pisos"], ["Tile","Azulejo / Tile"], ["Plumbing","Plomería"],
+    ["Electrical","Electricidad"], ["HVAC","Aire y Calefacción"],
+    ["Insulation","Aislamiento"], ["Masonry & Stone","Albañilería y Piedra"],
+    ["Stucco","Estuco"], ["Gutters","Canaletas"], ["Garage Doors","Puertas de Garaje"],
+    ["Excavation & Dirt Work","Excavación / Tierra"], ["Grading","Nivelación"],
+    ["Demolition","Demolición"], ["Cleanup / Trash Out","Limpieza / Basura"],
+    ["Landscaping","Jardinería"], ["Irrigation","Riego"], ["Fencing","Cercas"],
+    ["Decks","Terrazas / Decks"], ["Waterproofing","Impermeabilización"],
+    ["Welding & Metal","Soldadura y Metal"], ["Glass & Mirror","Vidrio y Espejos"],
+    ["Appliance Install","Instalación de Electrodomésticos"],
+    ["Low Voltage / Security","Bajo Voltaje / Seguridad"], ["Pools","Piscinas"],
+    ["Septic","Séptico"], ["Surveying","Topografía"]
+  ];
+  var TRADES_VENDOR = [
+    ["Lumber","Madera"], ["Appliances","Electrodomésticos"],
+    ["Plumbing Fixtures","Accesorios de Plomería"], ["Electrical Supply","Material Eléctrico"],
+    ["HVAC Supply","Material de Aire y Calefacción"], ["Windows & Doors","Ventanas y Puertas"],
+    ["Cabinets","Gabinetes"], ["Countertops & Stone","Cubiertas y Piedra"],
+    ["Flooring","Pisos"], ["Tile","Azulejo"], ["Paint Supply","Material de Pintura"],
+    ["Concrete Supply","Material de Concreto"], ["Roofing Supply","Material de Techos"],
+    ["Hardware & Fasteners","Herrajes y Tornillería"],
+    ["Equipment Rental","Renta de Equipo"], ["Dumpsters & Waste","Contenedores y Basura"],
+    ["Portable Toilets","Baños Portátiles"], ["Insurance","Seguros"],
+    ["Lending & Finance","Préstamos y Finanzas"], ["Title & Closing","Título y Cierre"],
+    ["Survey","Topografía"], ["Trucking & Delivery","Transporte y Entrega"]
+  ];
+  var TRADES_WORKER = [
+    ["General Labor","Trabajo General"], ["Framing","Armazón / Framing"],
+    ["Concrete","Concreto"], ["Roofing","Techos"], ["Drywall","Tablaroca"],
+    ["Paint","Pintura"], ["Trim & Finish Carpentry","Acabados / Carpintería"],
+    ["Tile","Azulejo"], ["Flooring","Pisos"], ["Plumbing","Plomería"],
+    ["Electrical","Electricidad"], ["HVAC","Aire y Calefacción"],
+    ["Masonry","Albañilería"], ["Cleanup","Limpieza"],
+    ["Equipment Operator","Operador de Maquinaria"], ["CDL / Driver","CDL / Chofer"],
+    ["Foreman / Lead","Capataz / Líder"]
+  ];
+
+  // ── State ─────────────────────────────────────────────────────────────────
+  var lang = "en";
+  var kind = "sub";
+  var picked = [];
+  var photos = [];   // {data:base64, mime, thumb}
+  var src = "";
+  try {
+    var q = new URLSearchParams(location.search);
+    src = (q.get("src") || q.get("job") || q.get("s") || "").slice(0, 60);
+  } catch (e) { src = ""; }
+
+  var $ = function(id){ return document.getElementById(id); };
+
+  function t(k){ return (T[lang] && T[lang][k]) || T.en[k] || ""; }
+
+  function applyLang(){
+    document.documentElement.lang = lang;
+    $("mastH").textContent = t("mastH");
+    $("mastP").textContent = t("mastP");
+    Array.prototype.forEach.call(document.querySelectorAll("[data-t]"), function(el){
+      var k = el.getAttribute("data-t");
+      if (!(T[lang] && T[lang][k])) return;
+      // Labels carry an "(optional)" span inside them. Setting textContent would
+      // wipe it, so lift it out first and put it back after.
+      var opt = el.querySelector(".opt");
+      el.textContent = T[lang][k];
+      if (opt) { el.appendChild(document.createTextNode(" ")); el.appendChild(opt); }
+    });
+    Array.prototype.forEach.call(document.querySelectorAll("[data-ph]"), function(el){
+      var k = el.getAttribute("data-ph");
+      if (T[lang] && T[lang][k]) el.placeholder = T[lang][k];
+    });
+  }
+
+  function show(n){
+    Array.prototype.forEach.call(document.querySelectorAll(".step"), function(s){ s.classList.remove("on"); });
+    $("s" + n).classList.add("on");
+    window.scrollTo(0, 0);
+  }
+
+  // ── Step 0: language ──────────────────────────────────────────────────────
+  Array.prototype.forEach.call(document.querySelectorAll("[data-lang]"), function(b){
+    b.onclick = function(){ lang = b.getAttribute("data-lang"); applyLang(); show(1); };
+  });
+
+  // ── Step 1: kind ──────────────────────────────────────────────────────────
+  Array.prototype.forEach.call(document.querySelectorAll("[data-kind]"), function(b){
+    b.onclick = function(){ kind = b.getAttribute("data-kind"); buildChips(); show(2); };
+  });
+
+  Array.prototype.forEach.call(document.querySelectorAll("[data-back]"), function(b){
+    b.onclick = function(){ show(Number(b.getAttribute("data-back"))); };
+  });
+
+  // ── Step 2: trades ────────────────────────────────────────────────────────
+  function tradeList(){
+    return kind === "vendor" ? TRADES_VENDOR : kind === "worker" ? TRADES_WORKER : TRADES_SUB;
+  }
+  function buildChips(){
+    picked = [];
+    var suffix = kind === "vendor" ? "Ven" : kind === "worker" ? "Wor" : "Sub";
+    $("tradeH").textContent = t("tradeH" + suffix);
+    $("tradeP").textContent = t("tradeP" + suffix);
+    var box = $("chips");
+    box.innerHTML = "";
+    tradeList().forEach(function(pair){
+      var value = pair[0];
+      var b = document.createElement("button");
+      b.type = "button";
+      b.className = "chip";
+      b.textContent = lang === "es" ? pair[1] : pair[0];
+      b.onclick = function(){
+        var i = picked.indexOf(value);
+        if (i >= 0) { picked.splice(i, 1); b.classList.remove("sel"); }
+        else { picked.push(value); b.classList.add("sel"); }
+      };
+      box.appendChild(b);
+    });
+  }
+  $("toStep3").onclick = function(){ show(3); };
+
+  // ── Optional details toggle ───────────────────────────────────────────────
+  $("moreBtn").onclick = function(){
+    var m = $("more");
+    m.classList.toggle("open");
+    $("moreCar").textContent = m.classList.contains("open") ? "▲" : "▼";
+    if (m.classList.contains("open")) {
+      setTimeout(function(){ m.scrollIntoView({ behavior: "smooth", block: "start" }); }, 60);
+    }
+  };
+
+  // ── Photos ────────────────────────────────────────────────────────────────
+  // Downscale in-browser before upload. A modern phone camera produces 4-8 MB
+  // per shot; four of those would blow past the function's request limit and
+  // take forever on jobsite signal. 1400px at 0.72 quality is plenty to read a
+  // policy number off a certificate.
+  function shrink(file, cb){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      var img = new Image();
+      img.onload = function(){
+        var max = 1400;
+        var w = img.width, h = img.height;
+        if (w > max || h > max) {
+          if (w >= h) { h = Math.round(h * max / w); w = max; }
+          else { w = Math.round(w * max / h); h = max; }
+        }
+        var c = document.createElement("canvas");
+        c.width = w; c.height = h;
+        c.getContext("2d").drawImage(img, 0, 0, w, h);
+        var dataUri = c.toDataURL("image/jpeg", 0.72);
+        cb({ data: dataUri.split(",")[1], mime: "image/jpeg", thumb: dataUri });
+      };
+      img.onerror = function(){ cb(null); };
+      img.src = e.target.result;
+    };
+    reader.onerror = function(){ cb(null); };
+    reader.readAsDataURL(file);
+  }
+
+  function renderShots(){
+    var box = $("shots");
+    box.innerHTML = "";
+    photos.forEach(function(p, i){
+      var d = document.createElement("div");
+      d.className = "shot";
+      var im = document.createElement("img");
+      im.src = p.thumb;
+      im.alt = "";
+      var x = document.createElement("button");
+      x.type = "button";
+      x.textContent = "×";
+      x.onclick = function(){ photos.splice(i, 1); renderShots(); };
+      d.appendChild(im); d.appendChild(x);
+      box.appendChild(d);
+    });
+    if (photos.length < 4) {
+      var add = document.createElement("button");
+      add.type = "button";
+      add.className = "addshot";
+      add.textContent = "＋";
+      add.onclick = function(){ $("fileIn").click(); };
+      box.appendChild(add);
+    }
+  }
+  $("addShot").onclick = function(){ $("fileIn").click(); };
+  $("fileIn").onchange = function(){
+    var files = Array.prototype.slice.call(this.files || []).slice(0, 4 - photos.length);
+    var pending = files.length;
+    if (!pending) return;
+    files.forEach(function(f){
+      shrink(f, function(p){
+        if (p) photos.push(p);
+        if (--pending === 0) renderShots();
+      });
+    });
+    this.value = "";
+  };
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  function showErr(msg){
+    var e = $("err");
+    e.textContent = msg;
+    e.classList.add("on");
+    e.scrollIntoView({ behavior: "smooth", block: "center" });
+  }
+
+  $("submitBtn").onclick = function(){
+    var btn = this;
+    $("err").classList.remove("on");
+
+    var phone = $("fPhone").value.trim();
+    var digits = phone.replace(/\D/g, "");
+    if (!digits) return showErr(t("errPhone"));
+    if (digits.length < 10) return showErr(t("errPhoneShort"));
+
+    var trades = picked.slice();
+    var other = $("tradeOther").value.trim();
+    if (other) trades.push(other);
+
+    var payload = {
+      kind: kind, lang: lang, src: src,
+      name: $("fName").value.trim(),
+      phone: phone,
+      company: $("fCompany").value.trim(),
+      email: $("fEmail").value.trim(),
+      trades: trades,
+      city: $("fCity").value.trim(),
+      crew_size: $("fCrew").value.trim(),
+      service_area: $("fArea").value.trim(),
+      years: $("fYears").value.trim(),
+      license_no: $("fLic").value.trim(),
+      license_exp: $("fLicExp").value,
+      insured: $("fInsured").checked,
+      workers_comp: $("fComp").checked,
+      ins_carrier: $("fCarrier").value.trim(),
+      ins_exp: $("fInsExp").value,
+      pricing_mode: $("fPricing").value,
+      rate_notes: $("fRates").value.trim(),
+      notes: $("fNotes").value.trim(),
+      "company-website": $("hp").value,
+      files: photos.map(function(p, i){
+        return { data: p.data, mime: p.mime, label: "photo-" + (i + 1) };
+      })
+    };
+
+    btn.disabled = true;
+    var original = btn.textContent;
+    btn.textContent = t("sending");
+
+    fetch("/.netlify/functions/capture-sub", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    }).then(function(r){
+      return r.json().then(function(b){ return { ok: r.ok, body: b }; });
+    }).then(function(res){
+      if (!res.ok) throw new Error((res.body && res.body.error) || "failed");
+      $("doneP").textContent = kind === "worker" ? t("donePWor") : t("doneP");
+      show(4);
+    }).catch(function(){
+      btn.disabled = false;
+      btn.textContent = original;
+      showErr(t("errSend"));
+    });
+  };
+
+  // ── Add another (crews often sign up two or three guys at once) ───────────
+  $("againBtn").onclick = function(){
+    ["fName","fPhone","fCompany","fEmail","fCity","fCrew","fArea","fYears",
+     "fLic","fLicExp","fCarrier","fInsExp","fRates","fNotes","tradeOther"].forEach(function(id){
+      $(id).value = "";
+    });
+    $("fPricing").value = "";
+    $("fInsured").checked = false;
+    $("fComp").checked = false;
+    photos = [];
+    renderShots();
+    $("more").classList.remove("open");
+    $("moreCar").textContent = "▼";
+    $("submitBtn").disabled = false;
+    $("submitBtn").textContent = t("submit");
+    $("err").classList.remove("on");
+    show(1);
+  };
+
+  // ── Init ──────────────────────────────────────────────────────────────────
+  $("callLink").textContent = CRA_PHONE;
+  $("callLink").href = "tel:" + CRA_PHONE_TEL;
+  applyLang();
+  renderShots();
+})();
+</script>
+</body>
+</html>
