@@ -33,3 +33,9 @@
   from = "/sign"
   to = "/sign.html"
   status = 200
+
+# Public, and must stay public — carriers check this URL during A2P review.
+[[redirects]]
+  from = "/privacy"
+  to = "/privacy.html"
+  status = 200
