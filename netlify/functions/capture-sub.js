@@ -106,15 +106,19 @@ async function telegramAlert(rec, isReturning) {
 }
 
 // ── Auto-reply to the sub, in their language ────────────────────────────────
+// Kept short and matched word-for-word to the sample messages submitted with
+// the A2P campaign — carriers compare them. Every SMS carries STOP/HELP.
 const REPLY = {
-  en: "Thanks for scanning — CRA Construction got your info. We'll reach out when we have work in your trade. Save this number.",
-  es: "Gracias por escanear — CRA Construction recibió su información. Le contactaremos cuando tengamos trabajo en su oficio. Guarde este número.",
+  en: "CRA Construction: thanks for scanning. You're on our list and we'll reach out when we have work in your trade. Reply STOP to stop, HELP for help. Msg&data rates may apply.",
+  es: "CRA Construction: gracias por escanear. Está en nuestra lista y le contactaremos cuando tengamos trabajo de su oficio. Responda STOP para cancelar, HELP para ayuda. Pueden aplicar tarifas.",
 };
 
 async function smsReply(rec) {
   const sid = process.env.TWILIO_ACCOUNT_SID;
   const auth = process.env.TWILIO_AUTH_TOKEN;
   const from = process.env.TWILIO_FROM;
+  // No box checked, no text. This is the line that keeps the campaign alive.
+  if (!rec.sms_consent) return;
   if (!sid || !auth || !from || !rec.phone) return;
   try {
     const body = new URLSearchParams({
@@ -212,6 +216,9 @@ exports.handler = async function (event) {
     pricing_mode: clean(data.pricing_mode, 40),
     rate_notes: clean(data.rate_notes, 500),
     notes: clean(data.notes, 1000),
+    sms_consent: !!data.sms_consent,
+    consent_text: clean(data.consent_text, 600),
+    consent_at: data.sms_consent ? now : "",
     files,
     src: clean(data.src, 60),
     created_at: now,
@@ -240,6 +247,11 @@ exports.handler = async function (event) {
       merged.trades = Array.from(new Set((prev.trades || []).concat(rec.trades)));
       merged.insured = prev.insured || rec.insured;
       merged.workers_comp = prev.workers_comp || rec.workers_comp;
+      // Consent is latest-wins, not sticky: an unchecked box on a later scan
+      // is a withdrawal, and honoring that is the whole point of having it.
+      merged.sms_consent = rec.sms_consent;
+      merged.consent_text = rec.sms_consent ? rec.consent_text : "";
+      merged.consent_at = rec.sms_consent ? (prev.consent_at || now) : "";
       merged.files = (prev.files || []).concat(files).slice(0, 12);
       merged.lang = rec.lang;
       merged.updated_at = now;

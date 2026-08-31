@@ -2,6 +2,10 @@ User-agent: *
 Allow: /
 Disallow: /leads
 Disallow: /leads.html
+Disallow: /subs
+Disallow: /subs.html
+Disallow: /sign
+Disallow: /sign.html
 Disallow: /mockups/
 Disallow: /__forms.html
 

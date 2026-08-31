@@ -230,6 +230,7 @@
       <div class="fld"><label>Phone</label><input id="ePhone" /></div>
       <div class="fld"><label>Email</label><input id="eEmail" /></div>
     </div>
+    <label class="check"><input type="checkbox" id="eSms" /> Agreed to receive texts <span class="note" id="eSmsWhen"></span></label>
     <div class="fld"><label>Trades (comma separated)</label><input id="eTrades" /></div>
     <div class="three">
       <div class="fld"><label>Based in</label><input id="eCity" /></div>
@@ -521,6 +522,7 @@
       else flags += '<span class="flag grey">No insurance on file</span>';
       if (s.license_expired) flags += '<span class="flag red">License expired</span>';
       if (s.lang === "es") flags += '<span class="flag grey">Español</span>';
+      if (s.sms_consent) flags += '<span class="flag green">OK to text</span>';
       if ((s.status || "new") !== "new") flags += '<span class="flag grey">' + esc(STATUS_LABEL[s.status] || s.status) + "</span>";
 
       var rating = s.overall != null
@@ -618,6 +620,10 @@
     $("eCompany").value = s.company || "";
     $("ePhone").value = s.phone || "";
     $("eEmail").value = s.email || "";
+    $("eSms").checked = !!s.sms_consent;
+    $("eSmsWhen").textContent = s.sms_consent && s.consent_at
+      ? "— opted in " + fmtDate(s.consent_at)
+      : (s.sms_consent ? "" : "— do not text");
     $("eTrades").value = (s.trades || []).join(", ");
     $("eCity").value = s.city || "";
     $("eCrew").value = s.crew_size || "";
@@ -721,6 +727,7 @@
       company: $("eCompany").value.trim(),
       phone: $("ePhone").value.trim(),
       email: $("eEmail").value.trim().toLowerCase(),
+      sms_consent: $("eSms").checked,
       trades: $("eTrades").value.split(",").map(function(t){ return t.trim(); }).filter(Boolean),
       city: $("eCity").value.trim(),
       crew_size: $("eCrew").value.trim(),
@@ -821,7 +828,8 @@
     var cols = ["name","company","phone","email","kind","trades","lang","city","service_area",
                 "crew_size","years","license_no","license_exp","insured","workers_comp",
                 "ins_carrier","ins_exp","pricing_mode","rate_notes","status","overall",
-                "rating_count","src","notes","internal_notes","created_at"];
+                "rating_count","src","notes","internal_notes","created_at",
+                "sms_consent","consent_at","consent_text"];
     function cell(v){
       if (Array.isArray(v)) v = v.join("; ");
       if (v === true) v = "yes";

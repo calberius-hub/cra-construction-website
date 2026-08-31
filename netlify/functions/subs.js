@@ -96,7 +96,7 @@ const EDITABLE = [
   "name", "company", "phone", "email", "trades", "lang", "city", "service_area",
   "crew_size", "years", "license_no", "license_exp", "insured", "ins_carrier",
   "ins_exp", "workers_comp", "pricing_mode", "rate_notes", "notes",
-  "internal_notes", "kind", "tags",
+  "internal_notes", "kind", "tags", "sms_consent",
 ];
 
 exports.handler = async function (event) {
@@ -192,8 +192,14 @@ exports.handler = async function (event) {
         if (k === "trades" || k === "tags") {
           all[idx][k] = Array.isArray(patch[k])
             ? patch[k].map((t) => clean(t, 60)).filter(Boolean).slice(0, 16) : [];
-        } else if (k === "insured" || k === "workers_comp") {
+        } else if (k === "insured" || k === "workers_comp" || k === "sms_consent") {
           all[idx][k] = !!patch[k];
+          // Revoking from the portal (they called and said stop) clears the
+          // consent record too, so we never claim an opt-in we no longer have.
+          if (k === "sms_consent" && !patch[k]) {
+            all[idx].consent_text = "";
+            all[idx].consent_at = "";
+          }
         } else {
           all[idx][k] = clean(patch[k], 1000);
         }

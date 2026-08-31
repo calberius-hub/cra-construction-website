@@ -91,6 +91,9 @@
     .check{display:flex;align-items:flex-start;gap:11px;background:var(--white);border:1.5px solid var(--line);border-radius:8px;padding:14px;margin-bottom:11px;cursor:pointer;}
     .check input{width:21px;height:21px;flex-shrink:0;margin-top:1px;accent-color:var(--navy);}
     .check span{font-size:14.5px;line-height:1.4;}
+    .check.consent{align-items:flex-start;margin-bottom:16px;}
+    .check.consent b{display:block;font-weight:600;}
+    .check.consent small{display:block;font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:5px;}
 
     /* Buttons */
     .btn{
@@ -224,8 +227,22 @@
       <div class="fld">
         <label data-t="fPhone">Phone number</label>
         <input type="tel" id="fPhone" autocomplete="tel" inputmode="tel" placeholder="(501) 555-0123" />
-        <div class="hint" data-t="fPhoneH">We'll text you a confirmation.</div>
+        <div class="hint" data-t="fPhoneH">This is how we'll reach you about work.</div>
       </div>
+
+      <!-- Express written consent for SMS. Carriers require affirmative opt-in
+           for A2P 10DLC, so this box starts UNCHECKED and the exact wording
+           shown is stored with the record as the consent record. Leaving it
+           unchecked still puts them in the library — it only turns off texts. -->
+      <label class="check consent">
+        <input type="checkbox" id="fSms" />
+        <span>
+          <b data-t="smsL">Text me when CRA has work in my trade</b>
+          <small data-t="smsFine">By checking this box you agree to receive text messages from CRA
+          Construction about work opportunities. Message and data rates may apply. Message
+          frequency varies. Reply STOP to stop, HELP for help.</small>
+        </span>
+      </label>
 
       <!-- Honeypot: hidden from people, irresistible to bots. -->
       <div class="sr" aria-hidden="true">
@@ -368,7 +385,9 @@
       tradeHWor:"What can you do?", tradePWor:"Tap everything you have experience with.",
       otherL:"Something else? Type it here",
       conH:"How do we reach you?", conP:"Just your name and phone number is enough. Everything else is optional.",
-      fName:"Your name", fPhone:"Phone number", fPhoneH:"We'll text you a confirmation.",
+      fName:"Your name", fPhone:"Phone number", fPhoneH:"This is how we'll reach you about work.",
+      smsL:"Text me when CRA has work in my trade",
+      smsFine:"By checking this box you agree to receive text messages from CRA Construction about work opportunities. Message and data rates may apply. Message frequency varies. Reply STOP to stop, HELP for help.",
       moreT:"Add more details", moreS:"Company, license, insurance, pricing — all optional",
       fCompany:"Company name", fEmail:"Email", fCity:"Based in", fCrew:"Crew size",
       fArea:"How far will you travel?", fAreaP:"Central Arkansas, up to 1 hour",
@@ -405,7 +424,9 @@
       tradeHWor:"¿Qué sabe hacer?", tradePWor:"Toque todo en lo que tenga experiencia.",
       otherL:"¿Algo más? Escríbalo aquí",
       conH:"¿Cómo lo contactamos?", conP:"Solo su nombre y teléfono es suficiente. Todo lo demás es opcional.",
-      fName:"Su nombre", fPhone:"Número de teléfono", fPhoneH:"Le enviaremos un mensaje de confirmación.",
+      fName:"Su nombre", fPhone:"Número de teléfono", fPhoneH:"Así lo contactaremos sobre trabajo.",
+      smsL:"Envíenme un mensaje de texto cuando CRA tenga trabajo de mi oficio",
+      smsFine:"Al marcar esta casilla acepta recibir mensajes de texto de CRA Construction sobre oportunidades de trabajo. Pueden aplicar tarifas de mensajes y datos. La frecuencia de mensajes varía. Responda STOP para cancelar, HELP para ayuda.",
       moreT:"Agregar más información", moreS:"Compañía, licencia, seguro, precios — todo opcional",
       fCompany:"Nombre de la compañía", fEmail:"Correo electrónico", fCity:"¿Dónde está basado?",
       fCrew:"Tamaño de cuadrilla",
@@ -679,6 +700,10 @@
       pricing_mode: $("fPricing").value,
       rate_notes: $("fRates").value.trim(),
       notes: $("fNotes").value.trim(),
+      // Consent record: what they agreed to, in the language they read it in.
+      // Twilio and the carriers can ask to see this.
+      sms_consent: $("fSms").checked,
+      consent_text: $("fSms").checked ? t("smsL") + " — " + t("smsFine") : "",
       "company-website": $("hp").value,
       files: photos.map(function(p, i){
         return { data: p.data, mime: p.mime, label: "photo-" + (i + 1) };
@@ -715,6 +740,7 @@
     $("fPricing").value = "";
     $("fInsured").checked = false;
     $("fComp").checked = false;
+    $("fSms").checked = false;
     photos = [];
     renderShots();
     $("more").classList.remove("open");
