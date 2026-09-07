@@ -1384,13 +1384,26 @@
 
   <script>
     /* ── CONTACT MODAL ─────────────────────────────── */
+    /* Remember the dismissal on the device, not just for the tab session, so
+       the timed auto-open never nags a returning visitor. localStorage is the
+       real store; sessionStorage is the fallback when a browser refuses
+       persistent storage (private windows, strict privacy settings). */
+    function markContactSeen() {
+      try { localStorage.setItem('craContactSeen', '1'); return; } catch (e) {}
+      try { sessionStorage.setItem('craContactSeen', '1'); } catch (e) {}
+    }
+    function contactAlreadySeen() {
+      try { if (localStorage.getItem('craContactSeen')) return true; } catch (e) {}
+      try { if (sessionStorage.getItem('craContactSeen')) return true; } catch (e) {}
+      return false;
+    }
     window.openContactModal = function () {
       const m = document.getElementById('contactModal');
       m.classList.add('open');
       m.setAttribute('aria-hidden', 'false');
       document.body.style.overflow = 'hidden';
-      // Mark as seen so the timed auto-open never re-triggers this session
-      try { sessionStorage.setItem('craContactSeen', '1'); } catch (e) {}
+      // Mark as seen so the timed auto-open never re-triggers on this device
+      markContactSeen();
       // reset to form view in case it was left on success
       document.getElementById('contactFields').classList.remove('hide');
       document.getElementById('contactSuccess').classList.remove('show');
@@ -1402,7 +1415,7 @@
       m.classList.remove('open');
       m.setAttribute('aria-hidden', 'true');
       document.body.style.overflow = '';
-      try { sessionStorage.setItem('craContactSeen', '1'); } catch (e) {}
+      markContactSeen();
     };
     (function () {
       const overlay = document.getElementById('contactModal');
@@ -1418,19 +1431,16 @@
         if (e.key === 'Escape' && overlay.classList.contains('open')) window.closeContactModal();
       });
 
-      // Auto-open once per session, ~6s after landing — unless the visitor
-      // already opened it, already submitted, or dismissed it this session.
-      try {
-        var seen = sessionStorage.getItem('craContactSeen');
-        if (!seen) {
-          setTimeout(function () {
-            // Don't interrupt if they already opened/closed it in the meantime
-            if (!sessionStorage.getItem('craContactSeen') && !overlay.classList.contains('open')) {
-              window.openContactModal();
-            }
-          }, 6000);
-        }
-      } catch (err) { /* sessionStorage unavailable — skip auto-open */ }
+      // Auto-open once, ~6s after landing — unless the visitor has ever
+      // opened it, submitted it, or dismissed it on this device.
+      if (!contactAlreadySeen()) {
+        setTimeout(function () {
+          // Don't interrupt if they already opened/closed it in the meantime
+          if (!contactAlreadySeen() && !overlay.classList.contains('open')) {
+            window.openContactModal();
+          }
+        }, 6000);
+      }
 
       // AJAX submit → Netlify Forms, then show in-modal success
       form.addEventListener('submit', function (e) {
