@@ -1,0 +1,1117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1d3a4a" />
+  <title>CRA Bid Board</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#1d3a4a; --navy2:#162e3b; --gold:#c9a54a; --gold2:#a8882f;
+      --cream:#f8f5f0; --white:#fff; --ink:#1a1814; --muted:#6b6560;
+      --line:rgba(25,22,18,.12); --green:#3f7d5a; --amber:#b7791f; --red:#a3282d;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--cream);-webkit-font-smoothing:antialiased;}
+    a{color:inherit;text-decoration:none;}
+    input,select,textarea,button{font-family:inherit;}
+
+    /* ── Login gate ─────────────────────────────────────────── */
+    .gate{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--navy);padding:24px;z-index:100;}
+    .gate-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:4px;padding:44px 40px;width:min(400px,100%);box-shadow:0 30px 80px rgba(0,0,0,.35);}
+    .gate-card h1{font-family:'Playfair Display',serif;color:var(--navy);font-size:24px;margin-bottom:6px;}
+    .gate-card p{color:var(--muted);font-size:13px;margin-bottom:22px;}
+    .gate-card input{width:100%;padding:13px 14px;border:1px solid var(--line);border-radius:3px;font-size:16px;margin-bottom:14px;}
+    .gate-card input:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .gate-err{color:var(--red);font-size:13px;margin-bottom:12px;display:none;}
+
+    /* ── Buttons ────────────────────────────────────────────── */
+    .btn{background:var(--navy);color:#fff;border:none;border-radius:3px;cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;padding:13px 18px;transition:background .2s;}
+    .btn:hover{background:var(--gold2);}
+    .btn:disabled{opacity:.55;cursor:default;}
+    .btn-ghost{background:transparent;color:var(--navy);border:1px solid var(--line);}
+    .btn-ghost:hover{background:rgba(25,22,18,.05);color:var(--navy);}
+    .btn-gold{background:var(--gold);color:var(--ink);}
+    .btn-gold:hover{background:var(--gold2);color:#fff;}
+    .btn-sm{padding:9px 13px;font-size:11px;}
+    .btn-danger{background:transparent;color:var(--red);border:1px solid rgba(163,40,45,.3);}
+    .btn-danger:hover{background:rgba(163,40,45,.07);color:var(--red);}
+
+    /* ── App shell ──────────────────────────────────────────── */
+    .app{display:none;max-width:1240px;margin:0 auto;padding:22px 18px 80px;}
+    header.top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;margin-bottom:20px;}
+    .brand{display:flex;align-items:center;gap:12px;}
+    .monogram{width:42px;height:42px;border:2px solid var(--navy);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-weight:700;color:var(--navy);font-size:13px;}
+    .brand h1{font-family:'Playfair Display',serif;font-size:22px;color:var(--navy);line-height:1;}
+    .brand span{font-size:11px;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);}
+    .actions{display:flex;gap:9px;flex-wrap:wrap;}
+
+    .stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;}
+    .stat{background:var(--white);border:1px solid var(--line);border-radius:5px;padding:12px 18px;min-width:96px;}
+    .stat .n{font-family:'Playfair Display',serif;font-size:24px;color:var(--navy);line-height:1.1;}
+    .stat .l{font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:3px;}
+    .stat.warn .n{color:var(--red);}
+    .stat.good .n{color:var(--green);}
+
+    /* ── Project cards ──────────────────────────────────────── */
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:13px;}
+    .proj{background:var(--white);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:6px;padding:17px 18px;cursor:pointer;transition:.15s;}
+    .proj:hover{box-shadow:0 4px 18px rgba(25,22,18,.09);transform:translateY(-1px);}
+    .proj.st-out{border-left-color:var(--gold);}
+    .proj.st-closed{border-left-color:var(--navy);}
+    .proj.st-awarded{border-left-color:var(--green);}
+    .proj h3{font-size:16px;color:var(--navy);font-weight:700;line-height:1.3;}
+    .proj .addr{font-size:12.5px;color:var(--muted);margin-top:2px;}
+    .proj .meta{font-size:12px;color:var(--muted);margin-top:11px;line-height:1.7;}
+    .proj .due{font-weight:600;color:var(--ink);}
+    .proj .due.soon{color:var(--red);}
+    .empty{grid-column:1/-1;text-align:center;padding:56px 20px;color:var(--muted);background:var(--white);border:1px solid var(--line);border-radius:6px;line-height:1.7;}
+
+    .pill{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:20px;}
+    .pill.draft{background:#f0eee9;color:var(--muted);}
+    .pill.out{background:rgba(201,165,74,.18);color:var(--gold2);}
+    .pill.closed{background:rgba(29,58,74,.12);color:var(--navy);}
+    .pill.awarded{background:#e6f3ec;color:#2c6a45;}
+    .pill.queued{background:#f0eee9;color:var(--muted);}
+    .pill.sent{background:rgba(29,58,74,.10);color:var(--navy);}
+    .pill.opened{background:rgba(201,165,74,.18);color:var(--gold2);}
+    .pill.bidding{background:#e8f0fb;color:#2c4f80;}
+    .pill.declined{background:#f4f1ec;color:var(--muted);}
+    .pill.submitted{background:#e6f3ec;color:#2c6a45;}
+
+    /* ── Sections ───────────────────────────────────────────── */
+    .sec{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:20px;margin-bottom:14px;}
+    .sec-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px;}
+    .sec-head h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:19px;}
+    .sec-head .hint{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.5;}
+    .sec-h{font-size:9.5px;letter-spacing:.18em;text-transform:uppercase;color:var(--gold2);font-weight:700;margin:20px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+    .fld{margin-bottom:13px;}
+    .fld label{display:block;font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--navy);margin-bottom:5px;font-weight:600;}
+    .fld input,.fld select,.fld textarea{width:100%;padding:11px 12px;border:1px solid var(--line);border-radius:3px;font-size:14px;background:var(--white);}
+    .fld textarea{min-height:74px;resize:vertical;}
+    .fld input:focus,.fld select:focus,.fld textarea:focus{outline:none;border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,165,74,.15);}
+    .two{display:grid;grid-template-columns:1fr 1fr;gap:11px;}
+    .three{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;}
+    @media (max-width:640px){.two,.three{grid-template-columns:1fr;}}
+    .note{font-size:12.5px;color:var(--muted);line-height:1.6;}
+    .row{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:10px;}
+
+    .banner{padding:11px 13px;border-radius:4px;font-size:13px;margin-bottom:14px;display:none;line-height:1.5;}
+    .banner.warn{background:#fff4e0;color:#8a5a00;border:1px solid #f0d9a8;display:block;}
+    .banner.ok{background:#e6f3ec;color:#2c6a45;border:1px solid #bfe0cc;display:block;}
+    .banner.bad{background:#fdecec;color:var(--red);border:1px solid #f2c4c4;display:block;}
+    .banner.info{background:#eef3f6;color:#2a4a5c;border:1px solid #cddce4;display:block;}
+
+    /* ── Drop zone ──────────────────────────────────────────── */
+    .drop{border:2px dashed var(--line);border-radius:6px;padding:26px 18px;text-align:center;color:var(--muted);cursor:pointer;transition:.15s;background:var(--cream);}
+    .drop:hover,.drop.over{border-color:var(--gold);background:#fdfbf7;color:var(--ink);}
+    .drop b{display:block;font-size:15px;color:var(--navy);margin-bottom:4px;}
+    .drop small{font-size:12px;line-height:1.6;display:block;margin-top:5px;}
+
+    /* ── Trade rows ─────────────────────────────────────────── */
+    .trade{border:1px solid var(--line);border-radius:5px;padding:13px 15px;margin-bottom:9px;background:var(--white);}
+    .trade.on{border-color:var(--navy);background:#fbfaf7;}
+    .trade-top{display:flex;align-items:flex-start;gap:11px;}
+    .trade-top input[type=checkbox]{width:19px;height:19px;accent-color:var(--navy);margin-top:2px;flex:none;}
+    .trade-name{font-weight:700;font-size:14.5px;color:var(--navy);}
+    .trade-why{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
+    .trade textarea{width:100%;margin-top:9px;padding:9px 11px;border:1px solid var(--line);border-radius:3px;font-size:13px;min-height:54px;resize:vertical;}
+    .conf{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:3px;margin-left:8px;}
+    .conf.high{background:#e6f3ec;color:#2c6a45;}
+    .conf.medium{background:rgba(201,165,74,.18);color:var(--gold2);}
+    .conf.low,.conf.baseline{background:#f0eee9;color:var(--muted);}
+
+    /* ── Coverage board ─────────────────────────────────────── */
+    .board{width:100%;border-collapse:collapse;font-size:13.5px;}
+    .board th{text-align:left;font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:700;padding:8px 9px;border-bottom:1px solid var(--line);}
+    .board td{padding:10px 9px;border-bottom:1px solid var(--line);vertical-align:middle;}
+    .board tr.pkg{cursor:pointer;}
+    .board tr.pkg:hover{background:var(--cream);}
+    .board .nm{font-weight:600;color:var(--navy);}
+    .cov{display:inline-block;font-size:10px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 9px;border-radius:3px;white-space:nowrap;}
+    .cov.good{background:#e6f3ec;color:#2c6a45;}
+    .cov.thin{background:rgba(201,165,74,.2);color:var(--gold2);}
+    .cov.pending{background:#e8f0fb;color:#2c4f80;}
+    .cov.waiting{background:#f0eee9;color:var(--muted);}
+    .cov.none{background:#fdecec;color:var(--red);}
+    .num{font-family:'Playfair Display',serif;font-size:15px;color:var(--navy);}
+    .sub-rows td{background:#fbfaf7;font-size:13px;}
+    .vend{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid var(--line);flex-wrap:wrap;}
+    .vend:last-child{border-bottom:none;}
+    .vend .who{font-weight:600;}
+    .vend .det{font-size:11.5px;color:var(--muted);}
+    .vend .acts{display:flex;gap:6px;align-items:center;flex-wrap:wrap;}
+    .vend input.amt{width:118px;padding:7px 9px;border:1px solid var(--line);border-radius:3px;font-size:13px;}
+    .awarded-star{color:var(--gold2);font-size:15px;}
+
+    /* ── Vendor picker ──────────────────────────────────────── */
+    .cand{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);}
+    .cand:last-child{border-bottom:none;}
+    .cand input[type=checkbox]{width:18px;height:18px;accent-color:var(--navy);margin-top:2px;flex:none;}
+    .cand .who{font-weight:600;font-size:14px;}
+    .cand .det{font-size:11.5px;color:var(--muted);line-height:1.6;}
+    .cand.out{opacity:.5;}
+    .tagline{display:inline-block;font-size:10px;padding:3px 7px;border-radius:20px;background:rgba(201,165,74,.16);color:var(--gold2);margin-left:6px;}
+    .tagline.grey{background:#f0eee9;color:var(--muted);}
+    .tagline.green{background:#e6f3ec;color:#2c6a45;}
+
+    /* ── Modal ──────────────────────────────────────────────── */
+    .modal{position:fixed;inset:0;z-index:60;display:none;align-items:flex-start;justify-content:center;background:rgba(22,20,16,.55);padding:20px;overflow-y:auto;}
+    .modal.open{display:flex;}
+    .modal-card{background:var(--cream);border-top:4px solid var(--gold);border-radius:5px;width:min(760px,100%);margin:auto;padding:30px 28px 26px;position:relative;}
+    .modal-card h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:22px;margin-bottom:3px;line-height:1.25;}
+    .modal-card .sub-line{color:var(--muted);font-size:13px;margin-bottom:18px;}
+    .close-x{position:absolute;top:12px;right:14px;border:none;background:none;font-size:28px;color:var(--muted);cursor:pointer;line-height:1;padding:4px 8px;}
+    .preview{width:100%;height:420px;border:1px solid var(--line);border-radius:4px;background:#fff;}
+    .recips{max-height:220px;overflow-y:auto;background:var(--white);border:1px solid var(--line);border-radius:4px;padding:10px 13px;font-size:13px;line-height:1.9;}
+    .recips .no-mail{color:var(--red);}
+    .check{display:flex;align-items:center;gap:10px;font-size:14px;margin:12px 0;cursor:pointer;}
+    .check input{width:18px;height:18px;accent-color:var(--navy);}
+    .spin{display:inline-block;width:13px;height:13px;border:2px solid rgba(255,255,255,.4);border-top-color:#fff;border-radius:50%;animation:sp .7s linear infinite;vertical-align:-2px;margin-right:7px;}
+    @keyframes sp{to{transform:rotate(360deg);}}
+    .hide{display:none !important;}
+    .back{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);cursor:pointer;background:none;border:none;padding:0;margin-bottom:12px;}
+    .back:hover{color:var(--navy);}
+  </style>
+</head>
+<body>
+
+<!-- ── Login ─────────────────────────────────────────────────── -->
+<div class="gate" id="gate">
+  <div class="gate-card">
+    <h1>CRA Bid Board</h1>
+    <p>Plans out, numbers in, one screen.</p>
+    <div class="gate-err" id="gateErr">That key didn't work.</div>
+    <input type="password" id="pw" placeholder="Dashboard key" autocomplete="current-password" />
+    <button class="btn" id="loginBtn" style="width:100%">Open the board</button>
+  </div>
+</div>
+
+<div class="app" id="app">
+  <header class="top">
+    <div class="brand">
+      <div class="monogram">CRA</div>
+      <div>
+        <h1>Bid Board</h1>
+        <span id="crumb">All projects</span>
+      </div>
+    </div>
+    <div class="actions">
+      <a class="btn btn-ghost btn-sm" href="/subs">Sub Library</a>
+      <a class="btn btn-ghost btn-sm" href="/leads">Leads</a>
+      <button class="btn btn-ghost btn-sm" id="refreshBtn">Refresh</button>
+      <button class="btn btn-ghost btn-sm" id="logoutBtn">Log out</button>
+    </div>
+  </header>
+
+  <!-- ── Project list ───────────────────────────────────────── -->
+  <div id="listView">
+    <div class="stats" id="listStats"></div>
+    <div class="row" style="margin-bottom:16px;">
+      <button class="btn btn-gold" id="newBtn">+ New project</button>
+    </div>
+    <div class="grid" id="projGrid"></div>
+  </div>
+
+  <!-- ── One project ────────────────────────────────────────── -->
+  <div id="projView" class="hide">
+    <button class="back" id="backBtn">← All projects</button>
+
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <h2 id="pName"></h2>
+          <div class="hint" id="pSub"></div>
+        </div>
+        <div class="actions">
+          <span class="pill" id="pStatus"></span>
+          <button class="btn btn-ghost btn-sm" id="editBtn">Edit details</button>
+        </div>
+      </div>
+      <div class="stats" id="pStats"></div>
+      <div class="banner" id="pFlags"></div>
+    </div>
+
+    <!-- Step 1 — plans -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <h2>1 · The plans</h2>
+          <div class="hint">Drop the PDF to read what trades the job needs. The link is what gets emailed — host the set on Dropbox or Drive and paste the share link.</div>
+        </div>
+      </div>
+      <div class="fld">
+        <label for="planUrl">Plan link (Dropbox, Drive, Box — anything the subs can open)</label>
+        <input id="planUrl" type="url" placeholder="https://www.dropbox.com/scl/fo/..." />
+      </div>
+      <div class="fld">
+        <label for="planNotes">Note that rides with the link</label>
+        <input id="planNotes" type="text" placeholder="Full set + specs. Addendum 1 is in the same folder." />
+      </div>
+      <button class="btn btn-ghost btn-sm" id="savePlanBtn">Save plan link</button>
+
+      <div class="sec-h">Read the plans</div>
+      <div class="drop" id="drop">
+        <b>Drop the plan PDF here</b>
+        <small>Or tap to pick a file. The PDF never leaves your computer — we read the text out of it here and send just that text.</small>
+      </div>
+      <input type="file" id="planFile" accept="application/pdf" class="hide" />
+      <div class="fld" style="margin-top:12px;">
+        <label for="planText">…or paste the sheet index / scope by hand</label>
+        <textarea id="planText" placeholder="A1.1 FLOOR PLAN&#10;A2.1 EXTERIOR ELEVATIONS&#10;S1.1 FOUNDATION PLAN&#10;E1.1 ELECTRICAL PLAN…"></textarea>
+      </div>
+      <label class="check hide" id="deepWrap">
+        <input type="checkbox" id="deepChk" checked />
+        <span>Have Claude read it and write the scope line for each trade</span>
+      </label>
+      <div class="row">
+        <button class="btn" id="analyzeBtn">Read the plans</button>
+        <span class="note" id="readState"></span>
+      </div>
+      <div class="banner" id="readBanner"></div>
+    </div>
+
+    <!-- Step 2 — trades -->
+    <div class="sec" id="tradeSec">
+      <div class="sec-head">
+        <div>
+          <h2>2 · Bid packages</h2>
+          <div class="hint">Check what you're bidding out. The scope line goes in the email — that's what stops the phone calls.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" id="addAllBtn">Add another package</button>
+          <button class="btn btn-sm" id="saveTradesBtn">Save packages</button>
+        </div>
+      </div>
+      <div id="tradeList"></div>
+    </div>
+
+    <!-- Step 3 — who -->
+    <div class="sec" id="matchSec">
+      <div class="sec-head">
+        <div>
+          <h2>3 · Who gets it</h2>
+          <div class="hint">Straight out of the sub library, best-rated first. Anyone marked do-not-use never shows up here.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" id="pickBestBtn">Check everyone approved &amp; used</button>
+          <button class="btn btn-sm" id="addInvitesBtn">Add checked to the list</button>
+        </div>
+      </div>
+      <div id="matchList"></div>
+    </div>
+
+    <!-- Step 4 — send -->
+    <div class="sec" id="sendSec">
+      <div class="sec-head">
+        <div>
+          <h2>4 · Send it</h2>
+          <div class="hint">You'll see the exact email and the exact list before anything leaves.</div>
+        </div>
+        <div class="actions">
+          <button class="btn btn-ghost btn-sm" id="remindBtn">Nudge the quiet ones</button>
+          <button class="btn btn-gold" id="blastBtn">Review the blast</button>
+        </div>
+      </div>
+      <div class="banner" id="sendBanner"></div>
+    </div>
+
+    <!-- Step 5 — the board -->
+    <div class="sec">
+      <div class="sec-head">
+        <div>
+          <h2>5 · Where every trade stands</h2>
+          <div class="hint">Tap a package to see each sub, record a number that came in by phone, and award it.</div>
+        </div>
+      </div>
+      <table class="board" id="board"></table>
+    </div>
+  </div>
+</div>
+
+<!-- ── New / edit project ────────────────────────────────────── -->
+<div class="modal" id="projModal">
+  <div class="modal-card">
+    <button class="close-x" data-close="projModal">&times;</button>
+    <h2 id="pmTitle">New project</h2>
+    <div class="sub-line">The details that go in every invitation.</div>
+    <div class="banner" id="pmErr"></div>
+    <div class="fld"><label for="fName">Project name</label>
+      <input id="fName" type="text" placeholder="307 Fletcher Lp" /></div>
+    <div class="fld"><label for="fAddress">Address</label>
+      <input id="fAddress" type="text" placeholder="307 Fletcher Loop, Little Rock, AR" /></div>
+    <div class="two">
+      <div class="fld"><label for="fType">Job type</label>
+        <select id="fType">
+          <option value="custom">Custom home</option>
+          <option value="spec">Spec home</option>
+          <option value="development">Development / lots</option>
+          <option value="commercial">Light commercial</option>
+          <option value="remodel">Remodel / addition</option>
+        </select></div>
+      <div class="fld"><label for="fStatus">Status</label>
+        <select id="fStatus">
+          <option value="draft">Draft</option>
+          <option value="out">Out for bid</option>
+          <option value="closed">Bidding closed</option>
+          <option value="awarded">Awarded</option>
+        </select></div>
+    </div>
+    <div class="three">
+      <div class="fld"><label for="fDue">Bids due</label><input id="fDue" type="date" /></div>
+      <div class="fld"><label for="fWalk">Walk-through</label><input id="fWalk" type="date" /></div>
+      <div class="fld"><label for="fStart">Target start</label><input id="fStart" type="date" /></div>
+    </div>
+    <div class="fld"><label for="fWalkTime">Walk-through time</label>
+      <input id="fWalkTime" type="text" placeholder="9:00 AM" /></div>
+    <div class="fld"><label for="fScope">Scope notes for everyone</label>
+      <textarea id="fScope" placeholder="2,850 sf single story, slab on grade. Allowances in the spec book. Bids good for 30 days."></textarea></div>
+    <div class="row">
+      <button class="btn" id="pmSave">Save</button>
+      <button class="btn btn-ghost" data-close="projModal">Cancel</button>
+      <button class="btn btn-danger btn-sm hide" id="pmDelete" style="margin-left:auto;">Delete project</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Blast review ──────────────────────────────────────────── -->
+<div class="modal" id="blastModal">
+  <div class="modal-card">
+    <button class="close-x" data-close="blastModal">&times;</button>
+    <h2 id="bmTitle">Review the blast</h2>
+    <div class="sub-line" id="bmSub"></div>
+    <div class="banner" id="bmErr"></div>
+    <div class="sec-h">Going to</div>
+    <div class="recips" id="bmRecips"></div>
+    <label class="check hide" id="bmSmsWrap">
+      <input type="checkbox" id="bmSms" />
+      <span>Also text the ones who opted in to texts</span>
+    </label>
+    <div class="sec-h">What they'll get</div>
+    <iframe class="preview" id="bmPreview" title="Email preview"></iframe>
+    <div class="row">
+      <button class="btn btn-gold" id="bmSend">Send</button>
+      <button class="btn btn-ghost" data-close="blastModal">Not yet</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── Add a package ─────────────────────────────────────────── -->
+<div class="modal" id="pkgModal">
+  <div class="modal-card">
+    <button class="close-x" data-close="pkgModal">&times;</button>
+    <h2>Add a bid package</h2>
+    <div class="sub-line">Anything the plan read didn't turn up.</div>
+    <div id="pkgList" style="max-height:50vh;overflow-y:auto;"></div>
+    <div class="row"><button class="btn" id="pkgAdd">Add checked</button>
+      <button class="btn btn-ghost" data-close="pkgModal">Cancel</button></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+(function(){
+  var API = "/.netlify/functions/bids";
+  var $ = function(id){ return document.getElementById(id); };
+  var KEY = sessionStorage.getItem("craLeadsKey") || null;
+  var CATALOG = { packages: [], deep_read:false, can_email:false, can_sms:false };
+  var PROJECTS = [];
+  var P = null;          // the open project, decorated
+  var SUGGEST = [];      // the package editor's rows
+  var MATCHES = [];      // candidates per package
+  var STAGE = null;      // a prepared blast, waiting on the second click
+  var MAX_PLAN_PAGES = 60;
+  var MAX_PLAN_CHARS = 120000;
+
+  function api(action, extra){
+    var body = Object.assign({ action: action }, extra || {});
+    return fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", "x-leads-key": KEY || "" },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(b){
+        return { status: r.status, body: b };
+      });
+    });
+  }
+
+  // ── Little helpers ────────────────────────────────────────────────────────
+  function esc(s){
+    return String(s == null ? "" : s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+  function fmtDate(d){
+    if (!d) return "";
+    var t = Date.parse(d.length === 10 ? d + "T12:00:00" : d);
+    if (isNaN(t)) return d;
+    return new Date(t).toLocaleDateString("en-US", { month:"short", day:"numeric", year:"numeric" });
+  }
+  function daysOut(d){
+    if (!d) return null;
+    var t = Date.parse(d + "T23:59:59");
+    if (isNaN(t)) return null;
+    return Math.ceil((t - Date.now()) / 86400000);
+  }
+  function money(n){
+    var v = Number(n);
+    if (!(v > 0)) return "—";
+    return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 0 });
+  }
+  function banner(id, kind, text){
+    var el = $(id);
+    if (!text){ el.className = "banner"; el.textContent = ""; return; }
+    el.className = "banner " + kind;
+    el.textContent = text;
+  }
+  function openModal(id){ $(id).classList.add("open"); }
+  function closeModal(id){ $(id).classList.remove("open"); }
+  Array.prototype.forEach.call(document.querySelectorAll("[data-close]"), function(b){
+    b.onclick = function(){ closeModal(b.getAttribute("data-close")); };
+  });
+
+  // ── Login ─────────────────────────────────────────────────────────────────
+  function enter(){
+    $("gate").style.display = "none";
+    $("app").style.display = "block";
+    api("catalog").then(function(res){
+      if (res.status === 200){
+        CATALOG = res.body;
+        if (CATALOG.deep_read) $("deepWrap").classList.remove("hide");
+      }
+    });
+    showList();
+  }
+  function tryLogin(pw){
+    KEY = pw;
+    return api("list").then(function(res){
+      if (res.status === 200){
+        sessionStorage.setItem("craLeadsKey", pw);
+        PROJECTS = res.body.projects || [];
+        enter();
+        return true;
+      }
+      KEY = null;
+      return false;
+    });
+  }
+  $("loginBtn").onclick = function(){
+    var pw = $("pw").value.trim();
+    if (!pw) return;
+    var self = this;
+    self.disabled = true;
+    tryLogin(pw).then(function(ok){
+      self.disabled = false;
+      if (!ok) $("gateErr").style.display = "block";
+    });
+  };
+  $("pw").addEventListener("keydown", function(e){ if (e.key === "Enter") $("loginBtn").click(); });
+  $("logoutBtn").onclick = function(){ sessionStorage.removeItem("craLeadsKey"); location.reload(); };
+  $("refreshBtn").onclick = function(){ P ? openProject(P.id) : reloadList(); };
+
+  // ── Project list ──────────────────────────────────────────────────────────
+  function reloadList(){
+    return api("list").then(function(res){
+      if (res.status === 200){ PROJECTS = res.body.projects || []; renderList(); }
+    });
+  }
+  function showList(){
+    P = null;
+    $("projView").classList.add("hide");
+    $("listView").classList.remove("hide");
+    $("crumb").textContent = "All projects";
+    reloadList();
+  }
+  $("backBtn").onclick = showList;
+
+  function renderList(){
+    var live = PROJECTS.filter(function(p){ return p.status === "out"; });
+    var due = live.filter(function(p){ var d = daysOut(p.bid_due); return d != null && d >= 0 && d <= 3; });
+    $("listStats").innerHTML =
+      stat(PROJECTS.length, "Projects") +
+      stat(live.length, "Out for bid") +
+      stat(due.length, "Due in 3 days", due.length ? "warn" : "");
+
+    if (!PROJECTS.length){
+      $("projGrid").innerHTML = '<div class="empty"><b>No projects yet.</b><br>' +
+        'Start one, drop the plans on it, and the board fills itself in.</div>';
+      return;
+    }
+    $("projGrid").innerHTML = PROJECTS.map(function(p){
+      var d = daysOut(p.bid_due);
+      var dueTxt = p.bid_due
+        ? '<span class="due' + (d != null && d <= 3 ? " soon" : "") + '">' + fmtDate(p.bid_due) +
+          (d != null ? (d < 0 ? " · closed" : d === 0 ? " · today" : " · " + d + " days") : "") + "</span>"
+        : "no due date";
+      return '<div class="proj st-' + esc(p.status) + '" data-id="' + esc(p.id) + '">' +
+        "<h3>" + esc(p.name) + "</h3>" +
+        (p.address ? '<div class="addr">' + esc(p.address) + "</div>" : "") +
+        '<div class="meta">' +
+          '<span class="pill ' + esc(p.status) + '">' + esc(p.status) + "</span><br>" +
+          "Bids due: " + dueTxt + "<br>" +
+          (p.trade_count || 0) + " packages · " + (p.sent_count || 0) + " of " +
+          (p.invite_count || 0) + " invitations sent" +
+        "</div></div>";
+    }).join("");
+    Array.prototype.forEach.call($("projGrid").querySelectorAll(".proj"), function(el){
+      el.onclick = function(){ openProject(el.getAttribute("data-id")); };
+    });
+  }
+  function stat(n, label, kind){
+    return '<div class="stat ' + (kind || "") + '"><div class="n">' + n +
+      '</div><div class="l">' + esc(label) + "</div></div>";
+  }
+
+  // ── New / edit project ────────────────────────────────────────────────────
+  var editingId = null;
+  $("newBtn").onclick = function(){
+    editingId = null;
+    $("pmTitle").textContent = "New project";
+    $("pmDelete").classList.add("hide");
+    ["fName","fAddress","fDue","fWalk","fStart","fWalkTime","fScope"].forEach(function(id){ $(id).value = ""; });
+    $("fType").value = "custom";
+    $("fStatus").value = "draft";
+    banner("pmErr", "", "");
+    openModal("projModal");
+  };
+  $("editBtn").onclick = function(){
+    editingId = P.id;
+    $("pmTitle").textContent = "Edit project";
+    $("pmDelete").classList.remove("hide");
+    $("fName").value = P.name || "";
+    $("fAddress").value = P.address || "";
+    $("fType").value = P.type || "custom";
+    $("fStatus").value = P.status || "draft";
+    $("fDue").value = P.bid_due || "";
+    $("fWalk").value = P.walk_at || "";
+    $("fStart").value = P.start_date || "";
+    $("fWalkTime").value = P.walk_time || "";
+    $("fScope").value = P.scope_notes || "";
+    banner("pmErr", "", "");
+    openModal("projModal");
+  };
+  $("pmSave").onclick = function(){
+    var payload = {
+      name: $("fName").value.trim(),
+      address: $("fAddress").value.trim(),
+      type: $("fType").value,
+      status: $("fStatus").value,
+      bid_due: $("fDue").value,
+      walk_at: $("fWalk").value,
+      start_date: $("fStart").value,
+      walk_time: $("fWalkTime").value.trim(),
+      scope_notes: $("fScope").value.trim()
+    };
+    if (!payload.name){ banner("pmErr","bad","Give the project a name."); return; }
+    var self = this;
+    self.disabled = true;
+    var call = editingId
+      ? api("update", { id: editingId, patch: payload })
+      : api("create", { project: payload });
+    call.then(function(res){
+      self.disabled = false;
+      if (res.status !== 200){ banner("pmErr","bad", res.body.error || "That didn't save."); return; }
+      closeModal("projModal");
+      openProject(editingId || res.body.id);
+    });
+  };
+  $("pmDelete").onclick = function(){
+    if (!editingId) return;
+    if (!confirm("Delete this project, its packages and every invitation on it? The links already emailed will stop working.")) return;
+    api("delete", { id: editingId }).then(function(res){
+      if (res.status !== 200){ banner("pmErr","bad", res.body.error || "Couldn't delete it."); return; }
+      closeModal("projModal");
+      showList();
+    });
+  };
+
+  // ── One project ───────────────────────────────────────────────────────────
+  function openProject(id){
+    return api("get", { id: id }).then(function(res){
+      if (res.status !== 200){ alert(res.body.error || "Couldn't open that project."); return; }
+      P = res.body.project;
+      SUGGEST = [];
+      STAGE = null;
+      $("listView").classList.add("hide");
+      $("projView").classList.remove("hide");
+      $("crumb").textContent = P.name;
+      window.scrollTo(0, 0);
+      renderProject();
+      loadMatches();
+    });
+  }
+
+  function renderProject(){
+    var t = P.totals;
+    var d = daysOut(P.bid_due);
+    $("pName").textContent = P.name;
+    $("pSub").textContent = [P.address, P.bid_due ? "Bids due " + fmtDate(P.bid_due) +
+      (d != null ? (d < 0 ? " (closed)" : d === 0 ? " (today)" : " (" + d + " days)") : "") : "",
+      P.walk_at ? "Walk-through " + fmtDate(P.walk_at) + (P.walk_time ? " at " + P.walk_time : "") : ""]
+      .filter(Boolean).join(" · ");
+    $("pStatus").className = "pill " + P.status;
+    $("pStatus").textContent = P.status === "out" ? "Out for bid" : P.status;
+
+    $("pStats").innerHTML =
+      stat(t.trades, "Packages") +
+      stat(t.sent + " / " + t.invited, "Invites sent") +
+      stat(t.opened, "Opened") +
+      stat(t.bidding, "Bidding") +
+      stat(t.submitted, "Numbers in", t.submitted ? "good" : "") +
+      stat(t.silent, "No answer", t.silent ? "warn" : "") +
+      stat(t.uncovered, "Uncovered", t.uncovered ? "warn" : "good");
+
+    $("planUrl").value = P.plan_url || "";
+    $("planNotes").value = P.plan_notes || "";
+
+    if (P.plan_summary || (P.plan_flags || []).length){
+      var txt = (P.plan_summary || "");
+      if ((P.plan_flags || []).length) txt += (txt ? "\n\n" : "") + "Watch out for: " + P.plan_flags.join(" · ");
+      banner("pFlags", "info", txt);
+    } else banner("pFlags", "", "");
+
+    if (!SUGGEST.length){
+      SUGGEST = (P.trades || []).map(function(tr){
+        return { key: tr.key, label: tr.label, scope: tr.scope || "", why: tr.why || "",
+                 confidence: "", on: true };
+      });
+    }
+    renderTrades();
+    renderBoard();
+    renderSendState();
+  }
+
+  function renderSendState(){
+    var queued = (P.invites || []).filter(function(v){ return !v.sent_at; }).length;
+    var silent = (P.invites || []).filter(function(v){ return v.silent; }).length;
+    var bits = [];
+    if (queued) bits.push(queued + " invitation" + (queued === 1 ? "" : "s") + " ready to go out");
+    if (silent) bits.push(silent + " sent with no answer yet");
+    if (!P.plan_url) bits.push("no plan link saved — the email will go without one");
+    if (!CATALOG.can_email) bits.push("RESEND_API_KEY isn't set, so nothing can send yet");
+    banner("sendBanner", !CATALOG.can_email ? "bad" : queued ? "warn" : "info",
+      bits.length ? bits.join(" · ") : "Everybody on the list has been sent to.");
+    $("blastBtn").disabled = !queued;
+    $("remindBtn").disabled = !silent;
+    $("remindBtn").textContent = silent ? "Nudge the quiet ones (" + silent + ")" : "Nudge the quiet ones";
+  }
+
+  $("savePlanBtn").onclick = function(){
+    var self = this;
+    self.disabled = true;
+    api("update", { id: P.id, patch: { plan_url: $("planUrl").value.trim(), plan_notes: $("planNotes").value.trim() } })
+      .then(function(){ self.disabled = false; return openProject(P.id); });
+  };
+
+  // ── Reading the plans ─────────────────────────────────────────────────────
+  // pdf.js runs in the browser, so a 180 MB plan set never has to squeeze
+  // through a serverless function that caps out at 6 MB. Only the text goes up.
+  function extractPdfText(file){
+    if (typeof pdfjsLib === "undefined"){
+      return Promise.reject(new Error("The PDF reader didn't load. Paste the sheet index instead."));
+    }
+    pdfjsLib.GlobalWorkerOptions.workerSrc =
+      "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";
+    return file.arrayBuffer().then(function(buf){
+      return pdfjsLib.getDocument({ data: buf }).promise;
+    }).then(function(pdf){
+      var pages = Math.min(pdf.numPages, MAX_PLAN_PAGES);
+      var out = [];
+      var chain = Promise.resolve();
+      for (var i = 1; i <= pages; i++){
+        (function(n){
+          chain = chain.then(function(){
+            $("readState").textContent = "Reading sheet " + n + " of " + pages + "…";
+            return pdf.getPage(n).then(function(page){ return page.getTextContent(); })
+              .then(function(tc){
+                out.push("--- SHEET " + n + " ---\n" +
+                  tc.items.map(function(it){ return it.str; }).join(" "));
+              });
+          });
+        })(i);
+      }
+      return chain.then(function(){
+        return { text: out.join("\n\n"), pages: pages, total: pdf.numPages };
+      });
+    });
+  }
+
+  function handlePlanFile(file){
+    if (!file) return;
+    if (file.type !== "application/pdf" && !/\.pdf$/i.test(file.name)){
+      banner("readBanner","bad","That's not a PDF. Drop the plan set, or paste the sheet index below.");
+      return;
+    }
+    banner("readBanner","","");
+    $("readState").textContent = "Opening " + file.name + "…";
+    extractPdfText(file).then(function(got){
+      var text = got.text.slice(0, MAX_PLAN_CHARS);
+      $("planText").value = text;
+      $("readState").textContent = "";
+      var msg = "Read " + got.pages + " of " + got.total + " sheets from " + file.name + ".";
+      if (got.total > got.pages) msg += " Only the first " + got.pages + " went in — paste anything else that matters.";
+      if (got.text.length > MAX_PLAN_CHARS) msg += " Trimmed to " + MAX_PLAN_CHARS + " characters.";
+      if (text.replace(/[^a-z]/gi,"").length < 200){
+        msg += " Barely any text came out — this looks like a scanned set, so the read will lean on the job type.";
+      }
+      banner("readBanner","info", msg + " Now hit Read the plans.");
+    }).catch(function(err){
+      $("readState").textContent = "";
+      banner("readBanner","bad", String(err.message || err));
+    });
+  }
+
+  $("drop").onclick = function(){ $("planFile").click(); };
+  $("planFile").onchange = function(){ handlePlanFile(this.files[0]); };
+  ["dragenter","dragover"].forEach(function(ev){
+    $("drop").addEventListener(ev, function(e){ e.preventDefault(); this.classList.add("over"); });
+  });
+  ["dragleave","drop"].forEach(function(ev){
+    $("drop").addEventListener(ev, function(e){ e.preventDefault(); this.classList.remove("over"); });
+  });
+  $("drop").addEventListener("drop", function(e){
+    if (e.dataTransfer && e.dataTransfer.files) handlePlanFile(e.dataTransfer.files[0]);
+  });
+
+  $("analyzeBtn").onclick = function(){
+    var text = $("planText").value.trim();
+    var deep = CATALOG.deep_read && $("deepChk").checked;
+    var self = this;
+    self.disabled = true;
+    self.innerHTML = '<span class="spin"></span>' + (deep ? "Claude is reading…" : "Reading…");
+    api("analyze", { id: P.id, text: text, deep: deep, save: true }).then(function(res){
+      self.disabled = false;
+      self.textContent = "Read the plans";
+      if (res.status !== 200){ banner("readBanner","bad", res.body.error || "The read failed."); return; }
+      var b = res.body;
+      var already = {};
+      (P.trades || []).forEach(function(t){ already[t.key] = true; });
+      SUGGEST = b.packages.map(function(p){
+        return { key:p.key, label:p.label, scope:p.scope || "", why:p.why || "",
+                 confidence:p.confidence || "medium",
+                 on: already[p.key] || p.confidence === "high" || p.hits > 0 || p.confidence === "baseline" };
+      });
+      renderTrades();
+      var how = b.engine === "claude"
+        ? "Claude read " + b.chars_read.toLocaleString() + " characters of plan text and wrote the scope lines."
+        : "Matched " + b.chars_read.toLocaleString() + " characters of plan text against CRA's trade list" +
+          (deep ? " — the deep read didn't come back, so this is the keyword read" +
+            (b.fallback_reason ? " (" + b.fallback_reason + ")" : "") + "." : ".");
+      banner("readBanner", b.engine === "claude" ? "ok" : "info",
+        how + " Check the packages below, fix any scope line, then save.");
+      if (b.summary || (b.flags || []).length) { P.plan_summary = b.summary; P.plan_flags = b.flags; renderProject(); }
+      $("tradeSec").scrollIntoView({ behavior:"smooth", block:"start" });
+    });
+  };
+
+  // ── Bid packages ──────────────────────────────────────────────────────────
+  function renderTrades(){
+    if (!SUGGEST.length){
+      $("tradeList").innerHTML = '<div class="note">No packages yet. Read the plans, or add them by hand.</div>';
+      return;
+    }
+    $("tradeList").innerHTML = SUGGEST.map(function(t, i){
+      var live = (P.trades || []).filter(function(x){ return x.key === t.key; })[0];
+      var invited = live ? live.invited : 0;
+      return '<div class="trade' + (t.on ? " on" : "") + '" data-i="' + i + '">' +
+        '<div class="trade-top">' +
+          '<input type="checkbox" ' + (t.on ? "checked" : "") + ' data-chk="' + i + '" />' +
+          "<div style='flex:1'>" +
+            '<div class="trade-name">' + esc(t.label) +
+              (t.confidence ? '<span class="conf ' + esc(t.confidence) + '">' + esc(t.confidence) + "</span>" : "") +
+              (invited ? '<span class="tagline green">' + invited + " invited</span>" : "") + "</div>" +
+            (t.why ? '<div class="trade-why">' + esc(t.why) + "</div>" : "") +
+            '<textarea data-scope="' + i + '" placeholder="What this sub is bidding — sheets, quantities, materials, what\'s excluded.">' +
+              esc(t.scope) + "</textarea>" +
+          "</div>" +
+        "</div></div>";
+    }).join("");
+    Array.prototype.forEach.call($("tradeList").querySelectorAll("[data-chk]"), function(el){
+      el.onchange = function(){
+        SUGGEST[Number(el.getAttribute("data-chk"))].on = el.checked;
+        el.closest(".trade").className = "trade" + (el.checked ? " on" : "");
+      };
+    });
+    Array.prototype.forEach.call($("tradeList").querySelectorAll("[data-scope]"), function(el){
+      el.oninput = function(){ SUGGEST[Number(el.getAttribute("data-scope"))].scope = el.value; };
+    });
+  }
+
+  $("saveTradesBtn").onclick = function(){
+    var self = this;
+    self.disabled = true;
+    var trades = SUGGEST.filter(function(t){ return t.on; })
+      .map(function(t){ return { key:t.key, scope:t.scope, why:t.why }; });
+    api("set-trades", { id: P.id, trades: trades }).then(function(res){
+      self.disabled = false;
+      if (res.status !== 200){ alert(res.body.error || "Couldn't save the packages."); return; }
+      if ((res.body.kept_because_invited || []).length){
+        alert("Kept " + res.body.kept_because_invited.length +
+          " package(s) you unchecked — subs are already invited on them. Remove those invitations first.");
+      }
+      openProject(P.id);
+    });
+  };
+
+  $("addAllBtn").onclick = function(){
+    var have = {};
+    SUGGEST.forEach(function(t){ have[t.key] = true; });
+    var rest = CATALOG.packages.filter(function(p){ return !have[p.key]; });
+    if (!rest.length){ alert("Every package CRA tracks is already on this project."); return; }
+    $("pkgList").innerHTML = rest.map(function(p){
+      return '<label class="cand"><input type="checkbox" value="' + esc(p.key) + '" />' +
+        "<div><div class='who'>" + esc(p.label) + "</div>" +
+        "<div class='det'>" + esc((p.trades || []).join(" · ")) + "</div></div></label>";
+    }).join("");
+    openModal("pkgModal");
+  };
+  $("pkgAdd").onclick = function(){
+    var picked = Array.prototype.filter.call($("pkgList").querySelectorAll("input"), function(i){ return i.checked; });
+    picked.forEach(function(i){
+      var p = CATALOG.packages.filter(function(x){ return x.key === i.value; })[0];
+      if (p) SUGGEST.push({ key:p.key, label:p.label, scope:"", why:"Added by hand", confidence:"high", on:true });
+    });
+    closeModal("pkgModal");
+    renderTrades();
+  };
+
+  // ── Who gets it ───────────────────────────────────────────────────────────
+  function loadMatches(){
+    if (!(P.trades || []).length){
+      $("matchList").innerHTML = '<div class="note">Save your bid packages first — then the sub library fills this in.</div>';
+      return;
+    }
+    $("matchList").innerHTML = '<div class="note">Checking the sub library…</div>';
+    api("match", { id: P.id }).then(function(res){
+      if (res.status !== 200){ $("matchList").innerHTML = '<div class="note">' + esc(res.body.error || "Couldn't read the library.") + "</div>"; return; }
+      MATCHES = res.body.matches || [];
+      renderMatches(res.body.library_size);
+    });
+  }
+
+  function renderMatches(librarySize){
+    $("matchList").innerHTML = MATCHES.map(function(m){
+      var open = m.candidates.filter(function(c){ return !c.already_invited; });
+      var body = !m.candidates.length
+        ? '<div class="note">Nobody in the library does this work yet. Add them in the ' +
+          '<a href="/subs" style="color:var(--gold2);text-decoration:underline;">sub library</a> first.</div>'
+        : m.candidates.map(function(c){
+            return '<label class="cand' + (c.already_invited ? " out" : "") + '">' +
+              '<input type="checkbox" data-trade="' + esc(m.key) + '" data-vendor="' + esc(c.vendor_id) + '"' +
+              (c.already_invited ? " disabled" : "") + " />" +
+              "<div><div class='who'>" + esc(c.name || "(no name)") +
+                (c.company ? " · " + esc(c.company) : "") +
+                '<span class="tagline' + (c.status === "approved" || c.status === "used" ? " green" : " grey") + '">' +
+                  esc(c.status) + "</span>" +
+                (c.rating ? '<span class="tagline">' + c.rating + "★</span>" : "") +
+                (c.already_invited ? '<span class="tagline grey">already invited</span>' : "") +
+              "</div>" +
+              "<div class='det'>" + (c.email ? esc(c.email) : '<span style="color:var(--red)">no email on file</span>') +
+                (c.phone ? " · " + esc(c.phone) : "") +
+                (c.sms_consent ? " · texts ok" : "") + "</div></div></label>";
+          }).join("");
+      return '<div class="sec-h">' + esc(m.label) + " · " + m.candidates.length + " in the library" +
+        (open.length ? "" : " · all invited") + "</div>" + body;
+    }).join("") || '<div class="note">No packages saved yet.</div>';
+    if (librarySize != null && !librarySize){
+      $("matchList").innerHTML = '<div class="note">The sub library is empty. Collect subs with the ' +
+        '<a href="/bid" style="color:var(--gold2);text-decoration:underline;">Bid My Job</a> QR intake, ' +
+        'or add them by hand in the <a href="/subs" style="color:var(--gold2);text-decoration:underline;">library</a>.</div>';
+    }
+  }
+
+  $("pickBestBtn").onclick = function(){
+    var checked = 0;
+    MATCHES.forEach(function(m){
+      m.candidates.forEach(function(c){
+        if (c.already_invited || (c.status !== "approved" && c.status !== "used")) return;
+        var box = $("matchList").querySelector('input[data-trade="' + m.key + '"][data-vendor="' + c.vendor_id + '"]');
+        if (box && !box.disabled){ box.checked = true; checked += 1; }
+      });
+    });
+    if (!checked) alert("Nobody in the library is marked approved or used for these packages yet.");
+  };
+
+  $("addInvitesBtn").onclick = function(){
+    var picked = Array.prototype.filter.call($("matchList").querySelectorAll("input[data-vendor]"),
+      function(i){ return i.checked && !i.disabled; })
+      .map(function(i){ return { trade: i.getAttribute("data-trade"), vendor_id: i.getAttribute("data-vendor") }; });
+    if (!picked.length){ alert("Check who you want on this one first."); return; }
+    var self = this;
+    self.disabled = true;
+    api("add-invites", { id: P.id, invites: picked }).then(function(res){
+      self.disabled = false;
+      if (res.status !== 200){ alert(res.body.error || "Couldn't add them."); return; }
+      if ((res.body.skipped || []).length){
+        alert("Added " + res.body.added + ". Skipped " + res.body.skipped.length + ": " +
+          res.body.skipped.map(function(s){ return s.why; }).join(", ") + ".");
+      }
+      openProject(P.id);
+    });
+  };
+
+  // ── The blast ─────────────────────────────────────────────────────────────
+  function prepare(mode){
+    banner("bmErr","","");
+    return api("prepare-send", { id: P.id, mode: mode, alsoSms: false }).then(function(res){
+      if (res.status !== 200){ alert(res.body.error || "Couldn't stage that."); return null; }
+      STAGE = { token: res.body.token, mode: mode };
+      $("bmTitle").textContent = mode === "remind" ? "Nudge the quiet ones" : "Review the blast";
+      $("bmSub").textContent = res.body.count + " " +
+        (mode === "remind" ? "follow-up" : "invitation") + (res.body.count === 1 ? "" : "s") +
+        " · reply-to comes back to CRA" +
+        (res.body.no_email ? " · " + res.body.no_email + " have no email on file" : "");
+      $("bmRecips").innerHTML = res.body.recipients.map(function(r){
+        return "<div>" + esc(r.name) + (r.company ? " · " + esc(r.company) : "") +
+          " — <b>" + esc(r.trade) + "</b><br>" +
+          (r.email ? esc(r.email) : '<span class="no-mail">no email — ' +
+            (r.sms_consent && r.phone ? "text only" : "can't reach them") + "</span>") +
+          (r.phone ? " · " + esc(r.phone) : "") + "</div>";
+      }).join("");
+      $("bmPreview").srcdoc = res.body.sample_html;
+      var smsable = res.body.recipients.filter(function(r){ return r.sms_consent && r.phone; }).length;
+      if (CATALOG.can_sms && smsable){
+        $("bmSmsWrap").classList.remove("hide");
+        $("bmSmsWrap").querySelector("span").textContent =
+          "Also text the " + smsable + " who opted in to texts";
+        $("bmSms").checked = false;
+      } else $("bmSmsWrap").classList.add("hide");
+      $("bmSend").textContent = "Send " + res.body.count + " " + (mode === "remind" ? "reminders" : "invitations");
+      openModal("blastModal");
+      return res.body;
+    });
+  }
+  $("blastBtn").onclick = function(){ prepare("new"); };
+  $("remindBtn").onclick = function(){ prepare("remind"); };
+
+  $("bmSend").onclick = function(){
+    if (!STAGE) return;
+    var self = this;
+    var label = self.textContent;
+    self.disabled = true;
+    self.innerHTML = '<span class="spin"></span>Sending…';
+    // The SMS choice is made here, at the last click, so re-stage with it set.
+    var go = $("bmSms").checked && !$("bmSmsWrap").classList.contains("hide")
+      ? api("prepare-send", { id: P.id, mode: STAGE.mode, alsoSms: true })
+          .then(function(res){ if (res.status === 200) STAGE.token = res.body.token; })
+      : Promise.resolve();
+    go.then(function(){
+      return api("send", { id: P.id, token: STAGE.token });
+    }).then(function(res){
+      self.disabled = false;
+      self.textContent = label;
+      if (res.status !== 200){ banner("bmErr","bad", res.body.error || "Sending failed."); return; }
+      closeModal("blastModal");
+      STAGE = null;
+      openProject(P.id).then(function(){
+        banner("sendBanner", res.body.failed ? "warn" : "ok",
+          "Sent " + res.body.sent + (res.body.texted ? ", texted " + res.body.texted : "") +
+          (res.body.failed ? ", " + res.body.failed + " failed: " +
+            res.body.failures.map(function(f){ return f.name; }).join(", ") : "") + ".");
+      });
+    });
+  };
+
+  // ── The board ─────────────────────────────────────────────────────────────
+  var openTrade = null;
+  function renderBoard(){
+    if (!(P.trades || []).length){
+      $("board").innerHTML = '<tr><td class="note" style="padding:22px 4px;">' +
+        "Nothing on the board yet. Read the plans, save your packages, then pick who gets them.</td></tr>";
+      return;
+    }
+    var head = "<tr><th>Package</th><th>Coverage</th><th>Sent</th><th>Opened</th>" +
+      "<th>Bidding</th><th>Numbers in</th><th>Low bid</th></tr>";
+    var rows = P.trades.map(function(t){
+      var covLabel = { good:"covered", thin:"one bid only", pending:"waiting on bids",
+                       waiting:"no answer yet", none:"nobody on it" }[t.coverage] || t.coverage;
+      var main = '<tr class="pkg" data-trade="' + esc(t.key) + '">' +
+        '<td class="nm">' + esc(t.label) + "</td>" +
+        '<td><span class="cov ' + esc(t.coverage) + '">' + esc(covLabel) + "</span></td>" +
+        '<td class="num">' + t.sent + " / " + t.invited + "</td>" +
+        '<td class="num">' + t.opened + "</td>" +
+        '<td class="num">' + t.bidding + "</td>" +
+        '<td class="num">' + t.submitted + "</td>" +
+        '<td class="num">' + (t.low ? money(t.low) : "—") + "</td></tr>";
+      if (openTrade !== t.key) return main;
+      var mine = P.invites.filter(function(v){ return v.trade === t.key; });
+      var detail = mine.length ? mine.map(function(v){
+        return '<div class="vend">' +
+          "<div><span class='who'>" + esc(v.name || "(no name)") +
+            (v.company ? " · " + esc(v.company) : "") + "</span>" +
+            (v.status === "awarded" || v.awarded ? ' <span class="awarded-star">★ awarded</span>' : "") +
+            "<div class='det'>" + esc(v.email || v.phone || "no contact on file") +
+              (v.sent_at ? " · sent " + fmtDate(v.sent_at) : " · not sent yet") +
+              (v.opened_at ? " · opened " + fmtDate(v.opened_at) : "") +
+              ((v.reminders || []).length ? " · " + v.reminders.length + " nudge(s)" : "") +
+              (v.overdue ? " · past due" : "") +
+              (v.bid_notes ? "<br>“" + esc(v.bid_notes) + "”" : "") +
+              (v.eta ? "<br>Can start: " + esc(v.eta) : "") +
+            "</div></div>" +
+          '<div class="acts">' +
+            '<span class="pill ' + esc(v.status) + '">' + esc(v.status) + "</span>" +
+            '<input class="amt" type="text" inputmode="decimal" placeholder="$ bid" data-amt="' +
+              esc(v.id) + '" value="' + (v.amount ? esc(v.amount) : "") + '" />' +
+            '<button class="btn btn-ghost btn-sm" data-save="' + esc(v.id) + '">Save</button>' +
+            '<button class="btn btn-ghost btn-sm" data-pass="' + esc(v.id) + '">Passed</button>' +
+            '<button class="btn btn-sm" data-award="' + esc(v.id) + '">' +
+              (v.awarded ? "Un-award" : "Award") + "</button>" +
+            '<button class="btn btn-danger btn-sm" data-drop="' + esc(v.id) + '">Remove</button>' +
+          "</div></div>";
+      }).join("") : '<div class="note">Nobody invited on this package yet.</div>';
+      return main + '<tr class="sub-rows"><td colspan="7">' + detail + "</td></tr>";
+    }).join("");
+    $("board").innerHTML = head + rows;
+
+    Array.prototype.forEach.call($("board").querySelectorAll("tr.pkg"), function(tr){
+      tr.onclick = function(e){
+        if (e.target.closest(".acts")) return;
+        var k = tr.getAttribute("data-trade");
+        openTrade = openTrade === k ? null : k;
+        renderBoard();
+      };
+    });
+    function inviteAction(attr, fn){
+      Array.prototype.forEach.call($("board").querySelectorAll("[" + attr + "]"), function(b){
+        b.onclick = function(e){ e.stopPropagation(); fn(b.getAttribute(attr), b); };
+      });
+    }
+    inviteAction("data-save", function(id){
+      var input = $("board").querySelector('[data-amt="' + id + '"]');
+      api("set-invite", { id: P.id, inviteId: id, patch: { amount: input.value } })
+        .then(function(res){
+          if (res.status !== 200){ alert(res.body.error || "Couldn't save that number."); return; }
+          openProject(P.id);
+        });
+    });
+    inviteAction("data-pass", function(id){
+      api("set-invite", { id: P.id, inviteId: id, patch: { status: "declined" } })
+        .then(function(){ openProject(P.id); });
+    });
+    inviteAction("data-award", function(id){
+      var inv = P.invites.filter(function(v){ return v.id === id; })[0];
+      api("award", { id: P.id, inviteId: id, awarded: !(inv && inv.awarded) })
+        .then(function(){ openProject(P.id); });
+    });
+    inviteAction("data-drop", function(id){
+      if (!confirm("Take them off this package? Their bid link stops working.")) return;
+      api("remove-invite", { id: P.id, inviteId: id }).then(function(){ openProject(P.id); });
+    });
+  }
+
+  // ── Boot ──────────────────────────────────────────────────────────────────
+  if (KEY){
+    api("list").then(function(res){
+      if (res.status === 200){ PROJECTS = res.body.projects || []; enter(); }
+      else { KEY = null; sessionStorage.removeItem("craLeadsKey"); }
+    });
+  }
+})();
+</script>
+</body>
+</html>

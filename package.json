@@ -4,6 +4,7 @@
   "private": true,
   "description": "CRA Construction marketing site + leads dashboard functions",
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.126.0",
     "@netlify/blobs": "^8.1.0"
   }
 }
