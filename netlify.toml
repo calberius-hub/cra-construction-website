@@ -34,6 +34,17 @@
   to = "/sign.html"
   status = 200
 
+# The Bid Board — internal, and the vendor's one-tap reply page.
+[[redirects]]
+  from = "/bids"
+  to = "/bids.html"
+  status = 200
+
+[[redirects]]
+  from = "/bid-invite"
+  to = "/bid-invite.html"
+  status = 200
+
 # Public, and must stay public — carriers check this URL during A2P review.
 [[redirects]]
   from = "/privacy"

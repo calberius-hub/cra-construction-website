@@ -6,6 +6,10 @@ Disallow: /subs
 Disallow: /subs.html
 Disallow: /sign
 Disallow: /sign.html
+Disallow: /bids
+Disallow: /bids.html
+Disallow: /bid-invite
+Disallow: /bid-invite.html
 Disallow: /mockups/
 Disallow: /__forms.html
 

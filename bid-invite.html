@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <meta name="theme-color" content="#1d3a4a" />
+  <title>CRA Construction — Bid Invitation</title>
+  <link rel="icon" href="/favicon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root{
+      --navy:#1d3a4a; --gold:#c9a54a; --gold2:#a8882f; --cream:#f8f5f0; --white:#fff;
+      --ink:#1a1814; --muted:#6b6560; --line:rgba(25,22,18,.12);
+      --green:#3f7d5a; --red:#a3282d;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+    body{font-family:'Montserrat',system-ui,sans-serif;color:var(--ink);background:var(--cream);
+         -webkit-font-smoothing:antialiased;padding:0 0 60px;}
+    a{color:inherit;}
+    .top{background:var(--navy);color:#fff;padding:20px 20px 22px;border-bottom:4px solid var(--gold);}
+    .top .wrap{max-width:620px;margin:0 auto;}
+    .eyebrow{font-size:10px;letter-spacing:.24em;text-transform:uppercase;opacity:.72;}
+    .top h1{font-family:'Playfair Display',serif;font-size:26px;line-height:1.2;margin-top:8px;font-weight:600;}
+    .top .sub{font-size:14px;opacity:.85;margin-top:6px;}
+    .wrap{max-width:620px;margin:0 auto;padding:0 18px;}
+    .card{background:var(--white);border:1px solid var(--line);border-radius:6px;padding:20px;margin-top:16px;}
+    .card h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:19px;margin-bottom:12px;}
+    .facts{width:100%;border-collapse:collapse;font-size:14.5px;}
+    .facts td{padding:8px 0;border-bottom:1px solid var(--line);vertical-align:top;}
+    .facts tr:last-child td{border-bottom:none;}
+    .facts td.k{color:var(--muted);width:40%;}
+    .facts td.v{font-weight:600;}
+    .scope{background:var(--cream);border-left:3px solid var(--gold);padding:13px 15px;
+           font-size:14.5px;line-height:1.6;margin-top:14px;}
+    .scope b{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+             color:var(--gold2);margin-bottom:5px;}
+    .plans{display:block;text-align:center;background:var(--navy);color:#fff;text-decoration:none;
+           padding:16px;border-radius:5px;font-weight:600;font-size:15px;letter-spacing:.06em;margin-top:16px;}
+    .plans:hover{background:#162e3b;}
+    .choices{display:grid;gap:10px;margin-top:6px;}
+    .choice{display:block;width:100%;text-align:left;background:var(--white);border:2px solid var(--line);
+            border-radius:6px;padding:16px 18px;font-size:16px;font-weight:600;color:var(--ink);
+            cursor:pointer;font-family:inherit;transition:.15s;}
+    .choice:hover{border-color:var(--gold);}
+    .choice.on{border-color:var(--navy);background:#f2f6f8;}
+    .choice small{display:block;font-weight:400;font-size:13px;color:var(--muted);margin-top:3px;}
+    .fld{margin-top:14px;}
+    .fld label{display:block;font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+               color:var(--navy);font-weight:700;margin-bottom:6px;}
+    .fld input,.fld textarea{width:100%;padding:14px;border:1px solid var(--line);border-radius:4px;
+                             font-size:16px;font-family:inherit;background:var(--white);}
+    .fld textarea{min-height:88px;resize:vertical;}
+    .fld input:focus,.fld textarea:focus{outline:none;border-color:var(--gold);
+                                         box-shadow:0 0 0 3px rgba(201,165,74,.16);}
+    .money{position:relative;}
+    .money span{position:absolute;left:14px;top:50%;transform:translateY(-50%);color:var(--muted);font-size:16px;}
+    .money input{padding-left:30px;font-size:20px;font-weight:600;}
+    .go{width:100%;background:var(--gold);color:var(--ink);border:none;border-radius:5px;padding:17px;
+        font-size:15px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;
+        margin-top:16px;font-family:inherit;}
+    .go:hover{background:var(--gold2);color:#fff;}
+    .go:disabled{opacity:.55;cursor:default;}
+    .msg{padding:13px 15px;border-radius:4px;font-size:14px;line-height:1.5;margin-top:14px;display:none;}
+    .msg.bad{background:#fdecec;color:var(--red);border:1px solid #f2c4c4;display:block;}
+    .msg.ok{background:#e6f3ec;color:#2c6a45;border:1px solid #bfe0cc;display:block;}
+    .done{text-align:center;padding:30px 20px;}
+    .done .big{font-size:44px;line-height:1;}
+    .done h2{font-family:'Playfair Display',serif;color:var(--navy);font-size:24px;margin:14px 0 8px;}
+    .done p{color:var(--muted);font-size:15px;line-height:1.6;}
+    .done .amt{font-family:'Playfair Display',serif;font-size:32px;color:var(--navy);margin:10px 0;}
+    .redo{background:none;border:none;color:var(--gold2);font-size:14px;text-decoration:underline;
+          cursor:pointer;margin-top:18px;font-family:inherit;}
+    .foot{text-align:center;color:var(--muted);font-size:12.5px;line-height:1.6;margin-top:26px;}
+    .foot a{color:var(--gold2);}
+    .loading{text-align:center;padding:60px 20px;color:var(--muted);}
+    .hide{display:none;}
+    @media(max-width:480px){ .top h1{font-size:22px;} }
+  </style>
+</head>
+<body>
+
+<div class="top">
+  <div class="wrap">
+    <div class="eyebrow">CRA Construction · Bid Invitation</div>
+    <h1 id="hTrade">Loading…</h1>
+    <div class="sub" id="hProject"></div>
+  </div>
+</div>
+
+<div class="wrap">
+  <div id="loading" class="loading">Pulling up the job…</div>
+
+  <div id="gone" class="card hide">
+    <h2>This link isn't active</h2>
+    <p style="color:var(--muted);line-height:1.6;" id="goneMsg"></p>
+  </div>
+
+  <div id="app" class="hide">
+    <div class="card">
+      <table class="facts" id="facts"></table>
+      <div class="scope hide" id="scopeBox"><b>What you're bidding</b><span id="scopeText"></span></div>
+      <a class="plans hide" id="planLink" target="_blank" rel="noopener">View the plans</a>
+      <p id="planNotes" class="foot hide" style="margin-top:10px;text-align:left;"></p>
+    </div>
+
+    <div class="card" id="answerCard">
+      <h2>Where do you stand?</h2>
+      <div class="choices">
+        <button class="choice" data-k="bidding" type="button">I'm bidding it
+          <small>We'll hold a spot and follow up before bids close.</small></button>
+        <button class="choice" data-k="submit" type="button">Send my number now
+          <small>Give us the price and we'll get back to you.</small></button>
+        <button class="choice" data-k="pass" type="button">Pass on this one
+          <small>No hard feelings — we'll keep you on the list for the next one.</small></button>
+      </div>
+
+      <div id="amountWrap" class="fld hide">
+        <label for="amount">Your bid</label>
+        <div class="money"><span>$</span><input id="amount" type="text" inputmode="decimal" placeholder="0.00" /></div>
+      </div>
+      <div id="etaWrap" class="fld hide">
+        <label for="eta">When could you start?</label>
+        <input id="eta" type="text" placeholder="e.g. 2 weeks out, first of the month" />
+      </div>
+      <div id="notesWrap" class="fld hide">
+        <label for="notes">Anything we should know</label>
+        <textarea id="notes" placeholder="Exclusions, questions on scope, what your number covers…"></textarea>
+      </div>
+
+      <div class="msg" id="msg"></div>
+      <button class="go hide" id="send" type="button">Send it to CRA</button>
+    </div>
+
+    <div class="card done hide" id="done">
+      <div class="big" id="doneIcon">✅</div>
+      <h2 id="doneH"></h2>
+      <div class="amt hide" id="doneAmt"></div>
+      <p id="doneP"></p>
+      <button class="redo" id="redo" type="button">Change my answer</button>
+    </div>
+
+    <p class="foot">
+      Questions on scope? Call CRA at <a href="tel:+15015906646">(501) 590-6646</a><br />
+      CRA Construction · Little Rock, AR
+    </p>
+  </div>
+</div>
+
+<script>
+(function(){
+  var API = "/.netlify/functions/bid-respond";
+  var $ = function(id){ return document.getElementById(id); };
+  var params = new URLSearchParams(location.search);
+  var TOKEN = (params.get("t") || "").replace(/[^a-f0-9]/gi, "");
+  var PRESET = params.get("a") || "";
+  var DATA = null;
+  var pick = "";
+
+  function api(action, extra){
+    var body = Object.assign({ token: TOKEN, action: action }, extra || {});
+    return fetch(API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(r){
+      return r.json().catch(function(){ return {}; }).then(function(b){
+        return { status: r.status, body: b };
+      });
+    });
+  }
+
+  function fmtDate(d){
+    if (!d) return "";
+    var t = Date.parse(d.length === 10 ? d + "T12:00:00" : d);
+    if (isNaN(t)) return d;
+    return new Date(t).toLocaleDateString("en-US",
+      { weekday:"short", month:"short", day:"numeric", year:"numeric" });
+  }
+  function money(n){
+    var v = Number(n);
+    if (!(v > 0)) return "";
+    return "$" + v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+  }
+
+  function dead(msg){
+    $("loading").className = "loading hide";
+    $("gone").className = "card";
+    $("goneMsg").textContent = msg;
+    $("hTrade").textContent = "Bid invitation";
+  }
+
+  function render(){
+    var p = DATA.project, t = DATA.trade;
+    $("hTrade").textContent = t.label;
+    $("hProject").textContent = p.name + (p.address ? " · " + p.address : "");
+    document.title = t.label + " — " + p.name + " | CRA Construction";
+
+    var rows = [
+      ["Project", p.name],
+      ["Location", p.address],
+      ["Your package", t.label],
+      ["Bids due", p.bid_due ? fmtDate(p.bid_due) : "As soon as you can get it to us"],
+      ["Walk-through", p.walk_at ? fmtDate(p.walk_at) + (p.walk_time ? " at " + p.walk_time : "") : ""],
+      ["Target start", p.start_date ? fmtDate(p.start_date) : ""]
+    ].filter(function(r){ return r[1]; });
+    $("facts").innerHTML = rows.map(function(r){
+      return '<tr><td class="k"></td><td class="v"></td></tr>';
+    }).join("");
+    Array.prototype.forEach.call($("facts").querySelectorAll("tr"), function(tr, i){
+      tr.children[0].textContent = rows[i][0];
+      tr.children[1].textContent = rows[i][1];
+    });
+
+    var scope = t.scope || p.scope_notes || "";
+    if (scope){ $("scopeBox").className = "scope"; $("scopeText").textContent = scope; }
+    if (p.plan_url){ $("planLink").href = p.plan_url; $("planLink").className = "plans"; }
+    if (p.plan_notes){ $("planNotes").className = "foot"; $("planNotes").textContent = p.plan_notes; }
+
+    $("loading").className = "loading hide";
+    $("app").className = "";
+
+    var answered = ["bidding","declined","submitted","awarded"].indexOf(DATA.response.status) >= 0;
+    if (answered) showDone(DATA.response);
+    else if (PRESET) choose(PRESET === "pass" ? "pass" : PRESET === "submit" ? "submit" : "bidding");
+  }
+
+  function choose(k){
+    pick = k;
+    Array.prototype.forEach.call(document.querySelectorAll(".choice"), function(b){
+      b.className = "choice" + (b.getAttribute("data-k") === k ? " on" : "");
+    });
+    $("amountWrap").className = "fld" + (k === "submit" ? "" : " hide");
+    $("etaWrap").className = "fld" + (k === "pass" ? " hide" : "");
+    $("notesWrap").className = "fld";
+    $("send").className = "go";
+    $("send").textContent = k === "pass" ? "Let CRA know I'm passing"
+      : k === "submit" ? "Send my number" : "Tell CRA I'm bidding";
+    if (k === "submit") setTimeout(function(){ $("amount").focus(); }, 60);
+  }
+
+  function showDone(r){
+    $("answerCard").className = "card hide";
+    $("done").className = "card done";
+    var s = r.status;
+    if (s === "submitted" || s === "awarded"){
+      $("doneIcon").textContent = "💰";
+      $("doneH").textContent = "Got your number";
+      $("doneAmt").className = "amt";
+      $("doneAmt").textContent = money(r.amount);
+      $("doneP").textContent = "It's on CRA's board. We'll be in touch before we award this package.";
+    } else if (s === "declined"){
+      $("doneIcon").textContent = "👍";
+      $("doneH").textContent = "Thanks for telling us";
+      $("doneAmt").className = "amt hide";
+      $("doneP").textContent = "We'll keep you on the list — you'll get the next one that fits.";
+    } else {
+      $("doneIcon").textContent = "✅";
+      $("doneH").textContent = "You're on the list to bid";
+      $("doneAmt").className = "amt hide";
+      $("doneP").textContent = DATA.project.bid_due
+        ? "Get us your number by " + fmtDate(DATA.project.bid_due) + ". Reply to the email or send it right here."
+        : "Get us your number when you have it. Reply to the email or send it right here.";
+    }
+  }
+
+  Array.prototype.forEach.call(document.querySelectorAll(".choice"), function(b){
+    b.onclick = function(){ choose(b.getAttribute("data-k")); };
+  });
+
+  $("redo").onclick = function(){
+    $("done").className = "card done hide";
+    $("answerCard").className = "card";
+    choose(DATA.response.status === "declined" ? "pass"
+      : DATA.response.status === "submitted" ? "submit" : "bidding");
+    if (DATA.response.amount) $("amount").value = DATA.response.amount;
+    if (DATA.response.notes) $("notes").value = DATA.response.notes;
+    if (DATA.response.eta) $("eta").value = DATA.response.eta;
+  };
+
+  $("send").onclick = function(){
+    if (!pick) return;
+    var btn = this;
+    $("msg").className = "msg";
+    if (pick === "submit" && !(Number(String($("amount").value).replace(/[^0-9.]/g,"")) > 0)){
+      $("msg").className = "msg bad";
+      $("msg").textContent = "Put your bid amount in before you send it.";
+      return;
+    }
+    btn.disabled = true;
+    btn.textContent = "Sending…";
+    api("respond", {
+      response: pick,
+      amount: $("amount").value,
+      notes: $("notes").value,
+      eta: $("eta").value
+    }).then(function(res){
+      btn.disabled = false;
+      if (res.status !== 200){
+        $("msg").className = "msg bad";
+        $("msg").textContent = res.body.error || "That didn't go through. Try again, or call us.";
+        btn.textContent = "Send it to CRA";
+        return;
+      }
+      DATA.response = {
+        status: res.body.status,
+        amount: res.body.amount,
+        notes: $("notes").value,
+        eta: $("eta").value
+      };
+      showDone(DATA.response);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+  };
+
+  if (!TOKEN){
+    dead("We need the link straight out of the email we sent you — this one is missing its code.");
+  } else {
+    api("get").then(function(res){
+      if (res.status !== 200){
+        dead(res.body.error || "We couldn't find this invitation.");
+        return;
+      }
+      DATA = res.body;
+      render();
+    }).catch(function(){
+      dead("We couldn't reach the server. Check your signal and try again.");
+    });
+  }
+})();
+</script>
+</body>
+</html>
