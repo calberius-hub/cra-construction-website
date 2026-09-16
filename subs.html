@@ -84,6 +84,12 @@
     .flag.amber{background:#fff4e0;color:#8a5a00;}
     .flag.green{background:#e6f3ec;color:#2c6a45;}
     .flag.grey{background:#f0eee9;color:var(--muted);}
+    .tier{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:4px 9px;border-radius:3px;margin:6px 4px 0 0;}
+    .tier.preferred{background:#e6f3ec;color:#2c6a45;}
+    .tier.approved{background:rgba(29,58,74,.11);color:var(--navy);}
+    .tier.unvetted{background:#fff4e0;color:#8a5a00;}
+    .tier.blocked{background:#fdecec;color:var(--red);}
+    .tier-why{font-size:11.5px;color:var(--muted);margin-top:6px;line-height:1.5;}
     .sub-actions{display:flex;gap:7px;margin-top:13px;padding-top:12px;border-top:1px solid var(--line);}
     .sub-actions a{flex:1;text-align:center;font-size:11.5px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:9px;border:1px solid var(--line);border-radius:3px;color:var(--navy);}
     .sub-actions a:hover{background:var(--cream);}
@@ -270,6 +276,18 @@
     <div class="sec-h">Notes</div>
     <div class="fld"><label>What they told us</label><textarea id="eNotes"></textarea></div>
     <div class="fld"><label>Our internal notes <span class="note">(they never see this)</span></label><textarea id="eInternal"></textarea></div>
+
+    <div class="sec-h">Bidding</div>
+    <div class="fld">
+      <label>Tier <span class="note" id="eTierAuto"></span></label>
+      <select id="eTier">
+        <option value="">Work it out from the library (recommended)</option>
+        <option value="preferred">Preferred — always on the list</option>
+        <option value="approved">Approved to bid</option>
+        <option value="unvetted">Unvetted — keep them off bids for now</option>
+      </select>
+      <div class="note" style="margin-top:6px;">Preferred and Approved can be sent plans. Unvetted only goes out when you deliberately include them. To block somebody entirely, set their status to do-not-use.</div>
+    </div>
 
     <div class="sec-h">Photos they sent</div>
     <div class="photos" id="dPhotos"><div class="ph">None</div></div>
@@ -541,7 +559,9 @@
         "<div>" + kindTag + trades + more + "</div>" +
         '<div class="sub-meta">' + esc(s.phone || "") + (meta.length ? " · " + meta.join(" · ") : "") +
           "<br>Added " + fmtDate(s.created_at) + (s.src && s.src !== "manual" ? " · sign " + esc(s.src) : "") + "</div>" +
-        "<div>" + flags + "</div>" +
+        "<div>" + '<span class="tier ' + esc(s.tier || "unvetted") + '">' +
+          esc(s.tier_label || "") + (s.tier_overridden ? " · by hand" : "") + "</span>" + flags + "</div>" +
+        (s.tier_reason ? '<div class="tier-why">' + esc(s.tier_reason) + "</div>" : "") +
         '<div class="sub-actions">' +
           '<a href="' + telHref(s.phone) + '" data-stop="1">Call</a>' +
           '<a href="' + smsHref(s.phone) + '" data-stop="1">Text</a>' +
@@ -639,6 +659,12 @@
     $("eRates").value = s.rate_notes || "";
     $("eNotes").value = s.notes || "";
     $("eInternal").value = s.internal_notes || "";
+    $("eTier").value = s.tier_override || "";
+    // What the library works out on its own, so an override is a visible
+    // disagreement rather than a shrug.
+    $("eTierAuto").textContent = s.tier_overridden
+      ? "— set by hand; clear it to go back to the library's read"
+      : "— currently " + (s.tier_label || "") + ": " + (s.tier_reason || "");
 
     if (s.ins_expired) banner("dBanner", "Their insurance expired " + Math.abs(s.ins_days) + " days ago. Get a current certificate before they set foot on a job.", "bad");
     else if (s.ins_expiring) banner("dBanner", "Their insurance expires in " + s.ins_days + " days.", "warn");
@@ -742,7 +768,8 @@
       pricing_mode: $("ePricing").value,
       rate_notes: $("eRates").value.trim(),
       notes: $("eNotes").value.trim(),
-      internal_notes: $("eInternal").value.trim()
+      internal_notes: $("eInternal").value.trim(),
+      tier_override: $("eTier").value
     };
     api("update", { id: CURRENT.id, patch: patch }).then(function(res){
       btn.disabled = false;

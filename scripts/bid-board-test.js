@@ -289,8 +289,84 @@ async function phaseTwo() {
   delete process.env.ANTHROPIC_API_KEY;
 }
 
+
+// ── Phase 3 — the tier ladder ───────────────────────────────────────────────
+// Who is allowed to receive a set of plans, and who decides.
+async function phaseThree() {
+  const callBids = (b) => call(bids, b).then(parse);
+
+  DB.subs = { all: JSON.stringify([
+    { id: "t1", name: "Proven Framing", email: "a@x.com", trades: ["Framing"], status: "used",
+      insured: true, ins_exp: "2030-01-01", workers_comp: true,
+      ratings: [{ on_time: 5, quality: 4, price: 4 }] },
+    { id: "t2", name: "Vetted Framing", email: "b@x.com", trades: ["Framing"], status: "vetted",
+      insured: true, ins_exp: "2030-01-01", workers_comp: true, ratings: [] },
+    { id: "t3", name: "Walked Up Yesterday", email: "c@x.com", trades: ["Framing"], status: "new", ratings: [] },
+    { id: "t4", name: "Lapsed Papers", email: "d@x.com", trades: ["Framing"], status: "approved",
+      insured: true, ins_exp: "2020-03-01", workers_comp: true,
+      ratings: [{ on_time: 5, quality: 5, price: 5 }] },
+    { id: "t5", name: "Never Again", email: "e@x.com", trades: ["Framing"], status: "do-not-use", ratings: [] },
+    { id: "t6", name: "No Paperwork But Trusted", email: "f@x.com", trades: ["Framing"], status: "approved",
+      ratings: [] },
+    { id: "t7", name: "Hand Promoted", email: "g@x.com", trades: ["Framing"], status: "new",
+      tier_override: "approved", ratings: [] },
+  ]) };
+
+  const id = (await callBids({ action: "create", project: { name: "Tier Test", type: "custom" } })).body.id;
+  await callBids({ action: "set-trades", id, trades: [{ key: "framing", scope: "Frame it." }] });
+
+  let r = await callBids({ action: "match", id });
+  const byId = {};
+  r.body.matches[0].candidates.forEach(c => byId[c.vendor_id] = c);
+
+  assert.strictEqual(byId.t1.tier, "preferred", "used + well rated + papers current");
+  assert.strictEqual(byId.t2.tier, "approved", "vetted with current papers");
+  assert.strictEqual(byId.t3.tier, "unvetted", "walked up yesterday");
+  assert.strictEqual(byId.t4.tier, "unvetted", "an expired COI outranks a perfect rating");
+  assert.ok(/expired/i.test(byId.t4.tier_reason), "and says why: " + byId.t4.tier_reason);
+  assert.strictEqual(byId.t5, undefined, "do-not-use never reaches a bid screen at all");
+  assert.strictEqual(byId.t6.tier, "approved",
+    "a blank insurance box is a warning, not a demotion — otherwise the gate means nothing");
+  assert.ok(/No insurance on file/.test(byId.t6.tier_warning), "but it is surfaced: " + byId.t6.tier_warning);
+  assert.strictEqual(byId.t7.tier, "approved", "a hand override beats the ladder");
+  assert.strictEqual(byId.t7.tier_overridden, true);
+
+  assert.deepStrictEqual(r.body.matches[0].candidates.map(c => c.vendor_id),
+    ["t1", "t2", "t6", "t7", "t4", "t3"],
+    "tier decides the order, rating breaks ties inside a tier — so the lapsed sub still sorts " +
+    "above the unrated one, but both sit below everyone allowed to bid");
+  assert.strictEqual(r.body.matches[0].eligible_count, 4, "four are allowed to bid without an override");
+
+  // The gate
+  r = await callBids({ action: "add-invites", id, invites: [
+    { trade: "framing", vendor_id: "t1" },
+    { trade: "framing", vendor_id: "t3" },   // unvetted → skipped
+    { trade: "framing", vendor_id: "t4" },   // lapsed COI → skipped
+    { trade: "framing", vendor_id: "t5" },   // blocked → skipped
+  ] });
+  assert.strictEqual(r.body.added, 1, "only the eligible one goes on the list");
+  assert.deepStrictEqual(r.body.skipped.map(x => x.vendor_id).sort(), ["t3", "t4", "t5"]);
+  assert.ok(/do-not-use/.test(r.body.skipped.filter(x => x.vendor_id === "t5")[0].why));
+
+  // Short on coverage? Say so explicitly, per click.
+  r = await callBids({ action: "add-invites", id, allowUnvetted: true, invites: [
+    { trade: "framing", vendor_id: "t3" },
+    { trade: "framing", vendor_id: "t5" },   // still blocked, override or not
+  ] });
+  assert.strictEqual(r.body.added, 1, "unvetted can be let in deliberately");
+  assert.deepStrictEqual(r.body.skipped.map(x => x.vendor_id), ["t5"],
+    "but do-not-use is absolute — no flag reopens it");
+
+  const saved = JSON.parse(DB.bids["p:" + id]);
+  assert.strictEqual(saved.invites.filter(v => v.vendor_id === "t1")[0].tier_at_invite, "preferred",
+    "what they were when invited is kept, so a later lapse is visible as a change");
+
+  console.log("Phase 3 — tiers: ladder, warnings, overrides, and the gate on both sides.");
+}
+
 (async function () {
   await phaseOne();
   await phaseTwo();
+  await phaseThree();
   console.log("\nBid board OK.");
 })().catch((e) => { console.error("FAILED:", e.message); process.exit(1); });
