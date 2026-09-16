@@ -56,7 +56,7 @@ async function resolve(token) {
   const invite = (project.invites || []).filter(function (v) { return v.id === ptr.invite_id; })[0];
   if (!invite) return null;
   const trade = (project.trades || []).filter(function (t) { return t.key === invite.trade; })[0]
-    || { key: invite.trade, label: invite.trade, scope: "" };
+    || { key: invite.trade, label: invite.trade, scope: "", basis: "lump", basis_line: "" };
   return { project: project, invite: invite, trade: trade };
 }
 
@@ -102,7 +102,14 @@ exports.handler = async function (event) {
           plan_notes: project.plan_notes,
           scope_notes: project.scope_notes,
         },
-        trade: { key: trade.key, label: trade.label, scope: trade.scope || "" },
+        trade: {
+          key: trade.key,
+          label: trade.label,
+          scope: trade.scope || "",
+          // basis_line is stored when the package is saved, so what the sub
+          // reads here is word for word what went out in the email.
+          basis_line: trade.basis_line || "",
+        },
         invite: { name: invite.name, company: invite.company },
         response: {
           status: current.status || "opened",

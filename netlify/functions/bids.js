@@ -45,6 +45,55 @@ const PROJECT_STATUSES = ["draft", "out", "closed", "awarded"];
 const INVITE_STATUSES = ["queued", "sent", "opened", "bidding", "declined", "submitted", "awarded"];
 const PROJECT_TYPES = ["custom", "spec", "development", "commercial", "remodel"];
 
+// How a package gets priced. Without this a bid is just a number on one job;
+// with it, and a takeoff quantity, last year's framing bid is comparable to
+// this year's. "lump" is the honest default — plenty of packages are bid whole.
+const BASES = [
+  { key: "lump", label: "Lump sum", short: "lump sum" },
+  { key: "sf", label: "Per square foot", short: "sf" },
+  { key: "sq", label: "Per roofing square", short: "sq" },
+  { key: "lf", label: "Per linear foot", short: "lf" },
+  { key: "sy", label: "Per square yard", short: "sy" },
+  { key: "cy", label: "Per cubic yard", short: "cy" },
+  { key: "ea", label: "Per unit / each", short: "ea" },
+  { key: "hr", label: "Per hour", short: "hr" },
+];
+const BASIS_KEYS = BASES.map(function (b) { return b.key; });
+
+function basisOf(key) {
+  return BASES.filter(function (b) { return b.key === key; })[0] || BASES[0];
+}
+
+function cleanBasis(v, fallback) {
+  const k = clean(v, 10);
+  return BASIS_KEYS.indexOf(k) >= 0 ? k : (fallback || "lump");
+}
+
+// A quantity is only ever a takeoff number — blank beats a guess, because a
+// wrong one silently poisons every unit rate derived from it.
+function cleanQty(v) {
+  if (v == null || v === "") return "";
+  const n = Number(String(v).replace(/[^0-9.]/g, ""));
+  if (!(n > 0)) return "";
+  return Math.round(n * 100) / 100;
+}
+
+// The one-liner the email and the board both show: "per sf · 2,850 sf".
+function basisLine(trade) {
+  if (!trade) return "";
+  const b = basisOf(trade.basis);
+  if (b.key === "lump") return b.label;
+  if (!trade.qty) return b.label;
+  return b.label + " · " + Number(trade.qty).toLocaleString("en-US") + " " + b.short + " on the plans";
+}
+
+// $/unit, which is the number worth keeping. Null whenever it would be a lie.
+function unitRate(amount, trade) {
+  const n = Number(amount);
+  if (!(n > 0) || !trade || trade.basis === "lump" || !(Number(trade.qty) > 0)) return null;
+  return Math.round((n / Number(trade.qty)) * 100) / 100;
+}
+
 function json(code, obj) {
   return { statusCode: code, headers: { "Content-Type": "application/json" }, body: JSON.stringify(obj) };
 }
@@ -93,63 +142,63 @@ function prettyDate(d) {
 // what the plan text has to say for the package to get suggested — sheet
 // prefixes (E1., M2., S1.) count, because a plan index is often all you get.
 const PACKAGES = [
-  { key: "survey", label: "Survey & Staking", trades: ["Surveying", "Survey"],
+  { key: "survey", label: "Survey & Staking", trades: ["Surveying", "Survey"], basis: "lump",
     kw: ["survey", "plat", "staking", "boundary", "topographic", "benchmark"] },
-  { key: "sitework", label: "Site Work & Excavation", trades: ["Excavation & Dirt Work", "Grading", "Demolition", "Trucking & Delivery", "Equipment Rental"],
+  { key: "sitework", label: "Site Work & Excavation", trades: ["Excavation & Dirt Work", "Grading", "Demolition", "Trucking & Delivery", "Equipment Rental"], basis: "lump",
     kw: ["grading", "excavat", "site plan", "erosion", "silt fence", "cut and fill", "building pad", "c1.", "c2.", "civil", "detention", "swale"] },
-  { key: "septic", label: "Septic & Site Utilities", trades: ["Septic"],
+  { key: "septic", label: "Septic & Site Utilities", trades: ["Septic"], basis: "lump",
     kw: ["septic", "leach", "lateral field", "water tap", "sewer tap", "utility plan", "water meter"] },
-  { key: "concrete", label: "Concrete & Foundation", trades: ["Concrete / Flatwork", "Foundation", "Concrete Supply"],
+  { key: "concrete", label: "Concrete & Foundation", trades: ["Concrete / Flatwork", "Foundation", "Concrete Supply"], basis: "sf",
     kw: ["slab", "footing", "foundation", "concrete", "flatwork", "driveway", "rebar", "stem wall", "turndown", "post tension", "psi"] },
-  { key: "framing", label: "Framing & Lumber", trades: ["Framing", "Lumber"],
+  { key: "framing", label: "Framing & Lumber", trades: ["Framing", "Lumber"], basis: "sf",
     kw: ["framing", "truss", "joist", "header", "stud", "rafter", "beam", "lvl", "sheathing", "s1.", "s2.", "structural plan", "shear wall"] },
-  { key: "roofing", label: "Roofing", trades: ["Roofing", "Roofing Supply"],
+  { key: "roofing", label: "Roofing", trades: ["Roofing", "Roofing Supply"], basis: "sq",
     kw: ["roof", "shingle", "underlayment", "ridge vent", "valley", "standing seam", "fascia", "soffit"] },
-  { key: "windows", label: "Windows & Exterior Doors", trades: ["Windows & Doors"],
+  { key: "windows", label: "Windows & Exterior Doors", trades: ["Windows & Doors"], basis: "ea",
     kw: ["window schedule", "window", "exterior door", "glazing", "sliding door", "door schedule", "transom"] },
-  { key: "exterior", label: "Siding, Masonry & Stucco", trades: ["Siding", "Masonry & Stone", "Stucco"],
+  { key: "exterior", label: "Siding, Masonry & Stucco", trades: ["Siding", "Masonry & Stone", "Stucco"], basis: "sf",
     kw: ["siding", "brick", "stone veneer", "stucco", "hardie", "lap siding", "board and batten", "masonry", "exterior elevation"] },
-  { key: "plumbing", label: "Plumbing", trades: ["Plumbing", "Plumbing Fixtures"],
+  { key: "plumbing", label: "Plumbing", trades: ["Plumbing", "Plumbing Fixtures"], basis: "lump",
     kw: ["plumbing", "p1.", "p2.", "water heater", "tankless", "lavatory", "water closet", "supply line", "drain", "dwv", "fixture schedule"] },
-  { key: "hvac", label: "HVAC", trades: ["HVAC", "HVAC Supply"],
+  { key: "hvac", label: "HVAC", trades: ["HVAC", "HVAC Supply"], basis: "lump",
     kw: ["hvac", "mechanical", "m1.", "m2.", "duct", "condenser", "air handler", "manual j", "mini split", "return air", "register"] },
-  { key: "electrical", label: "Electrical", trades: ["Electrical", "Electrical Supply"],
+  { key: "electrical", label: "Electrical", trades: ["Electrical", "Electrical Supply"], basis: "lump",
     kw: ["electrical", "e1.", "e2.", "panel schedule", "circuit", "receptacle", "lighting plan", "amp service", "can light", "switch leg"] },
-  { key: "lowvolt", label: "Low Voltage, Security & AV", trades: ["Low Voltage / Security"],
+  { key: "lowvolt", label: "Low Voltage, Security & AV", trades: ["Low Voltage / Security"], basis: "lump",
     kw: ["low voltage", "security", "camera", "cat6", "structured wiring", "speaker", "alarm", "data drop", "smart home"] },
-  { key: "insulation", label: "Insulation", trades: ["Insulation"],
+  { key: "insulation", label: "Insulation", trades: ["Insulation"], basis: "sf",
     kw: ["insulation", "batt", "spray foam", "blown", "r-value", "r-38", "r-19", "radiant barrier"] },
-  { key: "drywall", label: "Drywall", trades: ["Drywall"],
+  { key: "drywall", label: "Drywall", trades: ["Drywall"], basis: "sf",
     kw: ["drywall", "sheetrock", "gypsum", "texture", "level 4", "tape and float", "5/8 type x"] },
-  { key: "trim", label: "Interior Trim & Doors", trades: ["Trim & Finish Carpentry"],
+  { key: "trim", label: "Interior Trim & Doors", trades: ["Trim & Finish Carpentry"], basis: "sf",
     kw: ["trim", "baseboard", "casing", "crown", "interior door", "shelving", "millwork", "wainscot", "mantel"] },
-  { key: "cabinets", label: "Cabinets & Countertops", trades: ["Cabinets", "Countertops", "Countertops & Stone"],
+  { key: "cabinets", label: "Cabinets & Countertops", trades: ["Cabinets", "Countertops", "Countertops & Stone"], basis: "lump",
     kw: ["cabinet", "vanity", "countertop", "quartz", "granite", "island", "cabinetry", "pantry shelving"] },
-  { key: "paint", label: "Painting", trades: ["Paint", "Paint Supply"],
+  { key: "paint", label: "Painting", trades: ["Paint", "Paint Supply"], basis: "sf",
     kw: ["paint", "primer", "finish schedule", "sheen", "stain grade", "caulk and paint"] },
-  { key: "flooring", label: "Flooring & Tile", trades: ["Flooring", "Tile"],
+  { key: "flooring", label: "Flooring & Tile", trades: ["Flooring", "Tile"], basis: "sf",
     kw: ["flooring", "lvp", "hardwood", "carpet", "tile", "shower pan", "grout", "backsplash", "finish floor"] },
-  { key: "gutters", label: "Gutters", trades: ["Gutters"],
+  { key: "gutters", label: "Gutters", trades: ["Gutters"], basis: "lf",
     kw: ["gutter", "downspout", "collection box"] },
-  { key: "garage", label: "Garage Doors", trades: ["Garage Doors"],
+  { key: "garage", label: "Garage Doors", trades: ["Garage Doors"], basis: "ea",
     kw: ["garage door", "overhead door", "door opener"] },
-  { key: "appliances", label: "Appliances", trades: ["Appliances", "Appliance Install"],
+  { key: "appliances", label: "Appliances", trades: ["Appliances", "Appliance Install"], basis: "lump",
     kw: ["appliance", "range", "cooktop", "refrigerator", "dishwasher", "microwave", "vent hood"] },
-  { key: "glass", label: "Glass, Mirror & Shower Doors", trades: ["Glass & Mirror"],
+  { key: "glass", label: "Glass, Mirror & Shower Doors", trades: ["Glass & Mirror"], basis: "ea",
     kw: ["mirror", "shower glass", "glass enclosure", "frameless"] },
-  { key: "metal", label: "Welding, Railing & Steel", trades: ["Welding & Metal"],
+  { key: "metal", label: "Welding, Railing & Steel", trades: ["Welding & Metal"], basis: "lf",
     kw: ["handrail", "railing", "structural steel", "welding", "canopy", "steel column", "w8x", "hss"] },
-  { key: "waterproof", label: "Waterproofing & Drainage", trades: ["Waterproofing"],
+  { key: "waterproof", label: "Waterproofing & Drainage", trades: ["Waterproofing"], basis: "lf",
     kw: ["waterproof", "damp proofing", "french drain", "vapor barrier", "foundation drain"] },
-  { key: "decks", label: "Decks & Outdoor Living", trades: ["Decks"],
+  { key: "decks", label: "Decks & Outdoor Living", trades: ["Decks"], basis: "sf",
     kw: ["deck", "pergola", "screened porch", "outdoor kitchen", "patio cover", "fire pit"] },
-  { key: "pool", label: "Pool & Spa", trades: ["Pools"],
+  { key: "pool", label: "Pool & Spa", trades: ["Pools"], basis: "lump",
     kw: ["pool", "gunite", "spa", "pool deck"] },
-  { key: "landscape", label: "Landscaping & Irrigation", trades: ["Landscaping", "Irrigation"],
+  { key: "landscape", label: "Landscaping & Irrigation", trades: ["Landscaping", "Irrigation"], basis: "lump",
     kw: ["landscap", "sod", "irrigation", "planting plan", "l1.", "shrub", "mulch", "seeding"] },
-  { key: "fencing", label: "Fencing", trades: ["Fencing"],
+  { key: "fencing", label: "Fencing", trades: ["Fencing"], basis: "lf",
     kw: ["fence", "fencing", "gate operator", "privacy fence"] },
-  { key: "cleanup", label: "Final Clean, Dumpsters & Toilets", trades: ["Cleanup / Trash Out", "Dumpsters & Waste", "Portable Toilets"],
+  { key: "cleanup", label: "Final Clean, Dumpsters & Toilets", trades: ["Cleanup / Trash Out", "Dumpsters & Waste", "Portable Toilets"], basis: "lump",
     kw: ["final clean", "trash out", "dumpster", "portable toilet", "construction debris"] },
 ];
 
@@ -189,6 +238,8 @@ function keywordRead(text, type) {
       key: p.key,
       label: p.label,
       scope: "",
+      basis: p.basis,
+      qty: "",
       why: hits.length
         ? "Plans mention " + hits.slice(0, 3).map(function (h) { return '"' + h.trim() + '"'; }).join(", ")
         : "Standard package for this job type",
@@ -218,10 +269,12 @@ const PLAN_SCHEMA = {
         properties: {
           key: { type: "string", enum: PACKAGES.map(function (p) { return p.key; }) },
           scope: { type: "string" },
+          basis: { type: "string", enum: BASIS_KEYS },
+          quantity: { type: "number" },
           why: { type: "string" },
           confidence: { type: "string", enum: ["high", "medium", "low"] },
         },
-        required: ["key", "scope", "why", "confidence"],
+        required: ["key", "scope", "basis", "quantity", "why", "confidence"],
         additionalProperties: false,
       },
     },
@@ -256,6 +309,11 @@ async function deepRead(text, project) {
         "materials and finishes the plans actually specify. Never invent a number the plans do not show.\n" +
         "- why: a short reason, citing the sheet or note when there is one.\n" +
         "- confidence: high when the plans show the work directly, low when you are inferring it.\n" +
+        "- basis: how this package is normally priced. Use lump unless the plans support a unit.\n" +
+        "- quantity: the takeoff quantity in that unit, read off the plans — heated square feet from " +
+        "the title block, roof squares off the roof plan, linear feet of fence off the site plan. " +
+        "Use 0 whenever the plans do not show it. A guessed quantity is worse than none, because " +
+        "every unit price derived from it will be wrong.\n" +
         "- flags: things that will cost the GC money if missed — missing sheets, an allowance with no spec, " +
         "an unusual detail, a long-lead item. Empty array if nothing stands out.",
       messages: [{
@@ -283,6 +341,8 @@ async function deepRead(text, project) {
         key: pkg.key,
         label: pkg.label,
         scope: clean(row.scope, 900),
+        basis: cleanBasis(row.basis, pkg.basis),
+        qty: cleanQty(row.quantity),
         why: clean(row.why, 300),
         confidence: row.confidence || "medium",
         hits: 1,
@@ -357,7 +417,7 @@ async function loadResponses(tokens) {
 }
 
 // ── Derived view ─────────────────────────────────────────────────────────────
-function decorateInvite(inv, resp, project) {
+function decorateInvite(inv, resp, project, trade) {
   const r = resp || {};
   let status = r.status || (inv.sent_at ? "sent" : "queued");
   if (INVITE_STATUSES.indexOf(status) < 0) status = "sent";
@@ -366,6 +426,7 @@ function decorateInvite(inv, resp, project) {
   const answered = ["bidding", "declined", "submitted", "awarded"].indexOf(status) >= 0;
   return Object.assign({}, inv, {
     status: status,
+    unit_rate: unitRate(r.amount, trade),
     opened_at: r.opened_at || "",
     responded_at: r.responded_at || "",
     amount: r.amount == null ? "" : r.amount,
@@ -380,8 +441,10 @@ function decorateInvite(inv, resp, project) {
 // Coverage is the number Cole actually cares about: not "did I email people"
 // but "is there a real bid on this trade, and is the clock running out".
 function decorate(project, responses) {
+  const tradeByKey = {};
+  (project.trades || []).forEach(function (t) { tradeByKey[t.key] = t; });
   const invites = (project.invites || []).map(function (inv) {
-    return decorateInvite(inv, responses[inv.token], project);
+    return decorateInvite(inv, responses[inv.token], project, tradeByKey[inv.trade]);
   });
   const trades = (project.trades || []).map(function (t) {
     const mine = invites.filter(function (v) { return v.trade === t.key; });
@@ -393,7 +456,15 @@ function decorate(project, responses) {
     else if (submitted.length === 1) coverage = "thin";
     else if (bidding.length) coverage = "pending";
     else if (mine.some(function (v) { return v.sent_at; })) coverage = "waiting";
+    const low = submitted.reduce(function (acc, v) {
+      const n = Number(v.amount);
+      return n > 0 && (acc == null || n < acc) ? n : acc;
+    }, null);
     return Object.assign({}, t, {
+      basis: t.basis || "lump",
+      basis_label: basisOf(t.basis).short,
+      basis_line: basisLine(t),
+      unit_low: unitRate(low, t),
       invited: mine.length,
       sent: mine.filter(function (v) { return v.sent_at; }).length,
       opened: mine.filter(function (v) { return v.opened_at; }).length,
@@ -401,10 +472,7 @@ function decorate(project, responses) {
       declined: declined.length,
       submitted: submitted.length,
       awarded: mine.filter(function (v) { return v.status === "awarded"; }).length,
-      low: submitted.reduce(function (acc, v) {
-        const n = Number(v.amount);
-        return n > 0 && (acc == null || n < acc) ? n : acc;
-      }, null),
+      low: low,
       coverage: coverage,
     });
   });
@@ -471,6 +539,7 @@ function inviteEmail(project, trade, invite) {
     ["Project", project.name],
     ["Location", project.address],
     ["Scope", trade.label],
+    ["Bid basis", basisLine(trade)],
     ["Bids due", due || "As soon as you can"],
     ["Walk-through", project.walk_at ? prettyDate(project.walk_at) + (project.walk_time ? " at " + project.walk_time : "") : ""],
     ["Target start", project.start_date ? prettyDate(project.start_date) : ""],
@@ -589,7 +658,10 @@ exports.handler = async function (event) {
     // ── catalog ─────────────────────────────────────────────────────────────
     if (req.action === "catalog") {
       return json(200, {
-        packages: PACKAGES.map(function (p) { return { key: p.key, label: p.label, trades: p.trades }; }),
+        packages: PACKAGES.map(function (p) {
+          return { key: p.key, label: p.label, trades: p.trades, basis: p.basis };
+        }),
+        bases: BASES,
         types: PROJECT_TYPES,
         deep_read: !!process.env.ANTHROPIC_API_KEY,
         can_email: !!process.env.RESEND_API_KEY,
@@ -702,6 +774,7 @@ exports.handler = async function (event) {
       (project.trades || []).forEach(function (t) {
         if (!have[t.key]) {
           result.packages.push({ key: t.key, label: t.label, scope: t.scope || "",
+            basis: t.basis || "lump", qty: t.qty == null ? "" : t.qty,
             why: "Already on this project", confidence: "high", hits: 1 });
         }
       });
@@ -734,7 +807,13 @@ exports.handler = async function (event) {
         const pkg = packageByKey(clean(t.key, 40));
         if (!pkg || seen[pkg.key]) return;
         seen[pkg.key] = true;
-        next.push({ key: pkg.key, label: pkg.label, scope: clean(t.scope, 900), why: clean(t.why, 300) });
+        const row = {
+          key: pkg.key, label: pkg.label, scope: clean(t.scope, 900), why: clean(t.why, 300),
+          basis: cleanBasis(t.basis, pkg.basis), qty: "",
+        };
+        if (row.basis !== "lump") row.qty = cleanQty(t.qty);
+        row.basis_line = basisLine(row);
+        next.push(row);
       });
       const kept = [];
       (project.trades || []).forEach(function (t) {
@@ -854,7 +933,7 @@ exports.handler = async function (event) {
       (project.trades || []).forEach(function (t) { tradeByKey[t.key] = t; });
 
       const chosen = (project.invites || []).filter(function (inv) {
-        const view = decorateInvite(inv, responses[inv.token], project);
+        const view = decorateInvite(inv, responses[inv.token], project, tradeByKey[inv.trade]);
         if (mode === "selected") return picked.indexOf(inv.id) >= 0;
         if (mode === "remind") return !!inv.sent_at && !view.answered;
         return !inv.sent_at;
@@ -986,7 +1065,8 @@ exports.handler = async function (event) {
       cur.by = "CRA";
       cur.updated_at = new Date().toISOString();
       await s.setJSON(inv.token, cur);
-      return json(200, { ok: true, invite: decorateInvite(inv, cur, project) });
+      const invTrade = (project.trades || []).filter(function (t) { return t.key === inv.trade; })[0];
+      return json(200, { ok: true, invite: decorateInvite(inv, cur, project, invTrade) });
     }
 
     // ── award ───────────────────────────────────────────────────────────────

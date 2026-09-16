@@ -202,6 +202,7 @@
       ["Project", p.name],
       ["Location", p.address],
       ["Your package", t.label],
+      ["How to price it", t.basis_line || ""],
       ["Bids due", p.bid_due ? fmtDate(p.bid_due) : "As soon as you can get it to us"],
       ["Walk-through", p.walk_at ? fmtDate(p.walk_at) + (p.walk_time ? " at " + p.walk_time : "") : ""],
       ["Target start", p.start_date ? fmtDate(p.start_date) : ""]
