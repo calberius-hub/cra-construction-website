@@ -162,6 +162,15 @@
     .cand .who{font-weight:600;font-size:14px;}
     .cand .det{font-size:11.5px;color:var(--muted);line-height:1.6;}
     .cand.out{opacity:.5;}
+    .tier{display:inline-block;font-size:9.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;padding:3px 8px;border-radius:3px;margin-left:6px;white-space:nowrap;}
+    .tier.preferred{background:#e6f3ec;color:#2c6a45;}
+    .tier.approved{background:rgba(29,58,74,.11);color:var(--navy);}
+    .tier.unvetted{background:#fff4e0;color:#8a5a00;}
+    .tier.blocked{background:#fdecec;color:var(--red);}
+    .why{font-size:11.5px;color:var(--muted);}
+    .warn-line{font-size:11.5px;color:#8a5a00;}
+    .cand.locked{opacity:.62;}
+    .gate-note{font-size:12.5px;color:var(--muted);background:var(--cream);border:1px solid var(--line);border-radius:4px;padding:9px 12px;margin:8px 0 2px;}
     .tagline{display:inline-block;font-size:10px;padding:3px 7px;border-radius:20px;background:rgba(201,165,74,.16);color:var(--gold2);margin-left:6px;}
     .tagline.grey{background:#f0eee9;color:var(--muted);}
     .tagline.green{background:#e6f3ec;color:#2c6a45;}
@@ -302,13 +311,17 @@
       <div class="sec-head">
         <div>
           <h2>3 · Who gets it</h2>
-          <div class="hint">Straight out of the sub library, best-rated first. Anyone marked do-not-use never shows up here.</div>
+          <div class="hint">Straight out of the sub library, by tier. Only Preferred and Approved can be sent plans; do-not-use never appears at all.</div>
         </div>
         <div class="actions">
-          <button class="btn btn-ghost btn-sm" id="pickBestBtn">Check everyone approved &amp; used</button>
+          <button class="btn btn-ghost btn-sm" id="pickBestBtn">Check everyone allowed to bid</button>
           <button class="btn btn-sm" id="addInvitesBtn">Add checked to the list</button>
         </div>
       </div>
+      <label class="check" id="unvettedWrap" style="margin-top:0;">
+        <input type="checkbox" id="showUnvetted" />
+        <span>Also show unvetted subs — short on coverage and willing to take one on</span>
+      </label>
       <div id="matchList"></div>
     </div>
 
@@ -939,46 +952,69 @@
   }
 
   function renderMatches(librarySize){
+    var showUnvetted = $("showUnvetted").checked;
     $("matchList").innerHTML = MATCHES.map(function(m){
-      var open = m.candidates.filter(function(c){ return !c.already_invited; });
-      var body = !m.candidates.length
-        ? '<div class="note">Nobody in the library does this work yet. Add them in the ' +
-          '<a href="/subs" style="color:var(--gold2);text-decoration:underline;">sub library</a> first.</div>'
-        : m.candidates.map(function(c){
-            return '<label class="cand' + (c.already_invited ? " out" : "") + '">' +
-              '<input type="checkbox" data-trade="' + esc(m.key) + '" data-vendor="' + esc(c.vendor_id) + '"' +
+      var shown = m.candidates.filter(function(c){ return showUnvetted || c.eligible; });
+      var hidden = m.candidates.length - shown.length;
+
+      var body;
+      if (!m.candidates.length){
+        body = '<div class="note">Nobody in the library does this work yet. Add them in the ' +
+          '<a href="/subs" style="color:var(--gold2);text-decoration:underline;">sub library</a> first.</div>';
+      } else if (!shown.length){
+        body = '<div class="gate-note"><b>Nobody approved to bid this one.</b> ' + hidden +
+          ' unvetted ' + (hidden === 1 ? "sub is" : "subs are") + ' hidden — vet them in the ' +
+          '<a href="/subs" style="color:var(--gold2);text-decoration:underline;">library</a>, ' +
+          'or tick the box above to send it to them anyway.</div>';
+      } else {
+        body = shown.map(function(c){
+          var locked = !c.eligible;
+          return '<label class="cand' + (c.already_invited ? " out" : "") + (locked ? " locked" : "") + '">' +
+            '<input type="checkbox" data-trade="' + esc(m.key) + '" data-vendor="' + esc(c.vendor_id) + '"' +
               (c.already_invited ? " disabled" : "") + " />" +
-              "<div><div class='who'>" + esc(c.name || "(no name)") +
-                (c.company ? " · " + esc(c.company) : "") +
-                '<span class="tagline' + (c.status === "approved" || c.status === "used" ? " green" : " grey") + '">' +
-                  esc(c.status) + "</span>" +
-                (c.rating ? '<span class="tagline">' + c.rating + "★</span>" : "") +
-                (c.already_invited ? '<span class="tagline grey">already invited</span>' : "") +
-              "</div>" +
-              "<div class='det'>" + (c.email ? esc(c.email) : '<span style="color:var(--red)">no email on file</span>') +
-                (c.phone ? " · " + esc(c.phone) : "") +
-                (c.sms_consent ? " · texts ok" : "") + "</div></div></label>";
-          }).join("");
-      return '<div class="sec-h">' + esc(m.label) + " · " + m.candidates.length + " in the library" +
-        (open.length ? "" : " · all invited") + "</div>" + body;
+            "<div><div class='who'>" + esc(c.name || "(no name)") +
+              (c.company ? " · " + esc(c.company) : "") +
+              '<span class="tier ' + esc(c.tier) + '">' + esc(c.tier_label) + "</span>" +
+              (c.tier_overridden ? '<span class="tagline grey">by hand</span>' : "") +
+              (c.rating ? '<span class="tagline">' + c.rating + "★</span>" : "") +
+              (c.already_invited ? '<span class="tagline grey">already invited</span>' : "") +
+            "</div>" +
+            (c.tier_reason ? "<div class='why'>" + esc(c.tier_reason) + "</div>" : "") +
+            (c.tier_warning ? "<div class='warn-line'>⚠ " + esc(c.tier_warning) + "</div>" : "") +
+            "<div class='det'>" + (c.email ? esc(c.email) : '<span style="color:var(--red)">no email on file</span>') +
+              (c.phone ? " · " + esc(c.phone) : "") +
+              (c.sms_consent ? " · texts ok" : "") + "</div></div></label>";
+        }).join("");
+        if (hidden){
+          body += '<div class="gate-note">' + hidden + " unvetted " +
+            (hidden === 1 ? "sub" : "subs") + " hidden on this package.</div>";
+        }
+      }
+
+      return '<div class="sec-h">' + esc(m.label) + " · " + m.eligible_count + " allowed to bid" +
+        (m.candidates.length - m.eligible_count
+          ? " · " + (m.candidates.length - m.eligible_count) + " unvetted" : "") +
+        "</div>" + body;
     }).join("") || '<div class="note">No packages saved yet.</div>';
+
     if (librarySize != null && !librarySize){
       $("matchList").innerHTML = '<div class="note">The sub library is empty. Collect subs with the ' +
         '<a href="/bid" style="color:var(--gold2);text-decoration:underline;">Bid My Job</a> QR intake, ' +
         'or add them by hand in the <a href="/subs" style="color:var(--gold2);text-decoration:underline;">library</a>.</div>';
     }
   }
+  $("showUnvetted").onchange = function(){ renderMatches(); };
 
   $("pickBestBtn").onclick = function(){
     var checked = 0;
     MATCHES.forEach(function(m){
       m.candidates.forEach(function(c){
-        if (c.already_invited || (c.status !== "approved" && c.status !== "used")) return;
+        if (c.already_invited || !c.eligible) return;
         var box = $("matchList").querySelector('input[data-trade="' + m.key + '"][data-vendor="' + c.vendor_id + '"]');
         if (box && !box.disabled){ box.checked = true; checked += 1; }
       });
     });
-    if (!checked) alert("Nobody in the library is marked approved or used for these packages yet.");
+    if (!checked) alert("Nobody in the library is approved to bid these packages yet. Vet somebody in the sub library, or tick the unvetted box to send it to them anyway.");
   };
 
   $("addInvitesBtn").onclick = function(){
@@ -988,12 +1024,14 @@
     if (!picked.length){ alert("Check who you want on this one first."); return; }
     var self = this;
     self.disabled = true;
-    api("add-invites", { id: P.id, invites: picked }).then(function(res){
+    api("add-invites", { id: P.id, invites: picked, allowUnvetted: $("showUnvetted").checked }).then(function(res){
       self.disabled = false;
       if (res.status !== 200){ alert(res.body.error || "Couldn't add them."); return; }
       if ((res.body.skipped || []).length){
-        alert("Added " + res.body.added + ". Skipped " + res.body.skipped.length + ": " +
-          res.body.skipped.map(function(s){ return s.why; }).join(", ") + ".");
+        alert("Added " + res.body.added + ". Skipped " + res.body.skipped.length + ":\n\n" +
+          res.body.skipped.map(function(s){
+            return "· " + (s.name || s.vendor_id) + " — " + s.why;
+          }).join("\n"));
       }
       openProject(P.id);
     });

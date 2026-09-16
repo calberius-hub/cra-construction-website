@@ -40,6 +40,7 @@
 
 const { getStore } = require("@netlify/blobs");
 const crypto = require("crypto");
+const { decorateSub, TIERS } = require("./subs.js");
 
 const PROJECT_STATUSES = ["draft", "out", "closed", "awarded"];
 const INVITE_STATUSES = ["queued", "sent", "opened", "bidding", "declined", "submitted", "awarded"];
@@ -516,17 +517,6 @@ async function readSubs() {
   return Array.isArray(arr) ? arr : [];
 }
 
-function subRating(sub) {
-  const ratings = Array.isArray(sub.ratings) ? sub.ratings : [];
-  const keys = ["on_time", "quality", "price", "cleanup", "again"];
-  const vals = [];
-  ratings.forEach(function (r) {
-    keys.forEach(function (k) { const n = Number(r[k]); if (n >= 1 && n <= 5) vals.push(n); });
-  });
-  if (!vals.length) return null;
-  return Math.round((vals.reduce(function (a, b) { return a + b; }, 0) / vals.length) * 10) / 10;
-}
-
 // ── Email + SMS ──────────────────────────────────────────────────────────────
 function inviteLink(token, action) {
   return siteUrl() + "/bid-invite?t=" + token + (action ? "&a=" + action : "");
@@ -662,6 +652,7 @@ exports.handler = async function (event) {
           return { key: p.key, label: p.label, trades: p.trades, basis: p.basis };
         }),
         bases: BASES,
+        tiers: TIERS,
         types: PROJECT_TYPES,
         deep_read: !!process.env.ANTHROPIC_API_KEY,
         can_email: !!process.env.RESEND_API_KEY,
@@ -828,13 +819,15 @@ exports.handler = async function (event) {
 
     // ── match ───────────────────────────────────────────────────────────────
     if (req.action === "match") {
-      const subs = await readSubs();
+      const subs = (await readSubs()).map(decorateSub);
       const invitedBy = {};
       (project.invites || []).forEach(function (v) { invitedBy[v.trade + "|" + v.vendor_id] = true; });
       const out = (project.trades || []).map(function (t) {
         const pkg = packageByKey(t.key);
         const candidates = subs.filter(function (s) {
-          return s.status !== "do-not-use" && s.kind !== "worker" && pkg && vendorMatches(s, pkg);
+          // Blocked subs never reach a bid screen at all — not greyed out,
+          // not sorted last. Nothing to click by accident at 10pm.
+          return s.tier !== "blocked" && s.kind !== "worker" && pkg && vendorMatches(s, pkg);
         }).map(function (s) {
           return {
             vendor_id: s.id,
@@ -844,22 +837,32 @@ exports.handler = async function (event) {
             phone: s.phone || "",
             trades: s.trades || [],
             status: s.status || "new",
+            tier: s.tier,
+            tier_level: s.tier_level,
+            tier_label: s.tier_label,
+            tier_reason: s.tier_reason,
+            tier_warning: s.tier_warning || "",
+            tier_overridden: !!s.tier_overridden,
+            eligible: s.tier_level <= TIERS.approved.level,
             sms_consent: !!s.sms_consent,
-            rating: subRating(s),
+            rating: s.overall,
             ins_exp: s.ins_exp || "",
+            ins_expiring: !!s.ins_expiring,
             already_invited: !!invitedBy[t.key + "|" + s.id],
             reachable: !!(s.email || s.phone),
           };
         });
-        // Best first: people you've used and rated, then vetted, then the rest.
-        const rank = { approved: 0, used: 1, vetted: 2, new: 3 };
+        // Tier first, then who you rated highest inside it.
         candidates.sort(function (a, b) {
-          const ra = rank[a.status] == null ? 4 : rank[a.status];
-          const rb = rank[b.status] == null ? 4 : rank[b.status];
-          if (ra !== rb) return ra - rb;
+          if (a.tier_level !== b.tier_level) return a.tier_level - b.tier_level;
           return (b.rating || 0) - (a.rating || 0);
         });
-        return { key: t.key, label: t.label, candidates: candidates };
+        return {
+          key: t.key,
+          label: t.label,
+          candidates: candidates,
+          eligible_count: candidates.filter(function (c) { return c.eligible; }).length,
+        };
       });
       return json(200, { matches: out, library_size: subs.length });
     }
@@ -867,7 +870,11 @@ exports.handler = async function (event) {
     // ── add-invites ─────────────────────────────────────────────────────────
     if (req.action === "add-invites") {
       const rows = Array.isArray(req.invites) ? req.invites.slice(0, 300) : [];
-      const subs = await readSubs();
+      // Unvetted subs are skipped unless this call says otherwise. The flag is
+      // set per click on the board, so letting somebody unvetted bid is always
+      // a decision somebody made for that package, never a default.
+      const allowUnvetted = !!req.allowUnvetted;
+      const subs = (await readSubs()).map(decorateSub);
       const byId = {};
       subs.forEach(function (s) { byId[s.id] = s; });
       const existing = {};
@@ -886,6 +893,19 @@ exports.handler = async function (event) {
         const sub = byId[vid];
         if (!sub) { skipped.push({ vendor_id: vid, why: "not in the library" }); continue; }
         if (!sub.email && !sub.phone) { skipped.push({ vendor_id: vid, why: "no email or phone on file" }); continue; }
+        // The gate. Blocked is absolute; unvetted needs the explicit flag.
+        if (sub.tier === "blocked") {
+          skipped.push({ vendor_id: vid, name: sub.name || sub.company, why: "marked do-not-use" });
+          continue;
+        }
+        if (sub.tier_level > TIERS.approved.level && !allowUnvetted) {
+          skipped.push({
+            vendor_id: vid,
+            name: sub.name || sub.company,
+            why: "unvetted — " + (sub.tier_reason || "not approved to bid"),
+          });
+          continue;
+        }
         const token = newToken();
         const inv = {
           id: newId("i"),
@@ -897,6 +917,7 @@ exports.handler = async function (event) {
           email: (sub.email || "").toLowerCase(),
           phone: sub.phone || "",
           sms_consent: !!sub.sms_consent,
+          tier_at_invite: sub.tier,
           added_at: new Date().toISOString(),
           sent_at: "",
           reminders: [],

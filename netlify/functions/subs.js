@@ -23,6 +23,80 @@
 const { getStore } = require("@netlify/blobs");
 
 const STATUSES = ["new", "vetted", "approved", "used", "do-not-use"];
+
+// ── Bid tiers ───────────────────────────────────────────────────────────────
+// Derived, not another field to keep up to date. The library already knows a
+// sub's status, how they've been rated and whether their insurance is current,
+// and those are exactly what decides whether you'd let them bid your job. The
+// payoff for deriving it: a COI that lapses drops that sub out of the bidding
+// pool by itself, with nobody remembering to go change a setting.
+//
+//   preferred  — proven on CRA jobs, rated well, papers current
+//   approved   — vetted, papers current, fine to send plans to
+//   unvetted   — never checked out, or something has lapsed
+//   blocked    — do-not-use; never appears anywhere near a bid
+//
+// tier_override sets it by hand when the ladder is wrong about somebody. The
+// one thing an override cannot do is un-block a do-not-use sub — that call is
+// made in the library, deliberately, and a bid screen is the wrong place to
+// quietly reverse it.
+const TIERS = {
+  preferred: { level: 1, label: "Preferred" },
+  approved: { level: 2, label: "Approved to bid" },
+  unvetted: { level: 3, label: "Unvetted" },
+  blocked: { level: 9, label: "Blocked" },
+};
+const TIER_KEYS = Object.keys(TIERS);
+
+function tierOf(rec, view) {
+  function warning() {
+    if (view.ins_expired) return "COI expired " + rec.ins_exp;
+    if (view.ins_expiring) return "COI expires in " + view.ins_days + " day" + (view.ins_days === 1 ? "" : "s");
+    if (!rec.insured && !rec.ins_exp) return "No insurance on file — get a COI before they start";
+    if (!rec.workers_comp) return "No workers comp on file";
+    return "";
+  }
+  function out(key, reason, overridden) {
+    return {
+      tier: key,
+      tier_level: TIERS[key].level,
+      tier_label: TIERS[key].label,
+      tier_reason: reason,
+      tier_warning: warning(),
+      tier_overridden: !!overridden,
+    };
+  }
+
+  if (rec.status === "do-not-use") return out("blocked", "Marked do-not-use in the library");
+
+  const override = String(rec.tier_override || "");
+  if (TIER_KEYS.indexOf(override) >= 0) {
+    return out(override, "Set by hand" + (override === "blocked" ? "" : ", overriding the library"), true);
+  }
+
+  // A lapse outranks a good history: an expired COI is why you don't send
+  // somebody plans, however well they framed the last house.
+  //
+  // A *missing* COI is deliberately not a demotion. Most of the library came
+  // in off a QR sign where nobody filled in the insurance box, and treating
+  // blank as uninsured would drop nearly everyone into unvetted — which just
+  // teaches you to click past the gate until it means nothing. Marking a sub
+  // approved is your vetting call; the ladder only overrides it on evidence,
+  // and surfaces the blank as a warning instead.
+  if (view.ins_expired) return out("unvetted", "Insurance expired — renew the COI to put them back in");
+  if (view.license_expired) return out("unvetted", "License expired");
+  if (rec.status === "new") return out("unvetted", "Never vetted");
+
+  const proven = rec.status === "approved" || rec.status === "used";
+  if (proven && view.rating_count > 0 && view.overall != null && view.overall >= 4) {
+    return out("preferred", "Rated " + view.overall + " across " + view.rating_count +
+      " job" + (view.rating_count === 1 ? "" : "s"));
+  }
+  if (proven || rec.status === "vetted") {
+    return out("approved", rec.status === "used" ? "Used on a CRA job" : "Vetted, papers current");
+  }
+  return out("unvetted", "Not vetted yet");
+}
 const RATING_KEYS = ["on_time", "quality", "price", "cleanup", "again"];
 
 function json(code, obj) {
@@ -77,7 +151,7 @@ function decorate(rec) {
   const overallVals = RATING_KEYS.map((k) => avg[k]).filter((n) => n != null);
   const insDays = daysUntil(rec.ins_exp);
   const licDays = daysUntil(rec.license_exp);
-  return Object.assign({}, rec, {
+  const view = {
     avg,
     rating_count: ratings.length,
     overall: overallVals.length
@@ -87,7 +161,8 @@ function decorate(rec) {
     ins_expired: insDays != null && insDays < 0,
     ins_expiring: insDays != null && insDays >= 0 && insDays <= 30,
     license_expired: licDays != null && licDays < 0,
-  });
+  };
+  return Object.assign({}, rec, view, tierOf(rec, view));
 }
 
 // Fields the portal is allowed to edit. Anything not listed here — id,
@@ -96,8 +171,14 @@ const EDITABLE = [
   "name", "company", "phone", "email", "trades", "lang", "city", "service_area",
   "crew_size", "years", "license_no", "license_exp", "insured", "ins_carrier",
   "ins_exp", "workers_comp", "pricing_mode", "rate_notes", "notes",
-  "internal_notes", "kind", "tags", "sms_consent",
+  "internal_notes", "kind", "tags", "sms_consent", "tier_override",
 ];
+
+// Exported so the bid board gates on exactly the tier the library shows.
+// One implementation, so the two screens can never disagree about who is
+// allowed to receive a set of plans.
+exports.decorateSub = decorate;
+exports.TIERS = TIERS;
 
 exports.handler = async function (event) {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
@@ -192,6 +273,9 @@ exports.handler = async function (event) {
         if (k === "trades" || k === "tags") {
           all[idx][k] = Array.isArray(patch[k])
             ? patch[k].map((t) => clean(t, 60)).filter(Boolean).slice(0, 16) : [];
+        } else if (k === "tier_override") {
+          const v = clean(patch[k], 20);
+          all[idx][k] = TIER_KEYS.indexOf(v) >= 0 ? v : "";
         } else if (k === "insured" || k === "workers_comp" || k === "sms_consent") {
           all[idx][k] = !!patch[k];
           // Revoking from the portal (they called and said stop) clears the
