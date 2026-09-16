@@ -198,7 +198,30 @@ const EDITABLE = [
 exports.decorateSub = decorate;
 exports.TIERS = TIERS;
 
-exports.handler = async function (event) {
+// The library screen now lives on the Alberius Ops Hub, but the data — and the
+// tier logic the bid board shares — stays here. So this function answers a
+// named short list of origins, and nothing else.
+const ALLOWED_ORIGINS = [
+  "https://alberiusops.com",
+  "https://www.alberiusops.com",
+  "https://alberius-operations-hub.netlify.app",
+  "http://localhost:8888",
+];
+
+function corsHeaders(event) {
+  const h = event.headers || {};
+  const origin = h.origin || h.Origin || "";
+  if (!ALLOWED_ORIGINS.includes(origin)) return {};
+  return {
+    "Access-Control-Allow-Origin": origin,
+    "Access-Control-Allow-Headers": "Content-Type, x-leads-key",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Access-Control-Max-Age": "86400",
+    Vary: "Origin",
+  };
+}
+
+const handleRequest = async function (event) {
   if (event.httpMethod !== "POST") return json(405, { error: "POST only" });
 
   const key = process.env.SUBS_DASHBOARD_KEY || process.env.LEADS_DASHBOARD_KEY;
@@ -351,4 +374,20 @@ exports.handler = async function (event) {
   } catch (err) {
     return json(500, { error: String((err && err.message) || err) });
   }
+};
+
+// CORS is bolted on out here so the logic above stays exactly as it was — the
+// shared key is still the thing that authorises a call; an allowed origin only
+// gets the browser to make it.
+exports.handler = async function (event) {
+  const cors = corsHeaders(event);
+
+  if (event.httpMethod === "OPTIONS") {
+    return { statusCode: 204, headers: cors, body: "" };
+  }
+
+  const res = await handleRequest(event);
+  return Object.assign({}, res, {
+    headers: Object.assign({}, res.headers || {}, cors),
+  });
 };
