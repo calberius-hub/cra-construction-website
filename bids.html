@@ -121,6 +121,12 @@
     .trade-name{font-weight:700;font-size:14.5px;color:var(--navy);}
     .trade-why{font-size:12px;color:var(--muted);margin-top:2px;line-height:1.5;}
     .trade textarea{width:100%;margin-top:9px;padding:9px 11px;border:1px solid var(--line);border-radius:3px;font-size:13px;min-height:54px;resize:vertical;}
+    .basis-row{display:flex;gap:8px;align-items:center;margin-top:9px;flex-wrap:wrap;}
+    .basis-row select{padding:7px 9px;border:1px solid var(--line);border-radius:3px;font-size:12.5px;background:var(--white);}
+    .basis-row input{width:120px;padding:7px 9px;border:1px solid var(--line);border-radius:3px;font-size:12.5px;}
+    .basis-row input:disabled{background:#f4f1ec;color:var(--muted);}
+    .basis-row .unit{font-size:11.5px;color:var(--muted);}
+    .rate{display:block;font-size:11px;color:var(--muted);font-family:'Montserrat',sans-serif;margin-top:2px;}
     .conf{font-size:9.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;padding:3px 7px;border-radius:3px;margin-left:8px;}
     .conf.high{background:#e6f3ec;color:#2c6a45;}
     .conf.medium{background:rgba(201,165,74,.18);color:var(--gold2);}
@@ -463,6 +469,11 @@
     if (!(v > 0)) return "—";
     return "$" + v.toLocaleString("en-US", { maximumFractionDigits: 0 });
   }
+  function rate(n, unit){
+    if (!(Number(n) > 0) || !unit) return "";
+    return "$" + Number(n).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) +
+      "/" + unit;
+  }
   function banner(id, kind, text){
     var el = $(id);
     if (!text){ el.className = "banner"; el.textContent = ""; return; }
@@ -678,6 +689,7 @@
     if (!SUGGEST.length){
       SUGGEST = (P.trades || []).map(function(tr){
         return { key: tr.key, label: tr.label, scope: tr.scope || "", why: tr.why || "",
+                 basis: tr.basis || "lump", qty: tr.qty == null ? "" : tr.qty,
                  confidence: "", on: true };
       });
     }
@@ -793,6 +805,7 @@
       (P.trades || []).forEach(function(t){ already[t.key] = true; });
       SUGGEST = b.packages.map(function(p){
         return { key:p.key, label:p.label, scope:p.scope || "", why:p.why || "",
+                 basis:p.basis || "lump", qty:p.qty == null ? "" : p.qty,
                  confidence:p.confidence || "medium",
                  on: already[p.key] || p.confidence === "high" || p.hits > 0 || p.confidence === "baseline" };
       });
@@ -826,11 +839,23 @@
               (t.confidence ? '<span class="conf ' + esc(t.confidence) + '">' + esc(t.confidence) + "</span>" : "") +
               (invited ? '<span class="tagline green">' + invited + " invited</span>" : "") + "</div>" +
             (t.why ? '<div class="trade-why">' + esc(t.why) + "</div>" : "") +
+            basisRow(t, i) +
             '<textarea data-scope="' + i + '" placeholder="What this sub is bidding — sheets, quantities, materials, what\'s excluded.">' +
               esc(t.scope) + "</textarea>" +
           "</div>" +
         "</div></div>";
     }).join("");
+    Array.prototype.forEach.call($("tradeList").querySelectorAll("[data-basis]"), function(el){
+      el.onchange = function(){
+        var row = SUGGEST[Number(el.getAttribute("data-basis"))];
+        row.basis = el.value;
+        if (row.basis === "lump") row.qty = "";
+        renderTrades();
+      };
+    });
+    Array.prototype.forEach.call($("tradeList").querySelectorAll("[data-qty]"), function(el){
+      el.oninput = function(){ SUGGEST[Number(el.getAttribute("data-qty"))].qty = el.value; };
+    });
     Array.prototype.forEach.call($("tradeList").querySelectorAll("[data-chk]"), function(el){
       el.onchange = function(){
         SUGGEST[Number(el.getAttribute("data-chk"))].on = el.checked;
@@ -842,11 +867,29 @@
     });
   }
 
+  // Lump sum takes no quantity — a number there would only produce a fake rate.
+  function basisRow(t, i){
+    var bases = CATALOG.bases || [{ key:"lump", label:"Lump sum", short:"lump sum" }];
+    var lump = t.basis === "lump" || !t.basis;
+    var short = (bases.filter(function(b){ return b.key === t.basis; })[0] || bases[0]).short;
+    return '<div class="basis-row">' +
+      '<select data-basis="' + i + '">' +
+        bases.map(function(b){
+          return '<option value="' + esc(b.key) + '"' + (b.key === (t.basis || "lump") ? " selected" : "") +
+            ">" + esc(b.label) + "</option>";
+        }).join("") +
+      "</select>" +
+      '<input type="text" inputmode="decimal" data-qty="' + i + '" value="' + esc(t.qty == null ? "" : t.qty) +
+        '" placeholder="takeoff qty"' + (lump ? " disabled" : "") + " />" +
+      '<span class="unit">' + (lump ? "priced whole — no quantity" : short + " off the plans, blank if you don\'t have it yet") +
+      "</span></div>";
+  }
+
   $("saveTradesBtn").onclick = function(){
     var self = this;
     self.disabled = true;
     var trades = SUGGEST.filter(function(t){ return t.on; })
-      .map(function(t){ return { key:t.key, scope:t.scope, why:t.why }; });
+      .map(function(t){ return { key:t.key, scope:t.scope, why:t.why, basis:t.basis, qty:t.qty }; });
     api("set-trades", { id: P.id, trades: trades }).then(function(res){
       self.disabled = false;
       if (res.status !== 200){ alert(res.body.error || "Couldn't save the packages."); return; }
@@ -874,7 +917,8 @@
     var picked = Array.prototype.filter.call($("pkgList").querySelectorAll("input"), function(i){ return i.checked; });
     picked.forEach(function(i){
       var p = CATALOG.packages.filter(function(x){ return x.key === i.value; })[0];
-      if (p) SUGGEST.push({ key:p.key, label:p.label, scope:"", why:"Added by hand", confidence:"high", on:true });
+      if (p) SUGGEST.push({ key:p.key, label:p.label, scope:"", why:"Added by hand",
+        basis:p.basis || "lump", qty:"", confidence:"", on:true });
     });
     closeModal("pkgModal");
     renderTrades();
@@ -1021,23 +1065,26 @@
   var openTrade = null;
   function renderBoard(){
     if (!(P.trades || []).length){
-      $("board").innerHTML = '<tr><td class="note" style="padding:22px 4px;">' +
+      $("board").innerHTML = '<tr><td class="note" colspan="8" style="padding:22px 4px;">' +
         "Nothing on the board yet. Read the plans, save your packages, then pick who gets them.</td></tr>";
       return;
     }
-    var head = "<tr><th>Package</th><th>Coverage</th><th>Sent</th><th>Opened</th>" +
+    var head = "<tr><th>Package</th><th>Priced</th><th>Coverage</th><th>Sent</th><th>Opened</th>" +
       "<th>Bidding</th><th>Numbers in</th><th>Low bid</th></tr>";
     var rows = P.trades.map(function(t){
       var covLabel = { good:"covered", thin:"one bid only", pending:"waiting on bids",
                        waiting:"no answer yet", none:"nobody on it" }[t.coverage] || t.coverage;
       var main = '<tr class="pkg" data-trade="' + esc(t.key) + '">' +
         '<td class="nm">' + esc(t.label) + "</td>" +
+        '<td class="det">' + esc(t.basis_line || "Lump sum") + "</td>" +
         '<td><span class="cov ' + esc(t.coverage) + '">' + esc(covLabel) + "</span></td>" +
         '<td class="num">' + t.sent + " / " + t.invited + "</td>" +
         '<td class="num">' + t.opened + "</td>" +
         '<td class="num">' + t.bidding + "</td>" +
         '<td class="num">' + t.submitted + "</td>" +
-        '<td class="num">' + (t.low ? money(t.low) : "—") + "</td></tr>";
+        '<td class="num">' + (t.low ? money(t.low) : "—") +
+          (t.unit_low ? '<span class="rate">' + rate(t.unit_low, t.basis_label) + "</span>" : "") +
+        "</td></tr>";
       if (openTrade !== t.key) return main;
       var mine = P.invites.filter(function(v){ return v.trade === t.key; });
       var detail = mine.length ? mine.map(function(v){
@@ -1050,6 +1097,7 @@
               (v.opened_at ? " · opened " + fmtDate(v.opened_at) : "") +
               ((v.reminders || []).length ? " · " + v.reminders.length + " nudge(s)" : "") +
               (v.overdue ? " · past due" : "") +
+              (v.unit_rate ? " · " + rate(v.unit_rate, (P.trades.filter(function(x){ return x.key === v.trade; })[0] || {}).basis_label) : "") +
               (v.bid_notes ? "<br>“" + esc(v.bid_notes) + "”" : "") +
               (v.eta ? "<br>Can start: " + esc(v.eta) : "") +
             "</div></div>" +
@@ -1064,7 +1112,7 @@
             '<button class="btn btn-danger btn-sm" data-drop="' + esc(v.id) + '">Remove</button>' +
           "</div></div>";
       }).join("") : '<div class="note">Nobody invited on this package yet.</div>';
-      return main + '<tr class="sub-rows"><td colspan="7">' + detail + "</td></tr>";
+      return main + '<tr class="sub-rows"><td colspan="8">' + detail + "</td></tr>";
     }).join("");
     $("board").innerHTML = head + rows;
 

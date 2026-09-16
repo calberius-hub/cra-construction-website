@@ -41,10 +41,12 @@ class FakeAnthropic {
       return { content: [{ type: "text", text: JSON.stringify({
         project_summary: "2,850 sf single story on a slab.",
         packages: [
-          { key: "electrical", scope: "200A service per E1.1.", why: "Sheet E1.1", confidence: "high" },
-          { key: "framing", scope: "Frame per S-sheets.", why: "Structural sheets", confidence: "medium" },
-          { key: "not_a_real_key", scope: "x", why: "y", confidence: "low" },
-          { key: "electrical", scope: "dupe", why: "dupe", confidence: "low" },
+          { key: "electrical", scope: "200A service per E1.1.", basis: "sf", quantity: 2850,
+            why: "Sheet E1.1", confidence: "high" },
+          { key: "roofing", scope: "30 sq architectural shingle.", basis: "squares", quantity: 0,
+            why: "Roof plan", confidence: "medium" },
+          { key: "not_a_real_key", scope: "x", basis: "sf", quantity: 1, why: "y", confidence: "low" },
+          { key: "electrical", scope: "dupe", basis: "sf", quantity: 1, why: "dupe", confidence: "low" },
         ],
         flags: ["Spec book missing the window schedule"],
       }) }] };
@@ -114,12 +116,20 @@ async function phaseOne() {
   const elec = r.body.packages.filter(p => p.key === "electrical")[0];
   assert.ok(/mention/.test(elec.why), "suggestion carries its reason: " + elec.why);
 
-  // packages
+  // packages, each with the basis its bids get compared on
   r = parse(await call(bids, { action: "set-trades", id, trades: [
-    { key: "framing", scope: "Frame per S1.1, labor only, CRA supplies material." },
-    { key: "electrical", scope: "200 amp service per E1.1, fixtures by owner." },
+    { key: "framing", scope: "Frame per S1.1, labor only, CRA supplies material.",
+      basis: "sf", qty: "2,850 sf" },
+    { key: "electrical", scope: "200 amp service per E1.1, fixtures by owner.",
+      basis: "per hot dog", qty: "99" },
   ] }));
   assert.strictEqual(r.body.trades.length, 2, "two packages saved");
+  const framingPkg = r.body.trades.filter(t => t.key === "framing")[0];
+  assert.strictEqual(framingPkg.qty, 2850, "a typed-in quantity is read as a number");
+  assert.strictEqual(framingPkg.basis_line, "Per square foot · 2,850 sf on the plans");
+  const elecPkg = r.body.trades.filter(t => t.key === "electrical")[0];
+  assert.strictEqual(elecPkg.basis, "lump", "a basis we don't know falls back to the package default");
+  assert.strictEqual(elecPkg.qty, "", "a lump-sum package carries no quantity");
 
   // match the library
   r = parse(await call(bids, { action: "match", id }));
@@ -147,6 +157,8 @@ async function phaseOne() {
   assert.strictEqual(r.body.count, 2);
   const stageToken = r.body.token;
   assert.ok(/Frame per S1.1/.test(r.body.sample_html), "scope line rides in the email");
+  assert.ok(/Per square foot · 2,850 sf on the plans/.test(r.body.sample_html),
+    "so does how to price it, so every number comes back on the same basis");
 
   assert.strictEqual(parse(await call(bids, { action: "send", id, token: "nope" })).status, 400, "token must match");
 
@@ -200,6 +212,12 @@ async function phaseOne() {
   const framingRow = r.body.project.trades.filter(x => x.key === "framing")[0];
   assert.strictEqual(framingRow.coverage, "thin", "one bid is thin coverage");
   assert.strictEqual(framingRow.low, 42500);
+  assert.strictEqual(framingRow.unit_low, 14.91, "$42,500 over 2,850 sf is $14.91/sf");
+  assert.strictEqual(r.body.project.invites.filter(v => v.trade === "framing")[0].unit_rate, 14.91,
+    "and each bid carries its own rate");
+  const elecRow = r.body.project.trades.filter(x => x.key === "electrical")[0];
+  assert.strictEqual(elecRow.low, 18750);
+  assert.strictEqual(elecRow.unit_low, null, "a lump-sum package never invents a unit price");
 
   // award
   const framerInvite = r.body.project.invites.filter(v => v.trade === "framing")[0];
@@ -237,8 +255,17 @@ async function phaseTwo() {
   assert.strictEqual(seenCall.body.model, "claude-opus-5");
   assert.strictEqual(seenCall.body.output_config.format.type, "json_schema", "structured output requested");
   assert.ok(seenCall.body.output_config.format.schema.properties.packages, "schema sent");
+  const pkgProps = seenCall.body.output_config.format.schema.properties.packages.items.properties;
+  assert.ok(pkgProps.basis.enum.indexOf("sf") >= 0, "the model picks a basis from CRA's list");
+  assert.strictEqual(pkgProps.quantity.type, "number", "and reads the takeoff quantity off the plans");
+  assert.ok(/guessed quantity is worse than none/.test(seenCall.body.system),
+    "and is told not to invent one");
+  assert.strictEqual(r.body.packages[0].qty, 2850, "a quantity it did find comes through");
+  assert.strictEqual(r.body.packages[1].basis, "sq",
+    "a basis it made up falls back to that package's own default, not a generic one");
+  assert.strictEqual(r.body.packages[1].qty, "", "quantity 0 means the plans didn't show it");
   assert.ok(seenCall.options.signal, "the call carries an abort signal for the function clock");
-  assert.deepStrictEqual(r.body.packages.map(p=>p.key), ["electrical","framing"],
+  assert.deepStrictEqual(r.body.packages.map(p=>p.key), ["electrical","roofing"],
     "unknown keys and duplicates dropped");
   assert.strictEqual(r.body.packages[0].label, "Electrical", "label comes from CRA's catalog, not the model");
   assert.deepStrictEqual(r.body.flags, ["Spec book missing the window schedule"]);

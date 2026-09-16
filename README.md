@@ -101,7 +101,8 @@ each trade stands, without a spreadsheet or twenty hand-written emails.
    set, Claude reads the set instead and writes the scope line for each package;
    if that call fails or runs long, the keyword read takes over and the dashboard
    says so.
-4. **Check the packages** and fix any scope line. That line is what the sub sees.
+4. **Check the packages**, set how each one is priced, and fix any scope line.
+   That line is what the sub sees.
 5. **Who gets it** — the sub library fills itself in per package, best-rated
    first, anyone marked *do-not-use* left out.
 6. **Review the blast** — the exact recipient list and the exact email, then send.
@@ -111,6 +112,20 @@ each trade stands, without a spreadsheet or twenty hand-written emails.
    only` → `covered`), who opened, who's bidding, who passed, every number in,
    and the low bid. Record a number that came in by phone, nudge the quiet ones,
    award the package.
+
+### How a package is priced
+
+Every package carries a basis — lump sum, per sf, per roofing square, per lf, per
+cy, per each, per hour — and, when it isn't lump sum, the takeoff quantity off the
+plans. Both ride in the invitation ("Per square foot · 2,850 sf on the plans"), so
+the numbers come back on the same basis instead of four subs each pricing it their
+own way, and the board shows a $/unit next to every bid. Each package starts on the
+basis that trade is normally bid on around here; change it per job.
+
+Leave the quantity blank when you don't have the takeoff yet — a rate is only shown
+where there's a real number behind it, and the plan read is told to return nothing
+rather than guess one. That's also what makes bids comparable **across** jobs, which
+is the foundation of any estimating history worth keeping.
 
 Each sub gets their own link (`/bid-invite?t=…`) with one-tap **bidding / send my
 number / pass**. Bids and passes fire a Telegram alert. Opens are tracked with a
