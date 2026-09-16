@@ -310,6 +310,14 @@ async function phaseThree() {
       ratings: [] },
     { id: "t7", name: "Hand Promoted", email: "g@x.com", trades: ["Framing"], status: "new",
       tier_override: "approved", ratings: [] },
+    { id: "t8", name: "Framed Six Houses", email: "h@x.com", trades: ["Framing"], status: "used",
+      insured: true, ins_exp: "2030-01-01", workers_comp: true, ratings: [] },
+    { id: "t9", name: "Used Once, Never Again", email: "i@x.com", trades: ["Framing"], status: "used",
+      insured: true, ins_exp: "2030-01-01", workers_comp: true,
+      ratings: [{ on_time: 2, quality: 2, price: 2 }] },
+    { id: "t10", name: "Approved And Well Rated", email: "j@x.com", trades: ["Framing"], status: "approved",
+      insured: true, ins_exp: "2030-01-01", workers_comp: true,
+      ratings: [{ on_time: 5, quality: 4, price: 5, cleanup: 4 }] },
   ]) };
 
   const id = (await callBids({ action: "create", project: { name: "Tier Test", type: "custom" } })).body.id;
@@ -331,11 +339,23 @@ async function phaseThree() {
   assert.strictEqual(byId.t7.tier, "approved", "a hand override beats the ladder");
   assert.strictEqual(byId.t7.tier_overridden, true);
 
+  // The crews you actually build with, who nobody ever got around to scoring.
+  assert.strictEqual(byId.t8.tier, "preferred",
+    "having used them is the record — a star rating is not required on top of it");
+  assert.strictEqual(byId.t8.tier_reason, "Used on a CRA job");
+
+  // But a bad score outranks having hired them.
+  assert.strictEqual(byId.t9.tier, "approved", "used, but rated badly, is not preferred");
+  assert.ok(/rated 2/.test(byId.t9.tier_reason), byId.t9.tier_reason);
+
+  // And a good score promotes someone you approved but never hired.
+  assert.strictEqual(byId.t10.tier, "preferred", "a good rating pulls an unused sub up");
+
   assert.deepStrictEqual(r.body.matches[0].candidates.map(c => c.vendor_id),
-    ["t1", "t2", "t6", "t7", "t4", "t3"],
+    ["t10", "t1", "t8", "t9", "t2", "t6", "t7", "t4", "t3"],
     "tier decides the order, rating breaks ties inside a tier — so the lapsed sub still sorts " +
     "above the unrated one, but both sit below everyone allowed to bid");
-  assert.strictEqual(r.body.matches[0].eligible_count, 4, "four are allowed to bid without an override");
+  assert.strictEqual(r.body.matches[0].eligible_count, 7, "seven are allowed to bid without an override");
 
   // The gate
   r = await callBids({ action: "add-invites", id, invites: [

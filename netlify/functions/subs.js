@@ -87,13 +87,31 @@ function tierOf(rec, view) {
   if (view.license_expired) return out("unvetted", "License expired");
   if (rec.status === "new") return out("unvetted", "Never vetted");
 
-  const proven = rec.status === "approved" || rec.status === "used";
-  if (proven && view.rating_count > 0 && view.overall != null && view.overall >= 4) {
-    return out("preferred", "Rated " + view.overall + " across " + view.rating_count +
-      " job" + (view.rating_count === 1 ? "" : "s"));
+  const rated = view.rating_count > 0 && view.overall != null;
+  const jobs = view.rating_count + " job" + (view.rating_count === 1 ? "" : "s");
+
+  // Marking a sub "used" is the record that they worked a CRA job and were not
+  // blacklisted afterwards — which is the working definition of somebody you'd
+  // call first, and it earns Preferred on its own. Requiring a star rating on
+  // top of that was wrong: it left the crews Cole actually builds with sitting
+  // at the same tier as a stranger who filled in a form, purely because nobody
+  // had gone back and scored a finished job.
+  //
+  // A rating can still pull somebody up or push them down. Rate a sub you have
+  // only approved and never used, and a good score promotes them. Rate a sub
+  // you have used badly, and they drop — a bad score is evidence, and it is the
+  // one thing that should outrank having hired them before.
+  if (rated && view.overall < 3.5) {
+    return out("approved", "Used, but rated " + view.overall + " across " + jobs);
   }
-  if (proven || rec.status === "vetted") {
-    return out("approved", rec.status === "used" ? "Used on a CRA job" : "Vetted, papers current");
+  if (rec.status === "used") {
+    return out("preferred", rated ? "Used on CRA jobs, rated " + view.overall : "Used on a CRA job");
+  }
+  if (rec.status === "approved" && rated && view.overall >= 4) {
+    return out("preferred", "Rated " + view.overall + " across " + jobs);
+  }
+  if (rec.status === "approved" || rec.status === "vetted") {
+    return out("approved", rec.status === "approved" ? "Approved, not used yet" : "Vetted, papers current");
   }
   return out("unvetted", "Not vetted yet");
 }
