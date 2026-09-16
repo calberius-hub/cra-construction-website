@@ -98,7 +98,12 @@ img{display:block;width:100%;height:100%;object-fit:cover}
 .nav-mobile-menu a{display:block;padding:16px 0;font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--ink);border-bottom:1px solid var(--line)}
 .nav-mobile-menu a.mob-cta{margin-top:16px;text-align:center;background:var(--navy);color:var(--white);padding:14px;border-bottom:none;letter-spacing:.14em}
 @media(max-width:800px){.content-grid{grid-template-columns:1fr}.nav-links{display:none}.nav-cta{display:none}.nav-hamburger{display:flex}.gallery-main{height:260px}.gallery-thumb{height:160px}}
-</style>
+
+    /* admin link */
+    .nav-admin{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border:1px solid rgba(25,22,18,.18);border-radius:50%;color:#6b6560;transition:color .2s,border-color .2s}
+    .nav-admin:hover{color:#1d3a4a;border-color:#1d3a4a}
+    @media(max-width:900px){.nav-admin{display:none}}
+  </style>
 </head>
 <body>
 
@@ -114,7 +119,7 @@ img{display:block;width:100%;height:100%;object-fit:cover}
       <li><a href="../index.html#instagram">Instagram</a></li>
       <li><a href="../index.html#contact">Contact</a></li>
     </ul>
-    <a href="../index.html#contact" class="nav-cta">Get In Touch</a>
+    <div style="justify-self:end;display:flex;align-items:center;gap:12px;"><a href="https://alberiusops.com" target="_blank" rel="noopener" class="nav-admin" title="Admin &#8212; Alberius Ops Hub" aria-label="Admin &#8212; Alberius Ops Hub"><svg viewBox="0 0 24 24" width="15" height="15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2l7 3v6c0 4.5-3 8.5-7 11-4-2.5-7-6.5-7-11V5l7-3z"/></svg></a><a href="../index.html#contact" class="nav-cta">Get In Touch</a></div>
     <button class="nav-hamburger" id="navHamburger" aria-label="Menu">
       <span></span><span></span><span></span>
     </button>
@@ -127,7 +132,8 @@ img{display:block;width:100%;height:100%;object-fit:cover}
   <a href="../index.html#services">Services</a>
   <a href="../index.html#instagram">Instagram</a>
   <a href="../index.html#contact">Contact</a>
-  <a href="../index.html#contact" class="mob-cta">Get In Touch</a>
+  <a href="https://alberiusops.com" target="_blank" rel="noopener">Admin</a>
+    <a href="../index.html#contact" class="mob-cta">Get In Touch</a>
 </div>
 
 <div class="hero">
