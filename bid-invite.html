@@ -151,7 +151,7 @@
 
 <script>
 (function(){
-  var API = "/.netlify/functions/bid-respond";
+  var API = "/api/bmj/bid-respond";
   var $ = function(id){ return document.getElementById(id); };
   var params = new URLSearchParams(location.search);
   var TOKEN = (params.get("t") || "").replace(/[^a-f0-9]/gi, "");

@@ -715,7 +715,7 @@
     var original = btn.textContent;
     btn.textContent = t("sending");
 
-    fetch("/.netlify/functions/capture-sub", {
+    fetch("/api/bmj/capture-sub", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)

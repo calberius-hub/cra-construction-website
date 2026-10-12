@@ -15,8 +15,15 @@
 
 [[redirects]]
   from = "/leads"
-  to = "/leads.html"
-  status = 200
+  to = "https://bidmyjob.alberiusops.com/leads.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/leads.html"
+  to = "https://bidmyjob.alberiusops.com/leads.html"
+  status = 301
+  force = true
 
 # "Bid My Job" — QR intake for subs & vendors, and the internal library.
 [[redirects]]
@@ -26,19 +33,40 @@
 
 [[redirects]]
   from = "/subs"
-  to = "/subs.html"
-  status = 200
+  to = "https://bidmyjob.alberiusops.com/subs.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/subs.html"
+  to = "https://bidmyjob.alberiusops.com/subs.html"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/sign"
-  to = "/sign.html"
-  status = 200
+  to = "https://bidmyjob.alberiusops.com/sign.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/sign.html"
+  to = "https://bidmyjob.alberiusops.com/sign.html"
+  status = 301
+  force = true
 
 # The Bid Board — internal, and the vendor's one-tap reply page.
 [[redirects]]
   from = "/bids"
-  to = "/bids.html"
-  status = 200
+  to = "https://bidmyjob.alberiusops.com/bids.html"
+  status = 301
+  force = true
+
+[[redirects]]
+  from = "/bids.html"
+  to = "https://bidmyjob.alberiusops.com/bids.html"
+  status = 301
+  force = true
 
 [[redirects]]
   from = "/bid-invite"
@@ -50,3 +78,13 @@
   from = "/privacy"
   to = "/privacy.html"
   status = 200
+
+# Bid My Job runs on the Alberius platform (12 Oct 2026). The public pages stay
+# here (the printed QR signs, invite links and A2P review point at this site);
+# what they send goes to the platform. The library, Bid Board, leads and sign
+# maker moved there behind the Google sign-in (redirects above).
+[[redirects]]
+  from = "/api/bmj/*"
+  to = "https://bidmyjob.alberiusops.com/api/fn/:splat"
+  status = 200
+  force = true

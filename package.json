@@ -2,9 +2,5 @@
   "name": "cra-construction-website",
   "version": "1.0.0",
   "private": true,
-  "description": "CRA Construction marketing site + leads dashboard functions",
-  "dependencies": {
-    "@anthropic-ai/sdk": "^0.126.0",
-    "@netlify/blobs": "^8.1.0"
-  }
+  "description": "CRA Construction marketing site + leads dashboard functions"
 }

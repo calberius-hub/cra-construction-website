@@ -1476,7 +1476,7 @@
           body: body.toString()
         }).catch(function(){});
 
-        fetch('/.netlify/functions/capture-lead', {
+        fetch('/api/bmj/capture-lead', {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
           body: body.toString()
